@@ -15,12 +15,11 @@ const App: React.FC = () => {
     <div className="flex flex-col h-screen bg-tech-dark text-tech-text">
       <Header toggleSidebar={toggleSidebar} />
       <div className="flex flex-1 overflow-hidden">
-        {isSidebarOpen && (
-          <Sidebar
-            onSelectTopic={(topicId) => setCurrentTopic(topicId)}
-            currentTopic={currentTopic}
-          />
-        )}
+        <Sidebar
+          onSelectTopic={(topicId) => setCurrentTopic(topicId)}
+          currentTopic={currentTopic}
+          isOpen={isSidebarOpen}
+        />
         <main className="flex-grow flex flex-col">
           <ChatInterface currentTopic={currentTopic} />
         </main>
