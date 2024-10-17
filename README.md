@@ -54,3 +54,9 @@ export default tseslint.config({
 [] 增加按钮 ,
 [] 将 light 其他 3 个默认文件 作为 template
 [] 生成 tar.gz , 只有 panel.js 进行验证, 其他的代码采用默认的代码
+[] BRD 生成
+[] tab 切换 BRD 到 代码生成
+[] BRD 自动工作流到 代码生成的前置
+[] 图片上传及图片识别回复
+
+DEMO 要求: 生成一个 图片 带 CTA 按钮的组件, 可以实现 light 上传
