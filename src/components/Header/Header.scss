@@ -1,0 +1,120 @@
+.header {
+  background-color: var(--bg-secondary);
+  padding: 1rem;
+  background-color: var(--mantine-color-body);
+  height: 80px;
+  border-bottom: 1px solid
+    light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+
+  &__container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  &__left,
+  &__right {
+    display: flex;
+    align-items: center;
+  }
+
+  &__sidebar-toggle,
+  &__theme-toggle,
+  &__user-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-right: 1rem;
+    color: var(--text-primary);
+
+    &:hover {
+      color: var(--accent-color);
+    }
+  }
+
+  &__icon {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  &__logo {
+    width: 2rem;
+    height: 2rem;
+    color: var(--accent-color);
+    margin-right: 0.5rem;
+  }
+
+  &__title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: var(--text-primary);
+  }
+
+  &__menu {
+    position: relative;
+    margin-right: 1rem;
+  }
+
+  &__menu-button {
+    background-color: var(--accent-color);
+    color: var(--bg-primary);
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    border: none;
+    cursor: pointer;
+
+    &:hover {
+      background-color: var(--highlight-color);
+    }
+  }
+
+  &__menu-items {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    margin-top: 0.5rem;
+    width: 14rem;
+    background-color: var(--bg-secondary);
+    border-radius: 0.25rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  &__menu-item {
+    display: block;
+    padding: 0.5rem 1rem;
+    color: var(--text-primary);
+    text-decoration: none;
+
+    &--active,
+    &:hover {
+      background-color: var(--accent-color);
+      color: var(--bg-primary);
+    }
+  }
+
+  &__user-avatar {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+  }
+
+  &__nav {
+    display: flex;
+    margin-right: 1rem;
+  }
+
+  &__nav-item {
+    color: var(--text-primary);
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    transition: background-color 0.2s, color 0.2s;
+
+    &:hover {
+      background-color: var(--accent-color);
+      color: var(--bg-primary);
+    }
+  }
+}

@@ -58,5 +58,7 @@ export default tseslint.config({
 [] tab 切换 BRD 到 代码生成
 [] BRD 自动工作流到 代码生成的前置
 [] 图片上传及图片识别回复
+[] 代码 preview 渲染
+[] tailwind --> scss (optional)
 
 DEMO 要求: 生成一个 图片 带 CTA 按钮的组件, 可以实现 light 上传

@@ -4,6 +4,7 @@ import { persist, createJSONStorage } from "zustand/middleware";
 export interface ChatMessage {
   id: string;
   content: string;
+  image?: string;
   isUser: boolean;
   code?: {
     html: string;

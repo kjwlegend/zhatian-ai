@@ -1,4 +1,5 @@
 import React, { useState, useRef, KeyboardEvent } from "react";
+import "./UserInput.scss";
 
 interface UserInputProps {
   onSubmit: (input: string, image?: File) => void;
@@ -33,20 +34,20 @@ const UserInput: React.FC<UserInputProps> = ({ onSubmit, isLoading }) => {
   };
 
   return (
-    <div className="w-full p-4 bg-tech-dark-light border-t border-tech-accent">
-      <form onSubmit={handleSubmit} className="flex flex-col">
+    <div className="user-input">
+      <form onSubmit={handleSubmit} className="user-input__form">
         <textarea
-          className="p-2 mb-4 bg-tech-dark text-tech-text border border-tech-accent rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-tech-highlight"
+          className="user-input__textarea"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={handleKeyPress}
           placeholder="Enter your message here... (Press Enter to submit)"
         />
-        <div className="flex items-center mb-4">
+        <div className="user-input__actions">
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="mr-4 px-4 py-2 bg-tech-accent text-tech-text rounded-md hover:bg-tech-highlight transition-colors"
+            className="user-input__upload-button"
           >
             Upload Image
           </button>
@@ -55,21 +56,19 @@ const UserInput: React.FC<UserInputProps> = ({ onSubmit, isLoading }) => {
             ref={fileInputRef}
             onChange={handleImageUpload}
             accept="image/*"
-            className="hidden"
+            className="user-input__file-input"
           />
-          {image && <span className="text-tech-text">{image.name}</span>}
+          {image && <span className="user-input__file-name">{image.name}</span>}
+          <button
+            type="submit"
+            className={`user-input__submit-button ${
+              isLoading ? "user-input__submit-button--loading" : ""
+            }`}
+            disabled={isLoading}
+          >
+            {isLoading ? "Processing..." : "Submit"}
+          </button>
         </div>
-        <button
-          type="submit"
-          className={`px-4 py-2 rounded-md ${
-            isLoading
-              ? "bg-tech-accent text-tech-text cursor-not-allowed"
-              : "bg-tech-highlight text-tech-dark hover:bg-tech-accent hover:text-tech-text"
-          } transition-colors`}
-          disabled={isLoading}
-        >
-          {isLoading ? "Processing..." : "Submit"}
-        </button>
       </form>
     </div>
   );

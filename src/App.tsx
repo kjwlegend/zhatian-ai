@@ -1,30 +1,46 @@
-import React, { useState } from "react";
-import Header from "./components/Header";
-import ChatInterface from "./components/ChatInterface";
-import Sidebar from "./components/Sidebar";
+import React from "react";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { MantineProvider } from "@mantine/core";
+import { useHotkeys, useLocalStorage } from "@mantine/hooks";
+import { Header } from "./components/Header/Header";
+import Main from "./pages/Main";
+import Doc from "./pages/Doc";
+import Library from "./pages/Library";
+import Faq from "./pages/Faq";
+import Founders from "./pages/Founders";
+import Chat from "./pages/Chat";
+import "./styles/global.scss";
+import "@mantine/core/styles.css";
 
 const App: React.FC = () => {
-  const [currentTopic, setCurrentTopic] = useState<string>("Default Topic");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
   return (
-    <div className="flex flex-col h-screen bg-tech-dark text-tech-text">
-      <Header toggleSidebar={toggleSidebar} />
-      <div className="flex flex-1 overflow-hidden">
-        <Sidebar
-          onSelectTopic={(topicId) => setCurrentTopic(topicId)}
-          currentTopic={currentTopic}
-          isOpen={isSidebarOpen}
-        />
-        <main className="flex-grow flex flex-col">
-          <ChatInterface currentTopic={currentTopic} />
-        </main>
-      </div>
-    </div>
+    <MantineProvider
+      withGlobalStyles
+      withNormalizeCSS
+      theme={
+        {
+          /** 在这里添加你的主题配置 */
+        }
+      }
+    >
+      <Router>
+        <div className="app">
+          <Header />
+          <div className="app__content">
+            <main className="app__main">
+              <Routes>
+                <Route path="/" element={<Main />} />
+                <Route path="/doc" element={<Doc />} />
+                <Route path="/library" element={<Library />} />
+                <Route path="/faq" element={<Faq />} />
+                <Route path="/founders" element={<Founders />} />
+                <Route path="/chat" element={<Chat />} />
+              </Routes>
+            </main>
+          </div>
+        </div>
+      </Router>
+    </MantineProvider>
   );
 };
 

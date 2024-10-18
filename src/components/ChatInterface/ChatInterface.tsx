@@ -1,8 +1,9 @@
 import React, { useState, useCallback } from "react";
-import UserInput from "./UserInput";
-import MarkdownDisplay from "./MarkdownDisplay";
-import { chatWithOpenAI } from "../services/openai";
-import { useChatStore, ChatMessage } from "../store/chatStore";
+import { Box, Flex, ScrollArea, Paper, Text } from "@mantine/core";
+import UserInput from "../UserInput/UserInput";
+import MarkdownDisplay from "../MarkdownDisplay/MarkdownDisplay";
+import { chatWithOpenAI } from "../../services/openai";
+import { useChatStore, ChatMessage } from "../../store/chatStore";
 import ReactMarkdown from "react-markdown";
 
 interface ChatInterfaceProps {
@@ -33,6 +34,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentTopic }) => {
           id: botMessageId,
           content: "",
           isUser: false,
+          code: {
+            html: "",
+            index: "",
+            panel: "",
+            scss: "",
+          },
         };
         addMessage(currentTopic, initialBotMessage);
 
@@ -54,7 +61,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentTopic }) => {
               isUser: false,
               code: partialResponse.code,
             });
-            // 只更新有内容的代码部分
             const newCode = Object.entries(partialResponse.code).reduce(
               (acc, [key, value]) => {
                 if (value !== "") {
@@ -89,34 +95,65 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentTopic }) => {
   const chatHistory = getTopicMessages(currentTopic);
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex flex-1 overflow-hidden">
-        <div className="w-1/2 flex flex-col">
-          <div className="flex-1 overflow-auto p-4 border-r border-tech-accent">
+    <Flex direction="row" style={{ height: "100%" }}>
+      <Flex direction="column" style={{ flex: 1, overflow: "hidden" }}>
+        <ScrollArea style={{ flex: 1 }}>
+          <Box p="md">
             {chatHistory.map((message) => (
-              <div
+              <Paper
                 key={message.id}
-                className={`mb-4 p-3 rounded-lg ${
-                  message.isUser
-                    ? "bg-tech-accent text-tech-text ml-auto"
-                    : "bg-tech-dark-light text-tech-text"
-                } max-w-3/4 ${message.isUser ? "ml-1/4" : "mr-1/4"}`}
+                p="sm"
+                mb="sm"
+                radius="md"
+                style={{
+                  maxWidth: "75%",
+                  marginLeft: message.isUser ? "auto" : 0,
+                  marginRight: message.isUser ? 0 : "auto",
+                  backgroundColor: message.isUser
+                    ? "var(--mantine-color-blue-5)"
+                    : "var(--mantine-color-gray-1)",
+                }}
               >
                 {message.isUser ? (
-                  <p>{message.content}</p>
+                  <Text>{message.content}</Text>
                 ) : (
-                  <ReactMarkdown className="prose prose-invert max-w-none">
+                  <ReactMarkdown
+                    components={{
+                      img: ({ node, ...props }) => (
+                        <img
+                          {...props}
+                          style={{ maxWidth: "100%", height: "auto" }}
+                        />
+                      ),
+                    }}
+                  >
                     {message.content}
                   </ReactMarkdown>
                 )}
-              </div>
+                {message.image && (
+                  <img
+                    src={message.image}
+                    alt="Uploaded content"
+                    style={{
+                      marginTop: "0.5rem",
+                      maxWidth: "100%",
+                      height: "auto",
+                      borderRadius: "0.25rem",
+                    }}
+                  />
+                )}
+              </Paper>
             ))}
-          </div>
+          </Box>
+        </ScrollArea>
+        <Box p="md">
           <UserInput onSubmit={handleSubmit} isLoading={isLoading} />
-        </div>
+        </Box>
+      </Flex>
+      <Box style={{ width: "50%", overflow: "hidden" }}>
         <MarkdownDisplay currentTopic={currentTopic} />
-      </div>
-    </div>
+      </Box>
+    </Flex>
   );
 };
 
