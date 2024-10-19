@@ -1,15 +1,17 @@
-import '@mantine/core/styles.css';
-
+// 'use client'
 import React from 'react';
 import { ColorSchemeScript, MantineProvider } from '@mantine/core';
 import { theme } from '../theme';
+import AppLayout from './components/AppLayout/AppLayout';
+import '@mantine/core/styles.css';
+import './styles/global.scss';
 
 export const metadata = {
-  title: 'Mantine Next.js template',
-  description: 'I am using Mantine with Next.js!',
+  title: '下一代吊炸天的语言控制CMS生成一体化平台',
+  description: 'Chat interface for AI-assisted coding',
 };
 
-export default function RootLayout({ children }: { children: any }) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <head>
@@ -21,7 +23,11 @@ export default function RootLayout({ children }: { children: any }) {
         />
       </head>
       <body>
-        <MantineProvider theme={theme}>{children}</MantineProvider>
+        <MantineProvider theme={theme}>
+          <AppLayout>
+            {children}
+          </AppLayout>
+        </MantineProvider>
       </body>
     </html>
   );

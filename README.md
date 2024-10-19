@@ -35,3 +35,28 @@ This template comes with the following features:
 - `storybook` – starts storybook dev server
 - `storybook:build` – build production storybook bundle to `storybook-static`
 - `prettier:write` – formats all files with Prettier
+
+
+
+# 下面是我对一个工作区的规划
+
+## 产品文档
+左: 对话区
+右: 文本编辑区
+通过对话生成信息后, 自动填充到文本编辑区
+
+## 前端组件
+左: 对话区
+右: 代码区
+
+## 数据库
+
+左: 对话区
+右: SQL 语法去
+
+## 后端区
+
+左: 对话区
+右: 语言选择(JAVA / PYTHON) , 代码区
+
+## 组件库

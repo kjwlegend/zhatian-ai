@@ -1,0 +1,92 @@
+.chat-interface {
+  display: flex;
+  height: 100%;
+  background-color: var(--mantine-color-body);
+  color: var(--mantine-color-text);
+
+
+  &__left {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--mantine-color-default-border);
+    background-color: var(--mantine-color-body);
+  }
+
+  &__right {
+    width: 50%;
+    overflow: hidden;
+    border-left: 1px solid var(--mantine-color-default-border);
+    background-color: var(--mantine-color-body);
+  }
+
+
+
+  &__messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--mantine-spacing-md);
+  }
+
+  &__message {
+    margin-bottom: var(--mantine-spacing-md);
+    padding: var(--mantine-spacing-sm);
+    border-radius: var(--mantine-radius-sm);
+    max-width: 75%;
+
+    &--user {
+      background-color: var(--mantine-primary-color-filled);
+      color: var(--mantine-primary-color-contrast);
+      margin-left: auto;
+    }
+
+    &--bot {
+      background-color: var(--mantine-color-default);
+      color: var(--mantine-color-text);
+      margin-right: auto;
+    }
+  }
+
+  &__markdown {
+    font-size: var(--mantine-font-size-sm);
+    line-height: var(--mantine-line-height);
+
+    p {
+      margin-bottom: var(--mantine-spacing-xs);
+    }
+
+    code {
+      background-color: var(--mantine-color-default);
+      color: var(--mantine-color-dimmed);
+      padding: 2px 4px;
+      border-radius: var(--mantine-radius-sm);
+      font-family: var(--mantine-font-family-monospace);
+      font-size: var(--mantine-font-size-xs);
+    }
+
+    pre {
+      background-color: var(--mantine-color-dark);
+      color: var(--mantine-color-dimmed);
+      padding: var(--mantine-spacing-md);
+      border-radius: var(--mantine-radius-sm);
+      overflow-x: auto;
+
+      code {
+        background-color: transparent;
+        color: inherit;
+        padding: 0;
+      }
+    }
+  }
+
+  &__image,
+  &__uploaded-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--mantine-radius-sm);
+  }
+
+  &__uploaded-image {
+    margin-top: var(--mantine-spacing-xs);
+  }
+}

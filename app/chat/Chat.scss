@@ -1,0 +1,12 @@
+.chat-container {
+  display: flex;
+  height: calc(100vh - 120px); // 假设 header 和 footer 各 60px 高
+  width: 100%;
+}
+
+.chat-main {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}

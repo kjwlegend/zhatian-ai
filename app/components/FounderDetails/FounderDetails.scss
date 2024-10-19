@@ -1,0 +1,33 @@
+.founder-details {
+  margin-top: var(--mantine-spacing-xl);
+}
+
+.founder-paper {
+  overflow: hidden;
+  background-color: var(--mantine-color-body);
+}
+
+.founder-content {
+  display: flex;
+  gap: var(--mantine-spacing-xl);
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+}
+
+.founder-image {
+  flex: 1;
+  max-width: 400px;
+  border-radius: var(--mantine-radius-md);
+  overflow: hidden;
+}
+
+.founder-text {
+  flex: 2;
+
+  h2 {
+    margin-bottom: var(--mantine-spacing-xs);
+    color: var(--mantine-color-dark-6);
+  }
+}
