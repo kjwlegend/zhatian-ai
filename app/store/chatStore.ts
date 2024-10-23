@@ -1,120 +1,167 @@
-import { create } from 'zustand'
-import { persist, createJSONStorage } from 'zustand/middleware'
+import { create } from 'zustand';
+import { createJSONStorage, persist } from 'zustand/middleware';
+import * as dbService from '../services/db';
+import {
+  ChatMessage,
+  ChatTopic,
+  ChatView,
+  CodeContent,
+  Component,
+  Page,
+  Project,
+} from '../services/db/schema';
 
-export interface ChatMessage {
-  id: string
-  content: string
-  image?: string
-  isUser: boolean
-  code?: {
-    html: string
-    index: string
-    panel: string
-    scss: string
-  }
+interface ChatStore {
+  currentView: string;
+  currentTopic: string;
+  initializeDB: () => Promise<void>;
+  addMessage: (topicId: string, message: ChatMessage) => Promise<void>;
+  updateMessage: (topicId: string, messageId: string, updatedMessage: ChatMessage) => Promise<void>;
+  getTopicMessages: (topicId: string) => Promise<ChatMessage[]>;
+  addTopic: (viewId: string, title: string) => Promise<string>;
+  updateTopicTitle: (topicId: string, newTitle: string) => Promise<void>;
+  deleteTopic: (viewId: string, topicId: string) => Promise<void>;
+  getViewTopics: (viewId: string) => Promise<ChatTopic[]>;
+  getTopicCode: (topicId: string, codeType: keyof CodeContent) => Promise<string>;
+  updateTopicCode: (topicId: string, codeType: keyof CodeContent, code: string) => Promise<void>;
+  setCurrentView: (viewId: string) => void;
+  setCurrentTopic: (topicId: string) => void;
+
+  // 项目相关方法
+  addProject: (project: Project) => Promise<void>;
+  updateProject: (project: Project) => Promise<void>;
+  deleteProject: (id: string) => Promise<void>;
+  getAllProjects: () => Promise<Project[]>;
+
+  // 页面相关方法
+  addPage: (page: Page) => Promise<void>;
+  updatePage: (page: Page) => Promise<void>;
+  deletePage: (id: string) => Promise<void>;
+  getProjectPages: (projectId: string) => Promise<Page[]>;
+
+  // 组件相关方法
+  addComponent: (component: Component) => Promise<void>;
+  updateComponent: (component: Component) => Promise<void>;
+  deleteComponent: (id: string) => Promise<void>;
+  getPageComponents: (pageId: string) => Promise<Component[]>;
+
+  getAllViews: () => Promise<ChatView[]>;
 }
 
-interface ChatState {
-  topics: Record<string, ChatMessage[]>
-  topicCode: Record<
-    string,
-    {
-      html: string
-      index: string
-      panel: string
-      scss: string
-    }
-  >
-  addMessage: (topicId: string, message: ChatMessage) => void
-  updateMessage: (
-    topicId: string,
-    messageId: string,
-    updatedMessage: ChatMessage
-  ) => void
-  getTopicMessages: (topicId: string) => ChatMessage[]
-  addTopic: (topicId: string, title: string) => void
-  updateTopicTitle: (topicId: string, newTitle: string) => void
-  deleteTopic: (topicId: string) => void
-  getTopicCode: (topicId: string, codeType: keyof ChatMessage['code']) => string
-  updateTopicCode: (
-    topicId: string,
-    newCode: {
-      html?: string
-      index?: string
-      panel?: string
-      scss?: string
-    }
-  ) => void
-}
-
-export const useChatStore = create<ChatState>()(
+export const useChatStore = create<ChatStore>()(
   persist(
     (set, get) => ({
-      topics: {},
-      topicCode: {},
-      addMessage: (topicId, message) =>
-        set((state) => ({
-          topics: {
-            ...state.topics,
-            [topicId]: [...(state.topics[topicId] || []), message],
-          },
-        })),
-      updateMessage: (topicId, messageId, updatedMessage) =>
-        set((state) => ({
-          topics: {
-            ...state.topics,
-            [topicId]: state.topics[topicId].map((msg) =>
-              msg.id === messageId ? updatedMessage : msg
-            ),
-          },
-        })),
-      getTopicMessages: (topicId) => get().topics[topicId] || [],
-      addTopic: (topicId, title) =>
-        set((state) => ({
-          topics: {
-            ...state.topics,
-            [topicId]: [{ id: topicId, content: title, isUser: false }],
-          },
-          topicCode: {
-            ...state.topicCode,
-            [topicId]: { html: '', index: '', panel: '', scss: '' },
-          },
-        })),
-      updateTopicTitle: (topicId, newTitle) =>
-        set((state) => ({
-          topics: {
-            ...state.topics,
-            [topicId]: [
-              { id: topicId, content: newTitle, isUser: false },
-              ...state.topics[topicId].slice(1),
-            ],
-          },
-        })),
-      deleteTopic: (topicId) =>
-        set((state) => {
-          const { [topicId]: _, ...restTopics } = state.topics
-          const { [topicId]: __, ...restTopicCode } = state.topicCode
-          return { topics: restTopics, topicCode: restTopicCode }
-        }),
-      getTopicCode: (topicId, codeType) => {
-        return get().topicCode[topicId]?.[codeType] || ''
+      currentView: '',
+      currentTopic: '',
+
+      initializeDB: async () => {
+        await dbService.initDB();
+        await dbService.initializeViews();
       },
-      updateTopicCode: (topicId, newCode) =>
-        set((state) => ({
-          topicCode: {
-            ...state.topicCode,
-            [topicId]: {
-              html: newCode.html ?? state.topicCode[topicId]?.html ?? '',
-              index: newCode.index ?? state.topicCode[topicId]?.index ?? '',
-              panel: newCode.panel ?? state.topicCode[topicId]?.panel ?? '',
-              scss: newCode.scss ?? state.topicCode[topicId]?.scss ?? '',
-            },
-          },
-        })),
+
+      addMessage: async (topicId, message) => {
+        await dbService.addMessage(message);
+      },
+
+      updateMessage: async (topicId, messageId, updatedMessage) => {
+        await dbService.updateMessage(updatedMessage);
+      },
+
+      getTopicMessages: async (topicId) => {
+        return await dbService.getTopicMessages(topicId);
+      },
+
+      addTopic: async (viewId, title) => {
+        const topicId = Date.now().toString();
+        const newTopic: ChatTopic = {
+          id: topicId,
+          viewId,
+          title,
+          lastUpdated: Date.now(),
+        };
+        await dbService.addTopic(newTopic);
+        return topicId;
+      },
+
+      updateTopicTitle: async (topicId, newTitle) => {
+        const topic = await dbService.getTopic(topicId);
+        if (topic) {
+          topic.title = newTitle;
+          topic.lastUpdated = Date.now();
+          await dbService.updateTopic(topic);
+        }
+      },
+
+      deleteTopic: async (viewId, topicId) => {
+        await dbService.deleteTopic(topicId);
+        // You might want to also delete associated messages and code here
+      },
+
+      getViewTopics: async (viewId) => {
+        return await dbService.getViewTopics(viewId);
+      },
+
+      getTopicCode: async (topicId, codeType) => {
+        const code = await dbService.getCode(topicId, codeType);
+        return code || '';
+      },
+
+      updateTopicCode: async (topicId, codeType, code) => {
+        await dbService.updateCode(topicId, codeType, code);
+      },
+
+      setCurrentView: (viewId) => set({ currentView: viewId }),
+      setCurrentTopic: (topicId) => set({ currentTopic: topicId }),
+
+      // 实现项目相关方法
+      addProject: async (project) => {
+        await dbService.addProject(project);
+      },
+      updateProject: async (project) => {
+        await dbService.updateProject(project);
+      },
+      deleteProject: async (id) => {
+        await dbService.deleteProject(id);
+      },
+      getAllProjects: async () => {
+        return await dbService.getAllProjects();
+      },
+
+      // 实现页面相关方法
+      addPage: async (page) => {
+        await dbService.addPage(page);
+      },
+      updatePage: async (page) => {
+        await dbService.updatePage(page);
+      },
+      deletePage: async (id) => {
+        await dbService.deletePage(id);
+      },
+      getProjectPages: async (projectId) => {
+        return await dbService.getProjectPages(projectId);
+      },
+
+      // 实现组件相关方法
+      addComponent: async (component) => {
+        await dbService.addComponent(component);
+      },
+      updateComponent: async (component) => {
+        await dbService.updateComponent(component);
+      },
+      deleteComponent: async (id) => {
+        await dbService.deleteComponent(id);
+      },
+      getPageComponents: async (pageId) => {
+        return await dbService.getPageComponents(pageId);
+      },
+
+      getAllViews: async () => {
+        return await dbService.getAllViews();
+      },
     }),
     {
       name: 'chat-storage',
       storage: createJSONStorage(() => localStorage),
     }
   )
-)
+);

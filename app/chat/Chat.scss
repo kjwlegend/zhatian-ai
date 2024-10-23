@@ -1,6 +1,6 @@
 .chat-container {
   display: flex;
-  height: calc(100vh - 120px); // 假设 header 和 footer 各 60px 高
+  height: calc(100vh - 130px);
   width: 100%;
 }
 
@@ -9,4 +9,11 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+}
+
+// 共享样式
+.view-container {
+  display: flex;
+  height: 100%;
+  width: 100%;
 }

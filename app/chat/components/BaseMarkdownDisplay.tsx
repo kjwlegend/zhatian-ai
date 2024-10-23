@@ -8,22 +8,32 @@ import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { CodeContent } from '../../services/db/schema';
 import { useChatStore } from '../../store/chatStore';
 
-import './MarkdownDisplay.scss';
+import '../MarkdownDisplay/MarkdownDisplay.scss';
 
-interface MarkdownDisplayProps {
+interface BaseMarkdownDisplayProps {
   currentTopic: string;
+  customTabs?: (keyof CodeContent)[];
+  customRender?: (content: string, activeTab: keyof CodeContent) => React.ReactNode;
 }
 
-const MarkdownDisplay: React.FC<MarkdownDisplayProps> = ({ currentTopic }) => {
-  const [activeTab, setActiveTab] = useState<keyof CodeContent>('html');
+const BaseMarkdownDisplay: React.FC<BaseMarkdownDisplayProps> = ({
+  currentTopic,
+  customTabs = ['html', 'js', 'scss'],
+  customRender,
+}) => {
+  const [activeTab, setActiveTab] = useState<keyof CodeContent>(customTabs[0]);
   const [copied, setCopied] = useState(false);
   const [content, setContent] = useState('');
   const getTopicCode = useChatStore((state) => state.getTopicCode);
 
   useEffect(() => {
     const loadCode = async () => {
-      const code = await getTopicCode(currentTopic, activeTab);
-      setContent(code);
+      if (currentTopic) {
+        const code = await getTopicCode(currentTopic, activeTab);
+        setContent(code);
+      } else {
+        setContent('');
+      }
     };
     loadCode();
   }, [currentTopic, activeTab, getTopicCode]);
@@ -39,7 +49,7 @@ const MarkdownDisplay: React.FC<MarkdownDisplayProps> = ({ currentTopic }) => {
     <div className="markdown-display">
       <div className="markdown-display__header">
         <div className="markdown-display__tabs">
-          {(['html', 'js', 'scss'] as const).map((tab) => (
+          {customTabs.map((tab) => (
             <button
               key={tab}
               className={`markdown-display__tab ${
@@ -88,4 +98,4 @@ const MarkdownDisplay: React.FC<MarkdownDisplayProps> = ({ currentTopic }) => {
   );
 };
 
-export default MarkdownDisplay;
+export default BaseMarkdownDisplay;

@@ -8,27 +8,33 @@ import { chatWithOpenAI } from '../../services/openai';
 import { useChatStore } from '../../store/chatStore';
 import UserInput from '../UserInput/UserInput';
 
-import './ChatInterface.scss';
+import '../ChatInterface/ChatInterface.scss';
 
-interface ChatInterfaceProps {
+interface BaseChatInterfaceProps {
   currentTopic: string;
+  customRender?: (message: ChatMessage) => React.ReactNode;
 }
 
-const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentTopic }) => {
+const BaseChatInterface: React.FC<BaseChatInterfaceProps> = ({ currentTopic, customRender }) => {
   const { addMessage, updateMessage, getTopicMessages, updateTopicCode } = useChatStore();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
 
   useEffect(() => {
     const loadMessages = async () => {
-      const loadedMessages = await getTopicMessages(currentTopic);
-      setMessages(loadedMessages);
+      if (currentTopic) {
+        const loadedMessages = await getTopicMessages(currentTopic);
+        console.log('loadedMessages', loadedMessages);
+        setMessages(loadedMessages);
+      } else {
+        setMessages([]);
+      }
     };
     loadMessages();
   }, [currentTopic, getTopicMessages]);
 
   const systemPrompt =
-    'You are a helpful AI assistant. When providing code examples, please wrap them in triple backticks and use the following format: ```html for general code, ```index for index code, ```panel for panel.js code, and ```scss for SCSS code.';
+    'You are a helpful AI assistant. When providing code examples, please wrap them in triple backticks and use the following format: ```html for HTML, ```css for CSS, ```js for JavaScript, and ```react for React code.';
 
   const handleSubmit = useCallback(
     async (input: string, image?: File) => {
@@ -76,7 +82,9 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentTopic }) => {
             {} as Record<keyof typeof partialResponse.code, string>
           );
           if (Object.keys(newCode).length > 0) {
-            await updateTopicCode(currentTopic, newCode as any);
+            for (const [codeType, code] of Object.entries(newCode)) {
+              await updateTopicCode(currentTopic, codeType as keyof typeof newCode, code);
+            }
           }
         });
 
@@ -103,60 +111,57 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentTopic }) => {
   );
 
   return (
-    <Flex className="chat-interface-wrapper">
-      <Flex direction="column">
-        <ScrollArea className="chat-interface__messages">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`chat-interface__message ${
-                message.isUser ? 'chat-interface__message--user' : 'chat-interface__message--bot'
-              }`}
-            >
-              {message.isUser ? (
-                <p>{message.content}</p>
-              ) : (
-                <ReactMarkdown
-                  className="chat-interface__markdown"
-                  components={{
-                    code({ node, inline, className, children, ...props }) {
-                      const match = /language-(\w+)/.exec(className || '');
-                      return !inline && match ? (
-                        <pre className="code-block">
-                          <code className={className} {...props}>
-                            {children}
-                          </code>
-                        </pre>
-                      ) : (
+    <Flex className="chat-interface" direction="column" style={{ height: '100%' }}>
+      {currentTopic}
+      <ScrollArea style={{ flex: 1 }} className="chat-interface__messages">
+        {messages.map((message) => (
+          <div
+            key={message.id}
+            className={`chat-interface__message ${
+              message.isUser ? 'chat-interface__message--user' : 'chat-interface__message--bot'
+            }`}
+          >
+            {message.isUser ? (
+              <p>{message.content}</p>
+            ) : (
+              <ReactMarkdown
+                className="chat-interface__markdown"
+                components={{
+                  code({ node, inline, className, children, ...props }) {
+                    const match = /language-(\w+)/.exec(className || '');
+                    return !inline && match ? (
+                      <pre className="code-block">
                         <code className={className} {...props}>
                           {children}
                         </code>
-                      );
-                    },
-                    img: ({ node, ...props }) => (
-                      <img {...props} className="chat-interface__image" />
-                    ),
-                  }}
-                >
-                  {message.content}
-                </ReactMarkdown>
-              )}
-              {message.image && (
-                <img
-                  src={message.image}
-                  alt="Uploaded content"
-                  className="chat-interface__uploaded-image"
-                />
-              )}
-            </div>
-          ))}
-        </ScrollArea>
-        <Box p="md">
-          <UserInput onSubmit={handleSubmit} isLoading={isLoading} />
-        </Box>
-      </Flex>
+                      </pre>
+                    ) : (
+                      <code className={className} {...props}>
+                        {children}
+                      </code>
+                    );
+                  },
+                  img: ({ node, ...props }) => <img {...props} className="chat-interface__image" />,
+                }}
+              >
+                {message.content}
+              </ReactMarkdown>
+            )}
+            {message.image && (
+              <img
+                src={message.image}
+                alt="Uploaded content"
+                className="chat-interface__uploaded-image"
+              />
+            )}
+          </div>
+        ))}
+      </ScrollArea>
+      <Box p="md">
+        <UserInput onSubmit={handleSubmit} isLoading={isLoading} />
+      </Box>
     </Flex>
   );
 };
 
-export default ChatInterface;
+export default BaseChatInterface;
