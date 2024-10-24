@@ -15,6 +15,7 @@ export interface ChatMessage {
 }
 
 interface ChatState {
+  currentTopic: any
   topics: Record<string, ChatMessage[]>
   topicCode: Record<
     string,
@@ -47,9 +48,10 @@ interface ChatState {
   ) => void
 }
 
-export const useChatStore = create<ChatState>()(
+export const ChatStore = create<ChatState>()(
   persist(
     (set, get) => ({
+      currentTopic: null,
       topics: {},
       topicCode: {},
       addMessage: (topicId, message) =>
@@ -79,6 +81,7 @@ export const useChatStore = create<ChatState>()(
             ...state.topicCode,
             [topicId]: { html: '', index: '', panel: '', scss: '' },
           },
+          currentTopic: topicId,
         })),
       updateTopicTitle: (topicId, newTitle) =>
         set((state) => ({
@@ -94,7 +97,11 @@ export const useChatStore = create<ChatState>()(
         set((state) => {
           const { [topicId]: _, ...restTopics } = state.topics
           const { [topicId]: __, ...restTopicCode } = state.topicCode
-          return { topics: restTopics, topicCode: restTopicCode }
+          return { 
+            topics: restTopics, 
+            topicCode: restTopicCode,
+            currentTopic: state.currentTopic === topicId ? null : state.currentTopic
+          }
         }),
       getTopicCode: (topicId, codeType) => {
         return get().topicCode[topicId]?.[codeType] || ''
@@ -118,3 +125,6 @@ export const useChatStore = create<ChatState>()(
     }
   )
 )
+
+// 如果你之前使用的是 useChatStore，你可以保留它作为一个别名
+export const useChatStore = ChatStore
