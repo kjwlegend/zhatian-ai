@@ -1,13 +1,16 @@
 const path = require('path');
 const fs = require('fs');
 const { VueLoaderPlugin } = require('vue-loader');
-const webpackMerge = require('webpack-merge');
+const { merge } = require('webpack-merge'); // 使用解构导入
 
 // 读取 components-light 目录下的文件
 const componentsDir = path.resolve(__dirname, 'components-light');
 const components = fs.readdirSync(componentsDir)
     .filter(file => fs.statSync(path.join(componentsDir, file)).isDirectory());
 
+console.error('%c  components', 'background-image:color:transparent;color:red;');
+console.error('🚀~ => ', components);
+console.error('🚀~ => ', componentsDir);
 // 基础配置
 const baseConfig = {
     mode: 'production',
@@ -42,7 +45,7 @@ const baseConfig = {
 };
 
 // 为每个组件创建配置
-module.exports = components.map(component => webpackMerge(baseConfig, {
+module.exports = components.map(component => merge(baseConfig, {
     entry: path.resolve(componentsDir, component),
     output: {
         filename: `${component}.js`,

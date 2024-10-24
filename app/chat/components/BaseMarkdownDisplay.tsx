@@ -5,8 +5,8 @@ import { IconClipboard, IconClipboardCheck } from '@tabler/icons-react';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { CodeContent } from '../../services/db/schema';
-import { useChatStore } from '../../store/chatStore';
+import { CodeContent } from '@/app/services/db/schema';
+import { useChatStore } from '@/app/store/chatStore';
 
 import '../MarkdownDisplay/MarkdownDisplay.scss';
 
@@ -18,10 +18,10 @@ interface BaseMarkdownDisplayProps {
 
 const BaseMarkdownDisplay: React.FC<BaseMarkdownDisplayProps> = ({
   currentTopic,
-  customTabs = ['html', 'js', 'scss'],
+  customTabs = useChatStore((state) => state.customTabs),
   customRender,
 }) => {
-  const [activeTab, setActiveTab] = useState<keyof CodeContent>(customTabs[0]);
+  const [activeTab, setActiveTab] = useState<keyof CodeContent>(customTabs[0] as keyof CodeContent);
   const [copied, setCopied] = useState(false);
   const [content, setContent] = useState('');
   const getTopicCode = useChatStore((state) => state.getTopicCode);

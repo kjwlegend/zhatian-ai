@@ -1,5 +1,5 @@
 'use client'
-import React from 'react'
+import React, { useState } from 'react'
 import Link from 'next/link'
 import {
   Container,
@@ -10,14 +10,13 @@ import {
   useMantineColorScheme,
 } from '@mantine/core'
 import { IconSun, IconMoonStars } from '@tabler/icons-react'
-import { useState } from 'react'
-// import { notifications } from '@mantine/notifications'
 import { useChatStore } from '@/app/store/chatStore'
-
-// import classes from "./Header.module.css";
+import { CodeContent } from '@/app/services/db/schema';
 import './Header.scss'
 
-export function Header() {
+const Header = () => {
+  const { currentTopic, getTopicCode, customTabs } = useChatStore()
+
   const { setColorScheme } = useMantineColorScheme();
   const computedColorScheme = useComputedColorScheme('light', { getInitialValueInEffect: true });
 
@@ -30,15 +29,20 @@ export function Header() {
   const handlePackageDownload = async () => {
     setIsPackaging(true);
     try {
-      const currentTopic = useChatStore.getState().currentTopic;
+      let topicCode = {} as Record<string, string>
+      await Promise.all(customTabs.map(async type => {
+        const res = await getTopicCode(currentTopic, type as keyof CodeContent);
+        topicCode[type] = res
+      }));
+
       const response = await fetch('/api/package-download', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ currentTopic }),
+        body: JSON.stringify({ currentTopic, topicCode }),
       });
-      console.error('response', response);
+      console.error('API response:', response);
       if (response.ok) {
         console.log('打包成功');
         // 处理成功情况...
@@ -46,7 +50,7 @@ export function Header() {
         throw new Error('打包失败');
       }
     } catch (error) {
-      console.log('打包失败', error);
+      console.error('打包失败', error);
       // 处理错误情况...
     } finally {
       setIsPackaging(false);

@@ -17,7 +17,7 @@
     "test": "pnpm run prettier:check && pnpm run lint && pnpm run typecheck && pnpm run jest",
     "storybook": "storybook dev -p 6006",
     "storybook:build": "storybook build",
-    "build:packages": "next light-build --project Gucci --main src/components-light"
+    "build:packages": "npx webpack --config webpack.config.js"
   },
   "dependencies": {
     "@mantine/core": "^7.13.3",
@@ -38,7 +38,6 @@
   },
   "devDependencies": {
     "@babel/core": "^7.24.7",
-    "@baozun/ace-cli-plugin-light": "1.1.2-beta3",
     "@ianvs/prettier-plugin-sort-imports": "^4.3.1",
     "@next/eslint-plugin-next": "^14.2.4",
     "@storybook/nextjs": "^8.1.10",
