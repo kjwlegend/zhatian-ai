@@ -1,42 +1,94 @@
-'use client'
-import { useState } from 'react';
-import { UnstyledButton, Tooltip, Title, rem, TextInput, ActionIcon, Group, ScrollArea } from '@mantine/core';
+'use client';
+
+import { useEffect, useState } from 'react';
 import {
+  IconDatabase,
+  IconEdit,
+  IconFileFilled,
   IconHome2,
-  IconGauge,
-  IconDeviceDesktopAnalytics,
-  IconCalendarStats,
-  IconUser,
-  IconFingerprint,
-  IconSettings,
+  IconListDetails,
   IconPlus,
   IconTrash,
-  IconEdit,
+  IconWebhook,
 } from '@tabler/icons-react';
+import {
+  ActionIcon,
+  Group,
+  ScrollArea,
+  TextInput,
+  Title,
+  Tooltip,
+  UnstyledButton,
+} from '@mantine/core';
+import { ChatTopic, ChatView } from '../../services/db/schema';
 import { useChatStore } from '../../store/chatStore';
-import './Sidebar.scss'
+
+import './Sidebar.scss';
 
 const mainLinksMockdata = [
-  { icon: IconHome2, label: 'Home' },
-  { icon: IconGauge, label: 'Dashboard' },
-  { icon: IconDeviceDesktopAnalytics, label: 'Analytics' },
-  { icon: IconCalendarStats, label: 'Releases' },
-  { icon: IconUser, label: 'Account' },
-  { icon: IconFingerprint, label: 'Security' },
-  { icon: IconSettings, label: 'Settings' },
+  { icon: IconHome2, label: 'Projects' },
+  { icon: IconFileFilled, label: 'Pages' },
+  { icon: IconWebhook, label: 'Frontend' },
+  { icon: IconDatabase, label: 'Backend' },
+  { icon: IconListDetails, label: 'Tests' },
 ];
 
-interface DoubleNavbarProps {
-  onSelectTopic: (topic: string) => void;
-  currentTopic: string;
+interface SidebarProps {
+  onSelectView: (view: string) => void;
+  currentView: string;
 }
 
-export function DoubleNavbar({ onSelectTopic, currentTopic }: DoubleNavbarProps) {
-  const [active, setActive] = useState('Topics');
+export function Sidebar({ onSelectView, currentView }: SidebarProps) {
   const [editingTopic, setEditingTopic] = useState<string | null>(null);
   const [newTopicName, setNewTopicName] = useState('');
+  const [editingTopicName, setEditingTopicName] = useState('');
+  const [topics, setTopics] = useState<ChatTopic[]>([]);
+  const [activeTopic, setActiveTopic] = useState<string | null>(null);
 
-  const { topics, addTopic, deleteTopic, updateTopicTitle } = useChatStore();
+  const { addTopic, deleteTopic, updateTopicTitle, getViewTopics, setCurrentTopic } =
+    useChatStore();
+
+  useEffect(() => {
+    const loadTopics = async () => {
+      if (currentView && ['Frontend', 'Backend', 'Tests'].includes(currentView)) {
+        const loadedTopics = await getViewTopics(currentView);
+        setTopics(loadedTopics);
+      } else {
+        setTopics([]);
+      }
+    };
+    loadTopics();
+  }, [currentView, getViewTopics]);
+
+  const handleAddTopic = async () => {
+    if (newTopicName.trim() && currentView) {
+      const topicId = await addTopic(currentView, newTopicName.trim());
+      setNewTopicName('');
+      const updatedTopics = await getViewTopics(currentView);
+      setTopics(updatedTopics);
+      setActiveTopic(topicId);
+      setCurrentTopic(topicId);
+    }
+  };
+
+  const handleUpdateTopic = async (topicId: string, newName: string) => {
+    if (newName.trim() && newName !== topics.find((t) => t.id === topicId)?.title) {
+      await updateTopicTitle(topicId, newName.trim());
+      setEditingTopic(null);
+      const updatedTopics = await getViewTopics(currentView);
+      setTopics(updatedTopics);
+    }
+  };
+
+  const handleDeleteTopic = async (topicId: string) => {
+    await deleteTopic(currentView, topicId);
+    const updatedTopics = await getViewTopics(currentView);
+    setTopics(updatedTopics);
+    if (activeTopic === topicId) {
+      setActiveTopic(null);
+      setCurrentTopic('');
+    }
+  };
 
   const mainLinks = mainLinksMockdata.map((link) => (
     <Tooltip
@@ -47,41 +99,28 @@ export function DoubleNavbar({ onSelectTopic, currentTopic }: DoubleNavbarProps)
       key={link.label}
     >
       <UnstyledButton
-        onClick={() => setActive(link.label)}
+        onClick={() => {
+          onSelectView(link.label);
+          setActiveTopic(null);
+        }}
         className="mainLink"
-        data-active={link.label === active || undefined}
+        data-active={link.label === currentView || undefined}
       >
-        <link.icon style={{ width: rem(22), height: rem(22) }} stroke={1.5} />
+        <link.icon style={{ width: '22px', height: '22px' }} stroke={1.5} />
       </UnstyledButton>
     </Tooltip>
   ));
 
-  const handleAddTopic = () => {
-    if (newTopicName.trim()) {
-      const topicId = Date.now().toString(); // 生成一个唯一的 ID
-      addTopic(topicId, newTopicName.trim());
-      setNewTopicName('');
-      onSelectTopic(topicId); // 选择新创建的主题
-    }
-  };
-
-  const handleUpdateTopic = (topicId: string, newName: string) => {
-    if (newName.trim() && newName !== topics[topicId][0].content) {
-      updateTopicTitle(topicId, newName.trim());
-    }
-    setEditingTopic(null);
-  };
-
-  const topicLinks = Object.entries(topics).map(([topicId, messages]) => (
-    <div key={topicId} className="topic-item">
-      {editingTopic === topicId ? (
+  const topicLinks = topics.map((topic) => (
+    <div key={topic.id} className="topic-item">
+      {editingTopic === topic.id ? (
         <TextInput
-          value={newTopicName}
-          onChange={(event) => setNewTopicName(event.currentTarget.value)}
-          onBlur={() => handleUpdateTopic(topicId, newTopicName)}
+          value={editingTopicName}
+          onChange={(event) => setEditingTopicName(event.currentTarget.value)}
+          onBlur={() => handleUpdateTopic(topic.id, editingTopicName)}
           onKeyPress={(event) => {
             if (event.key === 'Enter') {
-              handleUpdateTopic(topicId, newTopicName);
+              handleUpdateTopic(topic.id, editingTopicName);
             }
           }}
           autoFocus
@@ -90,32 +129,24 @@ export function DoubleNavbar({ onSelectTopic, currentTopic }: DoubleNavbarProps)
         <>
           <UnstyledButton
             onClick={() => {
-              setActive(topicId);
-              onSelectTopic(topicId);
+              setActiveTopic(topic.id);
+              setCurrentTopic(topic.id);
             }}
             className="topic-button"
-            data-active={currentTopic === topicId || undefined}
+            data-active={activeTopic === topic.id || undefined}
           >
-            {messages[0].content}
+            {topic.title}
           </UnstyledButton>
           <div className="topic-actions">
-            <ActionIcon onClick={() => {
-              setEditingTopic(topicId);
-              setNewTopicName(messages[0].content);
-            }}>
+            <ActionIcon
+              onClick={() => {
+                setEditingTopic(topic.id);
+                setEditingTopicName(topic.title);
+              }}
+            >
               <IconEdit size="1rem" />
             </ActionIcon>
-            <ActionIcon onClick={() => {
-              deleteTopic(topicId);
-              if (currentTopic === topicId) {
-                const remainingTopics = Object.keys(topics).filter(id => id !== topicId);
-                if (remainingTopics.length > 0) {
-                  onSelectTopic(remainingTopics[0]);
-                } else {
-                  onSelectTopic('');
-                }
-              }
-            }} color="red">
+            <ActionIcon onClick={() => handleDeleteTopic(topic.id)} color="red">
               <IconTrash size="1rem" />
             </ActionIcon>
           </div>
@@ -124,39 +155,42 @@ export function DoubleNavbar({ onSelectTopic, currentTopic }: DoubleNavbarProps)
     </div>
   ));
 
+  const showTopics = ['Frontend', 'Backend', 'Tests'].includes(currentView);
+
   return (
     <nav className="navbar">
       <div className="wrapper">
-        <div className="aside">
-          {mainLinks}
-        </div>
+        <div className="aside">{mainLinks}</div>
         <div className="main">
           <Title order={4} className="title">
-            {active}
+            {currentView}
           </Title>
-          <ScrollArea className="topic-list" scrollbarSize={6}  my="md">
-            {topicLinks}
-          </ScrollArea>
-
-          <Group className="addTopic" wrap="nowrap">
-            <TextInput
-              placeholder="New topic"
-              value={newTopicName}
-              onChange={(event) => setNewTopicName(event.currentTarget.value)}
-              onKeyPress={(event) => {
-                if (event.key === 'Enter') {
-                  handleAddTopic();
-                }
-              }}
-            />
-            <ActionIcon onClick={handleAddTopic} color="blue">
-              <IconPlus size="1rem" />
-            </ActionIcon>
-          </Group>
+          {showTopics && (
+            <>
+              <ScrollArea className="topic-list" scrollbarSize={6} my="md">
+                {topicLinks}
+              </ScrollArea>
+              <Group className="addTopic" wrap="nowrap">
+                <TextInput
+                  placeholder="New topic"
+                  value={newTopicName}
+                  onChange={(event) => setNewTopicName(event.currentTarget.value)}
+                  onKeyPress={(event) => {
+                    if (event.key === 'Enter') {
+                      handleAddTopic();
+                    }
+                  }}
+                />
+                <ActionIcon onClick={handleAddTopic} color="blue">
+                  <IconPlus size="1rem" />
+                </ActionIcon>
+              </Group>
+            </>
+          )}
         </div>
       </div>
     </nav>
   );
 }
 
-export default DoubleNavbar;
+export default Sidebar;

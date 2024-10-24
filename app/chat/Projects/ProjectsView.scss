@@ -1,0 +1,12 @@
+@import '../Chat.scss';
+
+.projects-view {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  padding: 20px;
+
+  h1 {
+    margin-bottom: 20px;
+  }
+}

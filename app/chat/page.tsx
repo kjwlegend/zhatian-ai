@@ -1,21 +1,39 @@
-'use client'
-import React, { useState } from "react";
-import ChatInterface from "./ChatInterface/ChatInterface";
-import Sidebar from "./Sidebar/Sidebar";
-import "./Chat.scss"; // 导入新的 CSS 文件
+'use client';
+
+import React, { useState } from 'react';
+import BackendView from './Backend/BackendView';
+import FrontendView from './Frontend/FrontendView';
+import PagesView from './Pages/PagesView';
+import ProjectsView from './Projects/ProjectsView';
+import Sidebar from './Sidebar/Sidebar';
+import TestView from './Test/TestView';
+
+import './Chat.scss';
 
 const Chat: React.FC = () => {
-  const [currentTopic, setCurrentTopic] = useState<string>("");
+  const [currentView, setCurrentView] = useState<string>('Projects');
+
+  const renderView = () => {
+    switch (currentView) {
+      case 'Projects':
+        return <ProjectsView />;
+      case 'Pages':
+        return <PagesView />;
+      case 'Frontend':
+        return <FrontendView />;
+      case 'Backend':
+        return <BackendView />;
+      case 'Tests':
+        return <TestView />;
+      default:
+        return <ProjectsView />;
+    }
+  };
 
   return (
     <div className="chat-container">
-      <Sidebar
-        onSelectTopic={setCurrentTopic}
-        currentTopic={currentTopic}
-      />
-      <main className="chat-main">
-        <ChatInterface currentTopic={currentTopic} />
-      </main>
+      <Sidebar onSelectView={setCurrentView} currentView={currentView} />
+      <main className="chat-main">{renderView()}</main>
     </div>
   );
 };

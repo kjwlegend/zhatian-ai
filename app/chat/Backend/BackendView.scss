@@ -1,0 +1,16 @@
+@import '../Chat.scss';
+
+.backend-view {
+  display: flex;
+  height: 100%;
+  width: 100%;
+
+  .chat-interface {
+    width: 50%;
+    border-right: 1px solid var(--mantine-color-gray-3);
+  }
+
+  .markdown-display {
+    width: 50%;
+  }
+}

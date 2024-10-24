@@ -38,7 +38,7 @@ export function Header() {
         },
         body: JSON.stringify({ currentTopic }),
       });
-      console.log('response', response);
+      console.error('response', response);
       if (response.ok) {
         console.log('打包成功');
         // 处理成功情况...
