@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import {
+  IconClipboardList,
   IconDatabase,
   IconEdit,
   IconFileFilled,
@@ -31,6 +32,7 @@ const mainLinksMockdata = [
   { icon: IconWebhook, label: 'Frontend' },
   { icon: IconDatabase, label: 'Backend' },
   { icon: IconListDetails, label: 'Tests' },
+  { icon: IconClipboardList, label: 'BA' },
 ];
 
 interface SidebarProps {
@@ -45,12 +47,12 @@ export function Sidebar({ onSelectView, currentView }: SidebarProps) {
   const [topics, setTopics] = useState<ChatTopic[]>([]);
   const [activeTopic, setActiveTopic] = useState<string | null>(null);
 
-  const { addTopic, deleteTopic, updateTopicTitle, getViewTopics, setCurrentTopic } =
+  const { addTopic, deleteTopic, updateTopicTitle, getViewTopics, setCurrentTopic, currentTopic } =
     useChatStore();
 
   useEffect(() => {
     const loadTopics = async () => {
-      if (currentView && ['Frontend', 'Backend', 'Tests'].includes(currentView)) {
+      if (currentView && ['Frontend', 'Backend', 'Tests', 'BA'].includes(currentView)) {
         const loadedTopics = await getViewTopics(currentView);
         setTopics(loadedTopics);
       } else {
@@ -58,7 +60,7 @@ export function Sidebar({ onSelectView, currentView }: SidebarProps) {
       }
     };
     loadTopics();
-  }, [currentView, getViewTopics]);
+  }, [currentView, getViewTopics, currentTopic]); // Add currentTopic as a dependency
 
   const handleAddTopic = async () => {
     if (newTopicName.trim() && currentView) {
@@ -102,6 +104,7 @@ export function Sidebar({ onSelectView, currentView }: SidebarProps) {
         onClick={() => {
           onSelectView(link.label);
           setActiveTopic(null);
+          setCurrentTopic(''); // Clear currentTopic when selecting a new view
         }}
         className="mainLink"
         data-active={link.label === currentView || undefined}
@@ -155,7 +158,7 @@ export function Sidebar({ onSelectView, currentView }: SidebarProps) {
     </div>
   ));
 
-  const showTopics = ['Frontend', 'Backend', 'Tests'].includes(currentView);
+  const showTopics = ['Frontend', 'Backend', 'Tests', 'BA'].includes(currentView);
 
   return (
     <nav className="navbar">

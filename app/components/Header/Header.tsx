@@ -1,18 +1,18 @@
-'use client'
-import React from 'react'
-import Link from 'next/link'
+'use client';
+
+import React from 'react';
+import Link from 'next/link';
+import { IconMoonStars, IconSun } from '@tabler/icons-react';
 import {
+  ActionIcon,
+  Button,
   Container,
   Group,
-  Button,
-  ActionIcon,
   useComputedColorScheme,
   useMantineColorScheme,
-} from '@mantine/core'
-import { IconSun, IconMoonStars } from '@tabler/icons-react'
-
+} from '@mantine/core';
 // import classes from "./Header.module.css";
-import './Header.scss'
+import './Header.scss';
 
 export function Header() {
   const { setColorScheme } = useMantineColorScheme();
@@ -28,7 +28,7 @@ export function Header() {
         <Group justify="space-between" w="100%">
           <Group>
             <Button component={Link} href="/" variant="subtle">
-              下一代吊炸天的语言控制CMS生成一体化平台
+              下一代吊炸天的网站加小程序页面自然语言一站式生成系统
             </Button>
           </Group>
 
@@ -56,17 +56,13 @@ export function Header() {
               onClick={toggleColorScheme}
               title="Toggle color scheme"
             >
-              {computedColorScheme === 'dark' ? (
-                <IconSun size={18} />
-              ) : (
-                <IconMoonStars size={18} />
-              )}
+              {computedColorScheme === 'dark' ? <IconSun size={18} /> : <IconMoonStars size={18} />}
             </ActionIcon>
           </Group>
         </Group>
       </Container>
     </header>
-  )
+  );
 }
 
-export default Header
+export default Header;

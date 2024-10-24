@@ -1,5 +1,5 @@
-import Main from './components/pages/Main'
+import Main from './chat/page';
 
 export default function HomePage() {
-  return <Main />
+  return <Main />;
 }

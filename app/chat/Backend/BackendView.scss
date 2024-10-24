@@ -5,12 +5,12 @@
   height: 100%;
   width: 100%;
 
-  .chat-interface {
-    width: 50%;
-    border-right: 1px solid var(--mantine-color-gray-3);
+  > div {
+    flex: 1;
+    overflow: hidden;
   }
 
-  .markdown-display {
-    width: 50%;
+  .chat-interface {
+    border-right: 1px solid var(--mantine-color-gray-3);
   }
 }

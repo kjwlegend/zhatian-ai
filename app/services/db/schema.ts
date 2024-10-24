@@ -3,7 +3,9 @@ import { DBSchema } from 'idb';
 export interface Project {
   id: string;
   name: string;
-  description: string;
+  creator: string;
+  createdAt: number;
+  codeType: string;
   lastUpdated: number;
 }
 
@@ -55,7 +57,7 @@ export interface ChatDBSchema extends DBSchema {
   projects: {
     key: string;
     value: Project;
-    indexes: { 'by-last-updated': number };
+    indexes: { 'by-creator': string; 'by-last-updated': number };
   };
   pages: {
     key: string;

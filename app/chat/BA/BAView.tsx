@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useChatStore } from '../../store/chatStore';
-import FrontendChatInterface from './FrontendChatInterface';
-import FrontendMarkdownDisplay from './FrontendMarkdownDisplay';
+import BAChatInterface from './BAChatInterface';
+import BAMarkdownDisplay from './BAMarkdownDisplay';
 
-import './FrontendView.scss';
+import './BAView.scss';
 
-const FrontendView: React.FC = () => {
+const BAView: React.FC = () => {
   const { currentTopic, addTopic, setCurrentTopic, getViewTopics } = useChatStore();
   const [codeUpdate, setCodeUpdate] = useState({ type: '', content: '' });
   const [shouldRefreshMarkdown, setShouldRefreshMarkdown] = useState(false);
@@ -13,7 +13,7 @@ const FrontendView: React.FC = () => {
 
   useEffect(() => {
     const loadTopics = async () => {
-      const loadedTopics = await getViewTopics('Frontend');
+      const loadedTopics = await getViewTopics('BA');
       setTopics(loadedTopics);
     };
     loadTopics();
@@ -28,9 +28,9 @@ const FrontendView: React.FC = () => {
   };
 
   const handleCreateTopic = async () => {
-    const newTopicId = await addTopic('Frontend', 'New Frontend Topic');
+    const newTopicId = await addTopic('BA', 'New BA Topic');
     setCurrentTopic(newTopicId);
-    const updatedTopics = await getViewTopics('Frontend');
+    const updatedTopics = await getViewTopics('BA');
     setTopics(updatedTopics);
   };
 
@@ -40,16 +40,16 @@ const FrontendView: React.FC = () => {
   };
 
   return (
-    <div className="frontend-view">
-      <FrontendChatInterface
-        currentView="Frontend"
+    <div className="ba-view">
+      <BAChatInterface
+        currentView="BA"
         currentTopic={currentTopic}
         onCodeUpdate={handleCodeUpdate}
         onMessageComplete={handleMessageComplete}
         onCreateTopic={handleCreateTopic}
         onSelectTopic={handleSelectTopic}
       />
-      <FrontendMarkdownDisplay
+      <BAMarkdownDisplay
         currentTopic={currentTopic}
         codeUpdate={codeUpdate}
         shouldRefresh={shouldRefreshMarkdown}
@@ -58,4 +58,4 @@ const FrontendView: React.FC = () => {
   );
 };
 
-export default FrontendView;
+export default BAView;

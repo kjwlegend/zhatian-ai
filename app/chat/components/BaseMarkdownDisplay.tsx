@@ -14,12 +14,14 @@ interface BaseMarkdownDisplayProps {
   currentTopic: string;
   customTabs?: (keyof CodeContent)[];
   customRender?: (content: string, activeTab: keyof CodeContent) => React.ReactNode;
+  shouldRefresh?: boolean;
 }
 
 const BaseMarkdownDisplay: React.FC<BaseMarkdownDisplayProps> = ({
   currentTopic,
   customTabs = ['html', 'js', 'scss'],
   customRender,
+  shouldRefresh = false,
 }) => {
   const [activeTab, setActiveTab] = useState<keyof CodeContent>(customTabs[0]);
   const [copied, setCopied] = useState(false);
@@ -36,7 +38,7 @@ const BaseMarkdownDisplay: React.FC<BaseMarkdownDisplayProps> = ({
       }
     };
     loadCode();
-  }, [currentTopic, activeTab, getTopicCode]);
+  }, [currentTopic, activeTab, getTopicCode, shouldRefresh]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(content).then(() => {

@@ -1,6 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
+import { useChatStore } from '../store/chatStore';
+import { useProjectStore } from '../store/projectStore';
+import BAView from './BA/BAView';
 import BackendView from './Backend/BackendView';
 import FrontendView from './Frontend/FrontendView';
 import PagesView from './Pages/PagesView';
@@ -11,20 +14,23 @@ import TestView from './Test/TestView';
 import './Chat.scss';
 
 const Chat: React.FC = () => {
-  const [currentView, setCurrentView] = useState<string>('Projects');
+  const { currentProject } = useProjectStore();
+  const { currentView, setCurrentView } = useChatStore();
 
   const renderView = () => {
     switch (currentView) {
       case 'Projects':
         return <ProjectsView />;
       case 'Pages':
-        return <PagesView />;
+        return currentProject ? <PagesView projectId={currentProject.id} /> : null;
       case 'Frontend':
         return <FrontendView />;
       case 'Backend':
         return <BackendView />;
       case 'Tests':
         return <TestView />;
+      case 'BA':
+        return <BAView />;
       default:
         return <ProjectsView />;
     }

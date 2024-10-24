@@ -1,9 +1,10 @@
 @import '../Chat.scss';
 
-.test-view {
+.ba-view {
   display: flex;
   height: 100%;
   width: 100%;
+  flex-direction: row;
 
   > div {
     flex: 1;

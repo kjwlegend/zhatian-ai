@@ -3,11 +3,12 @@ import React from 'react';
 import { ColorSchemeScript, MantineProvider } from '@mantine/core';
 import { theme } from '../theme';
 import AppLayout from './components/AppLayout/AppLayout';
+
 import '@mantine/core/styles.css';
 import './styles/global.scss';
 
 export const metadata = {
-  title: '下一代吊炸天的语言控制CMS生成一体化平台',
+  title: '下一代吊炸天的网站加小程序页面自然语言一站式生成系统',
   description: 'Chat interface for AI-assisted coding',
 };
 
@@ -24,9 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <MantineProvider theme={theme}>
-          <AppLayout>
-            {children}
-          </AppLayout>
+          <AppLayout>{children}</AppLayout>
         </MantineProvider>
       </body>
     </html>

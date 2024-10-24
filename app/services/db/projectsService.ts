@@ -1,5 +1,5 @@
 import { initDB } from './index';
-import { Project } from './schema';
+import { Page, Project } from './schema';
 
 export async function getProject(id: string): Promise<Project | undefined> {
   const db = await initDB();
@@ -26,8 +26,23 @@ export async function getAllProjects(): Promise<Project[]> {
   return db.getAll('projects');
 }
 
-// export async function getProjectPages(projectId: string): Promise<string[]> {
-//   const db = await initDB();
-//   const pages = await db.getAllFromIndex('pages', 'by-project', projectId);
-//   return pages.map((page) => page.id);
-// }
+export async function getProjectsByCreator(creator: string): Promise<Project[]> {
+  const db = await initDB();
+  return db.getAllFromIndex('projects', 'by-creator', creator);
+}
+
+export async function getProjectPages(projectId: string): Promise<Page[]> {
+  const db = await initDB();
+  const pages = await db.getAllFromIndex('pages', 'by-project', projectId);
+  return pages as Page[];
+}
+
+export async function getProjectComponents(projectId: string): Promise<number> {
+  const db = await initDB();
+  const pages = await db.getAllFromIndex('pages', 'by-project', projectId);
+  const componentsPromises = pages.map((page) =>
+    db.getAllFromIndex('components', 'by-page', page.id)
+  );
+  const componentsPerPage = await Promise.all(componentsPromises);
+  return componentsPerPage.reduce((total, components) => total + components.length, 0);
+}
