@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { monitorForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { IconPlus } from '@tabler/icons-react';
-import { DragDropContext, DropResult } from 'react-beautiful-dnd';
 import { Anchor, Box, Breadcrumbs, Button, Group, ScrollArea, Text, Title } from '@mantine/core';
 import { Component, Page } from '../../services/db/schema';
 import { useProjectStore } from '../../store/projectStore';
@@ -52,44 +52,34 @@ const PagesView: React.FC<PagesViewProps> = ({ projectId }) => {
     loadData();
   }, [projectId, loadPages, loadComponents]);
 
+  useEffect(() => {
+    const cleanup = monitorForElements({
+      onDrop: async ({ source, location }) => {
+        const destination = location.current.dropTargets[0];
+        if (!destination) return;
+
+        const sourcePageId = source.data.pageId;
+        const destPageId = destination.data.pageId;
+        const componentId = source.data.componentId;
+
+        if (sourcePageId === destPageId) return;
+
+        const draggedComponent = components[sourcePageId].find((comp) => comp.id === componentId);
+        if (!draggedComponent) return;
+
+        const destinationIndex = destination.data.index;
+
+        await moveComponent(componentId, sourcePageId, destPageId, destinationIndex);
+        await updateComponent({ ...draggedComponent, pageId: destPageId });
+      },
+    });
+
+    return cleanup;
+  }, [components, moveComponent, updateComponent]);
+
   const handleCreatePage = async (newPage: Omit<Page, 'id' | 'lastUpdated'>) => {
     await addPage({ ...newPage, projectId });
     setIsCreateModalOpen(false);
-  };
-
-  const handleDragEnd = async (result: DropResult) => {
-    const { source, destination, draggableId } = result;
-
-    // If there's no destination, we don't need to do anything
-    if (!destination) return;
-
-    // If the source and destination are the same, we don't need to do anything
-    if (source.droppableId === destination.droppableId && source.index === destination.index)
-      return;
-
-    const sourcePageId = source.droppableId;
-    const destPageId = destination.droppableId;
-
-    // Get the component that was dragged
-    const draggedComponent = components[sourcePageId].find((comp) => comp.id === draggableId);
-
-    if (!draggedComponent) {
-      console.error('Dragged component not found');
-      return;
-    }
-
-    // Remove the component from the source page
-    const newSourceComponents = components[sourcePageId].filter((comp) => comp.id !== draggableId);
-
-    // Add the component to the destination page
-    const newDestComponents = Array.from(components[destPageId] || []);
-    newDestComponents.splice(destination.index, 0, { ...draggedComponent, pageId: destPageId });
-
-    // Update the store
-    await moveComponent(draggableId, sourcePageId, destPageId, destination.index);
-
-    // Update the component's page ID
-    await updateComponent({ ...draggedComponent, pageId: destPageId });
   };
 
   if (isLoading) {
@@ -121,24 +111,22 @@ const PagesView: React.FC<PagesViewProps> = ({ projectId }) => {
         </Button>
       </Group>
 
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <ScrollArea className="pages-scroll-area">
-          <div className="pages-container">
-            {pages.length === 0 ? (
-              <Text>No pages found. Create a new page to get started.</Text>
-            ) : (
-              pages.map((page) => (
-                <PageColumn
-                  key={page.id}
-                  page={page}
-                  components={components[page.id] || []}
-                  onDeletePage={() => deletePage(page.id)}
-                />
-              ))
-            )}
-          </div>
-        </ScrollArea>
-      </DragDropContext>
+      <ScrollArea className="pages-scroll-area">
+        <div className="pages-container">
+          {pages.length === 0 ? (
+            <Text>No pages found. Create a new page to get started.</Text>
+          ) : (
+            pages.map((page) => (
+              <PageColumn
+                key={page.id}
+                page={page}
+                components={components[page.id] || []}
+                onDeletePage={() => deletePage(page.id)}
+              />
+            ))
+          )}
+        </div>
+      </ScrollArea>
 
       <CreatePageModal
         isOpen={isCreateModalOpen}

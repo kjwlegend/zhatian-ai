@@ -161,36 +161,35 @@ export function Sidebar({ onSelectView, currentView }: SidebarProps) {
   const showTopics = ['Frontend', 'Backend', 'Tests', 'BA'].includes(currentView);
 
   return (
-    <nav className="navbar">
+    <nav className={`navbar ${showTopics ? 'wide' : 'narrow'}`}>
       <div className="wrapper">
         <div className="aside">{mainLinks}</div>
-        <div className="main">
-          <Title order={4} className="title">
-            {currentView}
-          </Title>
-          {showTopics && (
-            <>
-              <ScrollArea className="topic-list" scrollbarSize={6} my="md">
-                {topicLinks}
-              </ScrollArea>
-              <Group className="addTopic" wrap="nowrap">
-                <TextInput
-                  placeholder="New topic"
-                  value={newTopicName}
-                  onChange={(event) => setNewTopicName(event.currentTarget.value)}
-                  onKeyPress={(event) => {
-                    if (event.key === 'Enter') {
-                      handleAddTopic();
-                    }
-                  }}
-                />
-                <ActionIcon onClick={handleAddTopic} color="blue">
-                  <IconPlus size="1rem" />
-                </ActionIcon>
-              </Group>
-            </>
-          )}
-        </div>
+
+        {showTopics && (
+          <div className="main">
+            <Title order={4} className="title">
+              {currentView}
+            </Title>
+            <ScrollArea className="topic-list" scrollbarSize={6} my="md">
+              {topicLinks}
+            </ScrollArea>
+            <Group className="addTopic" wrap="nowrap">
+              <TextInput
+                placeholder="New topic"
+                value={newTopicName}
+                onChange={(event) => setNewTopicName(event.currentTarget.value)}
+                onKeyPress={(event) => {
+                  if (event.key === 'Enter') {
+                    handleAddTopic();
+                  }
+                }}
+              />
+              <ActionIcon onClick={handleAddTopic} color="blue">
+                <IconPlus size="1rem" />
+              </ActionIcon>
+            </Group>
+          </div>
+        )}
       </div>
     </nav>
   );

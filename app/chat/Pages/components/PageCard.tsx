@@ -1,10 +1,10 @@
 import React from 'react';
 import { IconDoorEnter, IconEye } from '@tabler/icons-react';
 import { Badge, Button, Card, Group, Text } from '@mantine/core';
-import { MockPage } from '../types';
+import { Page } from '../types';
 
 interface PageCardProps {
-  page: MockPage;
+  page: Page;
   onViewDetails: () => void;
   onEnterPage: () => void;
 }

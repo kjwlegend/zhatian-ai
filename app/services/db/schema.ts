@@ -14,6 +14,9 @@ export interface Page {
   projectId: string;
   name: string;
   lastUpdated: number;
+  description: string;
+  type: string;
+  componentsCount: number;
 }
 
 export interface Component {

@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { IconPlus, IconTrash } from '@tabler/icons-react';
-import { Droppable } from 'react-beautiful-dnd';
-import { ActionIcon, Box, Button, Group, Text, Title } from '@mantine/core';
+import { ActionIcon, Box, Button, Group, Title } from '@mantine/core';
 import { Component, Page } from '../../../services/db/schema';
 import { useProjectStore } from '../../../store/projectStore';
 import { AddComponentModal } from './AddComponentModal';
@@ -16,6 +16,18 @@ interface PageColumnProps {
 export const PageColumn: React.FC<PageColumnProps> = ({ page, components, onDeletePage }) => {
   const { deletePage, addComponent } = useProjectStore();
   const [isAddComponentModalOpen, setIsAddComponentModalOpen] = useState(false);
+  const columnRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!columnRef.current) return;
+
+    const cleanup = dropTargetForElements({
+      element: columnRef.current,
+      getData: () => ({ pageId: page.id }),
+    });
+
+    return cleanup;
+  }, [page.id]);
 
   const handleDeletePage = () => {
     deletePage(page.id);
@@ -27,7 +39,7 @@ export const PageColumn: React.FC<PageColumnProps> = ({ page, components, onDele
   };
 
   return (
-    <Box className="page-column">
+    <Box className="page-column" ref={columnRef}>
       <Group justify="space-between" mb="md">
         <Title order={3}>{page.name}</Title>
         <ActionIcon color="red" onClick={onDeletePage}>
@@ -44,16 +56,11 @@ export const PageColumn: React.FC<PageColumnProps> = ({ page, components, onDele
           Add Component
         </Button>
       </Box>
-      <Droppable droppableId={page.id}>
-        {(provided) => (
-          <div {...provided.droppableProps} ref={provided.innerRef} className="components-list">
-            {components.map((component, index) => (
-              <ComponentItem key={component.id} component={component} index={index} />
-            ))}
-            {provided.placeholder}
-          </div>
-        )}
-      </Droppable>
+      <div className="components-list">
+        {components.map((component, index) => (
+          <ComponentItem key={component.id} component={component} index={index} pageId={page.id} />
+        ))}
+      </div>
       <AddComponentModal
         isOpen={isAddComponentModalOpen}
         onClose={() => setIsAddComponentModalOpen(false)}
