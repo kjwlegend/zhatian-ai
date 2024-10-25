@@ -38,6 +38,7 @@ export interface CodeContent {
   html: string;
   js: string;
   scss: string;
+  panel: string;
 }
 
 export interface ChatTopic {

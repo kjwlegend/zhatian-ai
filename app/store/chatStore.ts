@@ -14,6 +14,16 @@ import {
 interface ChatStore {
   currentView: string;
   currentTopic: string;
+  topicCode: Record<
+    string,
+    {
+      html: string
+      index: string
+      panel: string
+      scss: string
+      js: string
+    }
+  >
   initializeDB: () => Promise<void>;
   addMessage: (topicId: string, message: ChatMessage) => Promise<void>;
   updateMessage: (topicId: string, messageId: string, updatedMessage: ChatMessage) => Promise<void>;
@@ -24,6 +34,17 @@ interface ChatStore {
   getViewTopics: (viewId: string) => Promise<ChatTopic[]>;
   getTopicCode: (topicId: string, codeType: keyof CodeContent) => Promise<string>;
   updateTopicCode: (topicId: string, codeType: keyof CodeContent, code: string) => Promise<void>;
+  // getLocalTopicCode: (topicId: string, codeType: keyof CodeContent) => string
+  // updateLocalTopicCode: (
+  //   topicId: string,
+  //   newCode: {
+  //     html?: string
+  //     index?: string
+  //     panel?: string
+  //     scss?: string
+  //     js?: string
+  //   }
+  // ) => void
   setCurrentView: (viewId: string) => void;
   setCurrentTopic: (topicId: string) => void;
 
@@ -46,6 +67,11 @@ interface ChatStore {
   getPageComponents: (pageId: string) => Promise<Component[]>;
 
   getAllViews: () => Promise<ChatView[]>;
+
+  customTabs: string[];
+  setCustomTabs: (tabs: string[]) => void;
+  addCustomTab: (tab: string) => void;
+  removeCustomTab: (tab: string) => void;
 }
 
 export const useChatStore = create<ChatStore>()(
@@ -53,6 +79,7 @@ export const useChatStore = create<ChatStore>()(
     (set, get) => ({
       currentView: '',
       currentTopic: '',
+      topicCode: {},
 
       initializeDB: async () => {
         await dbService.initDB();
@@ -82,6 +109,18 @@ export const useChatStore = create<ChatStore>()(
         await dbService.addTopic(newTopic);
         return topicId;
       },
+      // addTopic: (topicId, title) =>
+      //   set((state) => ({
+      //     topics: {
+      //       ...state.topics,
+      //       [topicId]: [{ id: topicId, content: title, isUser: false }],
+      //     },
+      //     topicCode: {
+      //       ...state.topicCode,
+      //       [topicId]: { html: '', index: '', panel: '', scss: '' },
+      //     },
+      //     currentTopic: topicId,
+      //   })),
 
       updateTopicTitle: async (topicId, newTitle) => {
         const topic = await dbService.getTopic(topicId);
@@ -105,10 +144,24 @@ export const useChatStore = create<ChatStore>()(
         const code = await dbService.getCode(topicId, codeType);
         return code || '';
       },
-
       updateTopicCode: async (topicId, codeType, code) => {
         await dbService.updateCode(topicId, codeType, code);
       },
+      // getLocalTopicCode:  (topicId, codeType) => {
+      //   return get().topicCode[topicId]?.[codeType] || ''
+      // },
+      // updateLocalTopicCode: (topicId, newCode) =>
+      //   set((state) => {
+      //     const updatedTopicCode = {
+      //       ...state.topicCode,
+      //       [topicId]: {
+      //         ...state.topicCode[topicId],
+      //         ...newCode
+      //       },
+      //     };
+      //     console.error('Updating topicCode:', updatedTopicCode);
+      //     return { topicCode: updatedTopicCode };
+      //   }),
 
       setCurrentView: (viewId) => set({ currentView: viewId }),
       setCurrentTopic: (topicId) => set({ currentTopic: topicId }),
@@ -140,6 +193,10 @@ export const useChatStore = create<ChatStore>()(
       getProjectPages: async (projectId) => {
         return await dbService.getProjectPages(projectId);
       },
+      customTabs: ['html', 'js', 'scss'],
+      setCustomTabs: (tabs) => set({ customTabs: tabs }),
+      addCustomTab: (tab) => set((state) => ({ customTabs: [...state.customTabs, tab] })),
+      removeCustomTab: (tab) => set((state) => ({ customTabs: state.customTabs.filter(t => t !== tab) })),
 
       // 实现组件相关方法
       addComponent: async (component) => {
@@ -154,10 +211,10 @@ export const useChatStore = create<ChatStore>()(
       getPageComponents: async (pageId) => {
         return await dbService.getPageComponents(pageId);
       },
-
       getAllViews: async () => {
         return await dbService.getAllViews();
       },
+
     }),
     {
       name: 'chat-storage',

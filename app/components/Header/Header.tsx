@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react'
 import Link from 'next/link';
 import { IconMoonStars, IconSun } from '@tabler/icons-react';
 import {
@@ -13,13 +13,50 @@ import {
 } from '@mantine/core';
 // import classes from "./Header.module.css";
 import './Header.scss';
+import { useChatStore } from '@/app/store/chatStore'
+import { CodeContent } from '@/app/services/db/schema';
 
-export function Header() {
+const Header = () => {
+  const { currentTopic, getTopicCode, customTabs } = useChatStore()
+
   const { setColorScheme } = useMantineColorScheme();
   const computedColorScheme = useComputedColorScheme('light', { getInitialValueInEffect: true });
 
   const toggleColorScheme = () => {
     setColorScheme(computedColorScheme === 'dark' ? 'light' : 'dark');
+  };
+
+  const [isPackaging, setIsPackaging] = useState(false);
+
+  const handlePackageDownload = async () => {
+    setIsPackaging(true);
+    try {
+      let topicCode = {} as Record<string, string>
+      await Promise.all(customTabs.map(async type => {
+        const res = await getTopicCode(currentTopic, type as keyof CodeContent);
+        topicCode[type] = res
+      }));
+
+      const response = await fetch('/api/package-download', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ currentTopic, topicCode }),
+      });
+      console.error('API response:', response);
+      if (response.ok) {
+        console.log('打包成功');
+        // 处理成功情况...
+      } else {
+        throw new Error('打包失败');
+      }
+    } catch (error) {
+      console.error('打包失败', error);
+      // 处理错误情况...
+    } finally {
+      setIsPackaging(false);
+    }
   };
 
   return (
@@ -48,6 +85,14 @@ export function Header() {
             </Button>
             <Button component={Link} href="/founders" variant="subtle">
               创始人
+            </Button>
+
+            <Button
+              onClick={handlePackageDownload}
+              loading={isPackaging}
+              disabled={isPackaging}
+            >
+              {isPackaging ? '打包中...' : '打包下载'}
             </Button>
 
             <ActionIcon
