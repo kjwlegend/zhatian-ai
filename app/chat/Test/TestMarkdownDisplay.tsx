@@ -1,22 +1,22 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { CodeContent } from '../../services/db/schema';
 import BaseMarkdownDisplay from '../components/BaseMarkdownDisplay';
-import { useChatStore } from '@/app/store/chatStore';
 
-interface FrontendMarkdownDisplayProps {
+interface TestMarkdownDisplayProps {
   currentTopic: string;
   codeUpdate: { type: string; content: string };
-  shouldRefresh: boolean; // Add this line
+  shouldRefresh: boolean;
 }
 
-const FrontendMarkdownDisplay: React.FC<FrontendMarkdownDisplayProps> = ({
+const TestMarkdownDisplay: React.FC<TestMarkdownDisplayProps> = ({
   currentTopic,
   codeUpdate,
-  shouldRefresh, // Add this line
+  shouldRefresh,
 }) => {
-  const customTabs: (keyof CodeContent)[] = useChatStore((state) => state.customTabs as (keyof CodeContent)[]);
+  const customTabs: (keyof CodeContent)[] = ['javascript', 'python', 'ruby'];
+
   const customRender = (content: string, activeTab: keyof CodeContent) => {
-    // 在这里添加前端特定的渲染逻辑
+    // 在这里添加测试特定的渲染逻辑
     // 如果没有特殊需求，可以返回 null 使用默认渲染
     return null;
   };
@@ -26,9 +26,9 @@ const FrontendMarkdownDisplay: React.FC<FrontendMarkdownDisplayProps> = ({
       currentTopic={currentTopic}
       customTabs={customTabs}
       customRender={customRender}
-      shouldRefresh={shouldRefresh} // Add this line
+      shouldRefresh={shouldRefresh}
     />
   );
 };
 
-export default FrontendMarkdownDisplay;
+export default TestMarkdownDisplay;

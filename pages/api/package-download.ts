@@ -31,8 +31,6 @@ const CUSTOM_TABS: (keyof CodeContent)[] = ['html', 'js', 'scss', 'panel']
  */
 async function createDemoFiles(currentTopic: string, topicCode: any): Promise<void> {
     const demoDir = buildPath('components-light', 'demo')
-    console.error('Creating demo files for topic:', currentTopic);
-    console.error('Topic code:', topicCode);
 
     await fs.rm(demoDir, { recursive: true, force: true })
     await fs.mkdir(demoDir, { recursive: true })
@@ -40,7 +38,6 @@ async function createDemoFiles(currentTopic: string, topicCode: any): Promise<vo
     const fileWritePromises = CUSTOM_TABS.map(async (type) => {
         try {
             const content = topicCode[type]
-            console.error(`Content for ${type}:`, content);
             if (content === undefined) {
                 console.warn(`Content for type ${type} is undefined`)
                 return

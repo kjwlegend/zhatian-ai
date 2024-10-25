@@ -1,12 +1,43 @@
 @import '../Chat.scss';
 
 .pages-view {
-  display: flex;
   height: 100%;
   width: 100%;
+  display: flex;
+  flex-direction: column;
   padding: 20px;
+}
 
-  h1 {
-    margin-bottom: 20px;
-  }
+.pages-scroll-area {
+  flex-grow: 1;
+  margin-top: 20px;
+}
+
+.pages-container {
+  display: flex;
+  min-height: 100%;
+}
+
+.page-column {
+  flex: 0 0 300px;
+  margin-right: 20px;
+  background-color: #f0f0f0;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.page-actions {
+  margin-bottom: 16px;
+}
+
+.components-list {
+  min-height: 100px;
+}
+
+.component-item {
+  background-color: white;
+  margin-bottom: 8px;
+  padding: 8px;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }

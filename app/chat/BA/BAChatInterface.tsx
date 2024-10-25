@@ -3,7 +3,7 @@ import { Button } from '@mantine/core';
 import { ChatMessage } from '../../services/db/schema';
 import BaseChatInterface from '../components/BaseChatInterface';
 
-interface FrontendChatInterfaceProps {
+interface BAChatInterfaceProps {
   currentView: string;
   currentTopic: string;
   onCodeUpdate: (codeType: string, code: string) => void;
@@ -12,7 +12,7 @@ interface FrontendChatInterfaceProps {
   onSelectTopic: () => void;
 }
 
-const FrontendChatInterface: React.FC<FrontendChatInterfaceProps> = ({
+const BAChatInterface: React.FC<BAChatInterfaceProps> = ({
   currentView,
   currentTopic,
   onCodeUpdate,
@@ -23,14 +23,14 @@ const FrontendChatInterface: React.FC<FrontendChatInterfaceProps> = ({
   const customRender = () => {
     return (
       <Button variant="outline" size="sm">
-        Custom Action
+        BA Action
       </Button>
     );
   };
 
   const breadcrumbs = [
-    { title: 'Frontend', href: '/frontend' },
-    { title: currentTopic, href: `/frontend/${currentTopic}` },
+    { title: 'Business Analysis', href: '/ba' },
+    { title: currentTopic, href: `/ba/${currentTopic}` },
   ];
 
   return (
@@ -41,11 +41,11 @@ const FrontendChatInterface: React.FC<FrontendChatInterfaceProps> = ({
       onCodeUpdate={onCodeUpdate}
       onMessageComplete={onMessageComplete}
       breadcrumbs={breadcrumbs}
-      systemPromptKey="FRONTEND"
+      systemPromptKey="BA"
       onCreateTopic={onCreateTopic}
       onSelectTopic={onSelectTopic}
     />
   );
 };
 
-export default FrontendChatInterface;
+export default BAChatInterface;

@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Box, Flex, ScrollArea } from '@mantine/core';
-import { ChatMessage } from '../../services/db/schema';
+import { Anchor, Box, Breadcrumbs, Button, Flex, ScrollArea, Text } from '@mantine/core';
+import { SYSTEM_PROMPTS } from '../../config/prompts';
+import { ChatMessage, ChatTopic } from '../../services/db/schema';
 import { chatWithOpenAI } from '../../services/openai';
 import { useChatStore } from '../../store/chatStore';
 import UserInput from '../UserInput/UserInput';
@@ -11,20 +12,47 @@ import UserInput from '../UserInput/UserInput';
 import '../ChatInterface/ChatInterface.scss';
 
 interface BaseChatInterfaceProps {
+  currentView: string;
   currentTopic: string;
-  customRender?: (message: ChatMessage) => React.ReactNode;
+  customRender?: () => React.ReactNode;
+  onCodeUpdate?: (codeType: string, code: string) => void;
+  onMessageComplete?: () => void;
+  breadcrumbs?: { title: string; href: string }[];
+  systemPromptKey: keyof typeof SYSTEM_PROMPTS;
+  onCreateTopic: () => void;
+  onSelectTopic: () => void;
 }
 
-const BaseChatInterface: React.FC<BaseChatInterfaceProps> = ({ currentTopic, customRender }) => {
-  const { addMessage, updateMessage, getTopicMessages, updateTopicCode } = useChatStore();
+const BaseChatInterface: React.FC<BaseChatInterfaceProps> = ({
+  currentView,
+  currentTopic,
+  customRender,
+  onCodeUpdate,
+  onMessageComplete,
+  breadcrumbs = [],
+  systemPromptKey,
+  onCreateTopic,
+  onSelectTopic,
+}) => {
+  const { addMessage, updateMessage, getTopicMessages, updateTopicCode, getViewTopics } =
+    useChatStore();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [topics, setTopics] = useState<ChatTopic[]>([]);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const loadTopics = async () => {
+      const loadedTopics = await getViewTopics(currentView);
+      setTopics(loadedTopics);
+    };
+    loadTopics();
+  }, [currentView, getViewTopics]);
 
   useEffect(() => {
     const loadMessages = async () => {
       if (currentTopic) {
         const loadedMessages = await getTopicMessages(currentTopic);
-        console.log('loadedMessages', loadedMessages);
         setMessages(loadedMessages);
       } else {
         setMessages([]);
@@ -33,8 +61,11 @@ const BaseChatInterface: React.FC<BaseChatInterfaceProps> = ({ currentTopic, cus
     loadMessages();
   }, [currentTopic, getTopicMessages]);
 
-  const systemPrompt =
-    'You are a helpful AI assistant. When providing code examples, please wrap them in triple backticks and use the following format: ```html for HTML, ```css for CSS, ```js for JavaScript, and ```react for React code.';
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const systemPrompt = SYSTEM_PROMPTS[systemPromptKey];
 
   const handleSubmit = useCallback(
     async (input: string, image?: File) => {
@@ -48,6 +79,7 @@ const BaseChatInterface: React.FC<BaseChatInterfaceProps> = ({ currentTopic, cus
           timestamp: Date.now(),
         };
         await addMessage(currentTopic, userMessage);
+        setMessages((prev) => [...prev, userMessage]);
 
         const botMessageId = (Date.now() + 1).toString();
         const initialBotMessage: ChatMessage = {
@@ -58,20 +90,27 @@ const BaseChatInterface: React.FC<BaseChatInterfaceProps> = ({ currentTopic, cus
           timestamp: Date.now(),
         };
         await addMessage(currentTopic, initialBotMessage);
+        setMessages((prev) => [...prev, initialBotMessage]);
 
         const history = messages.slice(-6).map((msg) => ({
           role: msg.isUser ? 'user' : 'assistant',
           content: msg.content,
         }));
 
+        let fullResponse = '';
         await chatWithOpenAI(input, history, systemPrompt, async (partialResponse) => {
+          fullResponse = partialResponse.text; // 使用 = 而不是 +=
           await updateMessage(currentTopic, botMessageId, {
             id: botMessageId,
             topicId: currentTopic,
-            content: partialResponse.text,
+            content: fullResponse,
             isUser: false,
             timestamp: Date.now(),
           });
+          setMessages((prev) =>
+            prev.map((msg) => (msg.id === botMessageId ? { ...msg, content: fullResponse } : msg))
+          );
+
           const newCode = Object.entries(partialResponse.code).reduce(
             (acc, [key, value]) => {
               if (value !== '') {
@@ -84,12 +123,17 @@ const BaseChatInterface: React.FC<BaseChatInterfaceProps> = ({ currentTopic, cus
           if (Object.keys(newCode).length > 0) {
             for (const [codeType, code] of Object.entries(newCode)) {
               await updateTopicCode(currentTopic, codeType as keyof typeof newCode, code);
+              if (onCodeUpdate) {
+                onCodeUpdate(codeType, code);
+              }
             }
           }
         });
 
-        const updatedMessages = await getTopicMessages(currentTopic);
-        setMessages(updatedMessages);
+        // Call onMessageComplete after the bot's message is complete
+        if (onMessageComplete) {
+          onMessageComplete();
+        }
       } catch (error) {
         console.error('Error in handleSubmit:', error);
         const errorMessage = 'An error occurred while processing your request. Please try again.';
@@ -101,18 +145,59 @@ const BaseChatInterface: React.FC<BaseChatInterfaceProps> = ({ currentTopic, cus
           timestamp: Date.now(),
         };
         await addMessage(currentTopic, errorChatMessage);
-        const updatedMessages = await getTopicMessages(currentTopic);
-        setMessages(updatedMessages);
+        setMessages((prev) => [...prev, errorChatMessage]);
       } finally {
         setIsLoading(false);
       }
     },
-    [currentTopic, addMessage, updateMessage, getTopicMessages, updateTopicCode, messages]
+    [
+      currentTopic,
+      addMessage,
+      updateMessage,
+      getTopicMessages,
+      updateTopicCode,
+      messages,
+      onCodeUpdate,
+      onMessageComplete,
+    ]
   );
+
+  if (!currentTopic) {
+    return (
+      <Flex direction="column" align="center" justify="center" style={{ height: '100%' }}>
+        {topics.length === 0 ? (
+          <Box>
+            <Text>No topics available. Create a new topic to start chatting.</Text>
+            <Button onClick={onCreateTopic} mt="md">
+              Create New Topic
+            </Button>
+          </Box>
+        ) : (
+          <Box>
+            <Text>Please select a topic to start chatting.</Text>
+            <Button onClick={onSelectTopic} mt="md">
+              Select Topic
+            </Button>
+          </Box>
+        )}
+      </Flex>
+    );
+  }
 
   return (
     <Flex className="chat-interface" direction="column" style={{ height: '100%' }}>
-      {currentTopic}
+      <Box className="chat-interface__header" p="md">
+        <Flex justify="space-between" align="center">
+          <Breadcrumbs>
+            {breadcrumbs.map((item, index) => (
+              <Anchor href={item.href} key={index}>
+                {item.title}
+              </Anchor>
+            ))}
+          </Breadcrumbs>
+          {customRender && customRender()}
+        </Flex>
+      </Box>
       <ScrollArea style={{ flex: 1 }} className="chat-interface__messages">
         {messages.map((message) => (
           <div
@@ -156,6 +241,7 @@ const BaseChatInterface: React.FC<BaseChatInterfaceProps> = ({ currentTopic, cus
             )}
           </div>
         ))}
+        <div ref={messagesEndRef} />
       </ScrollArea>
       <Box p="md">
         <UserInput onSubmit={handleSubmit} isLoading={isLoading} />
