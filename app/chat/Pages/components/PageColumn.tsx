@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { IconPlus, IconTrash } from '@tabler/icons-react';
-import { ActionIcon, Box, Button, Group, Title } from '@mantine/core';
+import { ActionIcon, Box, Button, Group, Text, Title } from '@mantine/core';
 import { Component, Page } from '../../../services/db/schema';
 import { useProjectStore } from '../../../store/projectStore';
 import { AddComponentModal } from './AddComponentModal';
@@ -23,7 +23,14 @@ export const PageColumn: React.FC<PageColumnProps> = ({ page, components, onDele
 
     const cleanup = dropTargetForElements({
       element: columnRef.current,
+      getIsSticky: () => true,
       getData: () => ({ pageId: page.id }),
+      onDragEnter: () => {
+        console.log('Drag entered page:', page.id);
+      },
+      onDragLeave: () => {
+        console.log('Drag left page:', page.id);
+      },
     });
 
     return cleanup;
@@ -39,19 +46,23 @@ export const PageColumn: React.FC<PageColumnProps> = ({ page, components, onDele
   };
 
   return (
-    <Box className="page-column" ref={columnRef}>
+    <Box ref={columnRef} className="page-column">
       <Group justify="space-between" mb="md">
-        <Title order={3}>{page.name}</Title>
-        <ActionIcon color="red" onClick={onDeletePage}>
+        <Title order={4}>{page.name}</Title>
+        <ActionIcon color="red" variant="subtle" onClick={onDeletePage}>
           <IconTrash size={16} />
         </ActionIcon>
       </Group>
+      <Text size="sm" color="dimmed" mb="md">
+        {page.description}
+      </Text>
       <Box className="page-actions">
         <Button
           leftSection={<IconPlus size={14} />}
           onClick={() => setIsAddComponentModalOpen(true)}
           fullWidth
           variant="light"
+          color="blue"
         >
           Add Component
         </Button>

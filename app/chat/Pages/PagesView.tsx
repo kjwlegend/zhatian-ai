@@ -54,23 +54,51 @@ const PagesView: React.FC<PagesViewProps> = ({ projectId }) => {
 
   useEffect(() => {
     const cleanup = monitorForElements({
+      onDragStart: (source) => {
+        console.log('Drag started:', source);
+      },
       onDrop: async ({ source, location }) => {
+        console.log('Drop event:', source, location);
         const destination = location.current.dropTargets[0];
-        if (!destination) return;
+        if (!destination) {
+          console.log('No valid drop destination');
+          return;
+        }
 
-        const sourcePageId = source.data.pageId;
-        const destPageId = destination.data.pageId;
-        const componentId = source.data.componentId;
+        const sourcePageId = source.data.pageId as string;
+        const destPageId = destination.data.pageId as string;
+        const componentId = source.data.componentId as string;
 
-        if (sourcePageId === destPageId) return;
+        console.log('sourcePageId', sourcePageId);
+        console.log('destPageId', destPageId);
+        console.log('componentId', componentId);
 
-        const draggedComponent = components[sourcePageId].find((comp) => comp.id === componentId);
-        if (!draggedComponent) return;
+        if (!sourcePageId || !destPageId || !componentId) {
+          console.log('Missing required data for drag and drop');
+          return;
+        }
 
-        const destinationIndex = destination.data.index;
+        if (sourcePageId === destPageId) {
+          console.log('Source and destination are the same');
+          return;
+        }
 
-        await moveComponent(componentId, sourcePageId, destPageId, destinationIndex);
-        await updateComponent({ ...draggedComponent, pageId: destPageId });
+        const draggedComponent = components[sourcePageId]?.find((comp) => comp.id === componentId);
+        if (!draggedComponent) {
+          console.log('Dragged component not found');
+          return;
+        }
+
+        const destinationIndex = components[destPageId]?.length || 0;
+
+        try {
+          await moveComponent(componentId, sourcePageId, destPageId, destinationIndex);
+          console.log('Component moved successfully');
+          await updateComponent({ ...draggedComponent, pageId: destPageId });
+          console.log('Component updated successfully');
+        } catch (error) {
+          console.error('Error during drag and drop:', error);
+        }
       },
     });
 

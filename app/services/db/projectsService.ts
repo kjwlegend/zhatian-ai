@@ -31,11 +31,11 @@ export async function getProjectsByCreator(creator: string): Promise<Project[]> 
   return db.getAllFromIndex('projects', 'by-creator', creator);
 }
 
-export async function getProjectPages(projectId: string): Promise<Page[]> {
-  const db = await initDB();
-  const pages = await db.getAllFromIndex('pages', 'by-project', projectId);
-  return pages as Page[];
-}
+// export async function getProjectPages(projectId: string): Promise<Page[]> {
+//   const db = await initDB();
+//   const pages = await db.getAllFromIndex('pages', 'by-project', projectId);
+//   return pages as Page[];
+// }
 
 export async function getProjectComponents(projectId: string): Promise<number> {
   const db = await initDB();

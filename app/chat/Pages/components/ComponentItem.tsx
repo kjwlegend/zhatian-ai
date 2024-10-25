@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-import { Box, Text } from '@mantine/core';
+import { Box, Group, Text } from '@mantine/core';
 import { Component } from '../../../services/db/schema';
 
 interface ComponentItemProps {
@@ -29,10 +29,12 @@ export const ComponentItem: React.FC<ComponentItemProps> = ({ component, index, 
 
   return (
     <Box ref={itemRef} className="component-item">
-      <Text>{component.name}</Text>
-      <Text size="sm" color="dimmed">
-        {component.type}
-      </Text>
+      <Group justify="apart">
+        <Text fw={500}>{component.name}</Text>
+        <Text size="xs" c="dimmed">
+          {component.type}
+        </Text>
+      </Group>
     </Box>
   );
 };
