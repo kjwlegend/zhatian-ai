@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Box, Flex, ScrollArea } from '@mantine/core';
-import { ChatMessage } from '../../services/db/schema';
+import { ChatMessage, CodeContent } from '../../services/db/schema';
 import { chatWithOpenAI } from '../../services/openai';
 import { useChatStore } from '../../store/chatStore';
 import UserInput from '../UserInput/UserInput';
@@ -40,7 +40,9 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentTopic }) => {
           content: input,
           isUser: true,
           timestamp: Date.now(),
+          image: image ? URL.createObjectURL(image) : undefined,
         };
+        console.log('userMessage', userMessage);
         await addMessage(currentTopic, userMessage);
 
         const botMessageId = (Date.now() + 1).toString();
@@ -58,27 +60,28 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentTopic }) => {
           content: msg.content,
         }));
 
-        await chatWithOpenAI(input, history, systemPrompt, async (partialResponse) => {
-          await updateMessage(currentTopic, botMessageId, {
-            id: botMessageId,
-            topicId: currentTopic,
-            content: partialResponse.text,
-            isUser: false,
-            timestamp: Date.now(),
-          });
-          const newCode = Object.entries(partialResponse.code).reduce(
-            (acc, [key, value]) => {
-              if (value !== '') {
-                acc[key as keyof typeof acc] = value;
+        await chatWithOpenAI(
+          input,
+          history,
+          systemPrompt,
+          async (partialResponse) => {
+            await updateMessage(currentTopic, botMessageId, {
+              id: botMessageId,
+              topicId: currentTopic,
+              content: partialResponse.text,
+              isUser: false,
+              timestamp: Date.now(),
+            });
+
+            // 遍历每个代码块，如果有内容就更新
+            Object.entries(partialResponse.code).forEach(([codeType, codeContent]) => {
+              if (codeContent !== '') {
+                updateTopicCode(currentTopic, codeType as keyof CodeContent, codeContent);
               }
-              return acc;
-            },
-            {} as Record<keyof typeof partialResponse.code, string>
-          );
-          if (Object.keys(newCode).length > 0) {
-            await updateTopicCode(currentTopic, newCode as any);
-          }
-        });
+            });
+          },
+          image
+        ); // Pass the image parameter here
 
         const updatedMessages = await getTopicMessages(currentTopic);
         setMessages(updatedMessages);

@@ -77,7 +77,9 @@ const BaseChatInterface: React.FC<BaseChatInterfaceProps> = ({
           content: input,
           isUser: true,
           timestamp: Date.now(),
+          image: image ? URL.createObjectURL(image) : undefined,
         };
+        console.log('userMessage', userMessage);
         await addMessage(currentTopic, userMessage);
         setMessages((prev) => [...prev, userMessage]);
 
@@ -98,37 +100,43 @@ const BaseChatInterface: React.FC<BaseChatInterfaceProps> = ({
         }));
 
         let fullResponse = '';
-        await chatWithOpenAI(input, history, systemPrompt, async (partialResponse) => {
-          fullResponse = partialResponse.text; // 使用 = 而不是 +=
-          await updateMessage(currentTopic, botMessageId, {
-            id: botMessageId,
-            topicId: currentTopic,
-            content: fullResponse,
-            isUser: false,
-            timestamp: Date.now(),
-          });
-          setMessages((prev) =>
-            prev.map((msg) => (msg.id === botMessageId ? { ...msg, content: fullResponse } : msg))
-          );
+        await chatWithOpenAI(
+          input,
+          history,
+          systemPrompt,
+          async (partialResponse) => {
+            fullResponse = partialResponse.text; // 使用 = 而不是 +=
+            await updateMessage(currentTopic, botMessageId, {
+              id: botMessageId,
+              topicId: currentTopic,
+              content: fullResponse,
+              isUser: false,
+              timestamp: Date.now(),
+            });
+            setMessages((prev) =>
+              prev.map((msg) => (msg.id === botMessageId ? { ...msg, content: fullResponse } : msg))
+            );
 
-          const newCode = Object.entries(partialResponse.code).reduce(
-            (acc, [key, value]) => {
-              if (value !== '') {
-                acc[key as keyof typeof acc] = value;
-              }
-              return acc;
-            },
-            {} as Record<keyof typeof partialResponse.code, string>
-          );
-          if (Object.keys(newCode).length > 0) {
-            for (const [codeType, code] of Object.entries(newCode)) {
-              await updateTopicCode(currentTopic, codeType as keyof typeof newCode, code);
-              if (onCodeUpdate) {
-                onCodeUpdate(codeType, code);
+            const newCode = Object.entries(partialResponse.code).reduce(
+              (acc, [key, value]) => {
+                if (value !== '') {
+                  acc[key as keyof typeof acc] = value;
+                }
+                return acc;
+              },
+              {} as Record<keyof typeof partialResponse.code, string>
+            );
+            if (Object.keys(newCode).length > 0) {
+              for (const [codeType, code] of Object.entries(newCode)) {
+                await updateTopicCode(currentTopic, codeType as keyof typeof newCode, code);
+                if (onCodeUpdate) {
+                  onCodeUpdate(codeType, code);
+                }
               }
             }
-          }
-        });
+          },
+          image
+        );
 
         // Call onMessageComplete after the bot's message is complete
         if (onMessageComplete) {

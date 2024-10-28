@@ -1,6 +1,8 @@
-'use client'
-import React, { useState, useRef, KeyboardEvent } from "react";
-import "./UserInput.scss";
+'use client';
+
+import React, { KeyboardEvent, useRef, useState } from 'react';
+
+import './UserInput.scss';
 
 interface UserInputProps {
   onSubmit: (input: string, image?: File) => void;
@@ -8,21 +10,24 @@ interface UserInputProps {
 }
 
 const UserInput: React.FC<UserInputProps> = ({ onSubmit, isLoading }) => {
-  const [input, setInput] = useState<string>("");
+  const [input, setInput] = useState<string>('');
   const [image, setImage] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault();
     if (input.trim() && !isLoading) {
-      onSubmit(input, image || undefined);
-      setInput("");
+      onSubmit(input, image || undefined); // 确保传递图片
+      setInput('');
       setImage(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''; // 清除文件输入
+      }
     }
   };
 
   const handleKeyPress = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSubmit();
     }
@@ -30,7 +35,25 @@ const UserInput: React.FC<UserInputProps> = ({ onSubmit, isLoading }) => {
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setImage(e.target.files[0]);
+      const file = e.target.files[0];
+      // 验证文件类型
+      if (!file.type.startsWith('image/')) {
+        alert('Please upload an image file');
+        return;
+      }
+      // 验证文件大小（例如：限制为 5MB）
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Image size should be less than 5MB');
+        return;
+      }
+      setImage(file);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setImage(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -59,15 +82,26 @@ const UserInput: React.FC<UserInputProps> = ({ onSubmit, isLoading }) => {
             accept="image/*"
             className="user-input__file-input"
           />
-          {image && <span className="user-input__file-name">{image.name}</span>}
+          {image && (
+            <div className="user-input__file-preview">
+              <span className="user-input__file-name">{image.name}</span>
+              <button
+                type="button"
+                onClick={handleRemoveImage}
+                className="user-input__remove-image"
+              >
+                ✕
+              </button>
+            </div>
+          )}
           <button
             type="submit"
             className={`user-input__submit-button ${
-              isLoading ? "user-input__submit-button--loading" : ""
+              isLoading ? 'user-input__submit-button--loading' : ''
             }`}
-            disabled={isLoading}
+            disabled={isLoading || (!input.trim() && !image)}
           >
-            {isLoading ? "Processing..." : "Submit"}
+            {isLoading ? 'Processing...' : 'Submit'}
           </button>
         </div>
       </form>

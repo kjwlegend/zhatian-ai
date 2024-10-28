@@ -48,14 +48,38 @@
     }
   }
 
-  &__file-input {
-    display: none;
+  &__file-preview {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 8px;
   }
 
   &__file-name {
-    margin-right: var(--mantine-spacing-sm);
-    color: var(--mantine-color-dimmed);
-    font-size: var(--mantine-font-size-sm);
+    font-size: 0.9em;
+    color: #666;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__remove-image {
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    padding: 4px;
+    font-size: 1.2em;
+    line-height: 1;
+
+    &:hover {
+      color: #ff4444;
+    }
+  }
+
+  &__file-input {
+    display: none;
   }
 
   &__submit-button {

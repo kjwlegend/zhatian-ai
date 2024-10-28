@@ -3,8 +3,7 @@
   padding: 1rem;
   background-color: var(--mantine-color-body);
   height: 80px;
-  border-bottom: 1px solid
-    light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+  border-bottom: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
 
   &__container {
     display: flex;
@@ -44,6 +43,17 @@
     height: 2rem;
     color: var(--accent-color);
     margin-right: 0.5rem;
+  }
+
+  .logo-container {
+    display: flex;
+    align-items: center;
+  }
+
+  .logo-text {
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: var(--text-primary);
   }
 
   &__title {
@@ -110,7 +120,9 @@
     text-decoration: none;
     padding: 0.5rem 1rem;
     border-radius: 0.25rem;
-    transition: background-color 0.2s, color 0.2s;
+    transition:
+      background-color 0.2s,
+      color 0.2s;
 
     &:hover {
       background-color: var(--accent-color);
