@@ -7,6 +7,8 @@ import FoundersCarousel from '../components/FoundersCarousel/FoundersCarousel';
 
 import './Founders.scss';
 
+import { Button } from '@/components/ui/button';
+
 const foundersData = [
   {
     id: 1,
@@ -46,7 +48,7 @@ const FoundersPage: React.FC = () => {
 
   return (
     <Container size="xl" className="founders-page">
-      <Title order={1} className="founders-title">
+      <Title order={1} className="text-2xl mb-50">
         创始人
       </Title>
       <FoundersCarousel founders={foundersData} setActiveFounder={setActiveFounder} />

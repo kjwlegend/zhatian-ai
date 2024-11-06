@@ -167,7 +167,7 @@ export function Sidebar({ onSelectView, currentView }: SidebarProps) {
 
         {showTopics && (
           <div className="main">
-            <Title order={4} className="title">
+            <Title order={4} className="title text-lg bg-red-500">
               {currentView}
             </Title>
             <ScrollArea className="topic-list" scrollbarSize={6} my="md">
