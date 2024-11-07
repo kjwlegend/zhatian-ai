@@ -1,13 +1,5 @@
-'use client';
-
 import React from 'react';
-import { Container, Title } from '@mantine/core';
-import FounderDetails from '../components/FounderDetails/FounderDetails';
-import FoundersCarousel from '../components/FoundersCarousel/FoundersCarousel';
-
-import './Founders.scss';
-
-import { Button } from '@/components/ui/button';
+import { ChevronDownIcon } from 'lucide-react';
 
 const foundersData = [
   {
@@ -43,18 +35,69 @@ const foundersData = [
     bio: '郑川旸是一位富有远见的产品战略家和业务专家，在产品构思、业务发展和战略规划方面拥有卓越的才能。作为产品业务及构思负责人和战略顾问，他在公司的产品方向和业务发展中扮演着关键角色。\n\n郑川旸拥有敏锐的市场洞察力，能够准确把握用户需求和行业趋势。他善于将创新理念转化为可行的产品概念，并制定清晰的产品路线图。在他的引导下，公司成功开发了多个引领市场的创新产品，为用户创造了巨大价值。\n\n作为战略顾问，郑川旸在公司的长期发展规划中发挥着重要作用。他深入分析市场动态和竞争格局，为公司制定了清晰的战略方向。他的建议不仅涉及产品开发，还包括市场定位、商业模式创新和合作伙伴关系等方面，全面推动公司的可持续发展。\n\n郑川旸特别擅长跨团队协作，他与技术、设计、市场等各个团队保持紧密沟通，确保产品vision能够得到准确的执行。他提倡以用户为中心的设计理念，不断推动产品优化和用户体验提升。\n\n除了在公司内部的贡献，郑川旸还是业内知名的思想领袖。他经常受邀在各种行业会议上发表演讲，分享他对产品开发和业务创新的独到见解。他的观点和预测常常引领行业趋势，为整个科技生态系统的发展做出了重要贡献。',
   },
 ];
-const FoundersPage: React.FC = () => {
-  const [activeFounder, setActiveFounder] = React.useState(foundersData[0]);
 
+export default function Component() {
   return (
-    <Container size="xl" className="founders-page">
-      <Title order={1} className="text-2xl mb-50">
-        创始人
-      </Title>
-      <FoundersCarousel founders={foundersData} setActiveFounder={setActiveFounder} />
-      <FounderDetails founder={activeFounder} />
-    </Container>
-  );
-};
+    <div className="bg-gray-100 min-h-screen">
+      {/* Hero Section */}
+      <section className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-20">
+        <div className="container mx-auto px-4">
+          <h1 className="text-4xl md:text-5xl font-bold mb-6 text-center">我们的创始团队</h1>
+          <p className="text-xl md:text-2xl text-center mb-12">携手打造未来科技</p>
+          <div className="flex flex-wrap justify-center gap-8">
+            {foundersData.map((founder) => (
+              <div key={founder.id} className="text-center">
+                <img
+                  src={founder.avatar}
+                  alt={founder.name}
+                  className="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-white"
+                />
+                <h3 className="font-semibold">{founder.name}</h3>
+                <p className="text-sm opacity-75">{founder.role}</p>
+              </div>
+            ))}
+          </div>
+          <div className="text-center mt-16">
+            <a
+              href="#founders"
+              className="inline-flex items-center text-white hover:text-gray-200 transition-colors"
+            >
+              了解更多 <ChevronDownIcon className="ml-2" />
+            </a>
+          </div>
+        </div>
+      </section>
 
-export default FoundersPage;
+      {/* Founders Section */}
+      <section id="founders" className="py-20">
+        <div className="container mx-auto px-4">
+          {foundersData.map((founder, index) => (
+            <div
+              key={founder.id}
+              className={`flex flex-col md:flex-row items-center gap-8 mb-20 ${index % 2 !== 0 ? 'md:flex-row-reverse' : ''}`}
+            >
+              <div className="w-full md:w-1/3">
+                <img
+                  src={founder.image}
+                  alt={founder.name}
+                  className="rounded-lg shadow-xl w-full"
+                />
+              </div>
+              <div className="w-full md:w-2/3">
+                <h2 className="text-3xl font-bold mb-4">{founder.name}</h2>
+                <h3 className="text-xl text-gray-600 mb-6">{founder.role}</h3>
+                <div className="space-y-4">
+                  {founder.bio.split('\n\n').map((paragraph, i) => (
+                    <p key={i} className="text-gray-700">
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}

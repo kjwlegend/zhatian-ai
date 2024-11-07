@@ -1,8 +1,10 @@
-'use client'
+'use client';
+
 import React from 'react';
 import { AppShell } from '@mantine/core';
-import Header from '../Header/Header';
 import Footer from '../Footer/Footer';
+import Header from '../Header/Header';
+import HeaderNew from '../Header/headernew';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -10,23 +12,11 @@ interface AppLayoutProps {
 
 const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   return (
-    <AppShell
-      header={{ height: 60 }}
-      footer={{ height: 60 }}
-      padding="md"
-    >
-      <AppShell.Header>
-        <Header />
-      </AppShell.Header>
-
-      <AppShell.Main>
-        {children}
-      </AppShell.Main>
-
-      <AppShell.Footer>
-        <Footer />
-      </AppShell.Footer>
-    </AppShell>
+    <>
+      <HeaderNew />
+      {children}
+      <Footer />
+    </>
   );
 };
 
