@@ -2,32 +2,21 @@
 
 import * as React from 'react';
 import { Check, ChevronRight, Copy, Home, Send, Upload } from 'lucide-react';
-import { useDropzone } from 'react-dropzone';
 import ReactMarkdown from 'react-markdown';
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
+import { ChatMessage } from '../services/db/schema';
+import { ChatHeader } from './components/ChatHeader';
+import { ChatInterface } from './components/ChatInterface';
+import { CodeDisplay } from './components/CodeDisplay';
+import { FrameworkSelector } from './components/FrameworkSelector';
+import { ImageUploader } from './components/ImageUploader';
+import { MarkdownEditor } from './components/MarkdownEditor';
+import { SharedProvider, useSharedContext } from './contexts/SharedContext';
+import { FrontendContent } from './frontend';
+import { RequirementContent } from './requirement';
 
 const mockMessages = [
   { role: 'user', content: 'Can you help me design a login page?' },
@@ -82,238 +71,46 @@ const initialMarkdown = `
 - Error message display area
 `;
 
+const mockCodeOutput = {
+  html: '<form>\n  <input type="text" placeholder="Username" />\n  <input type="password" placeholder="Password" />\n  <button type="submit">Login</button>\n</form>',
+  style:
+    '.form-input {\n  margin-bottom: 10px;\n}\n\n.form-button {\n  background-color: #007bff;\n  color: white;\n}',
+  js: 'document.querySelector("form").addEventListener("submit", (e) => {\n  e.preventDefault();\n  // Handle form submission\n});',
+};
+
 export default function Component() {
   const [activeImage, setActiveImage] = React.useState<string | null>(null);
   const [chatMessages, setChatMessages] = React.useState(mockMessages);
-  const [inputValue, setInputValue] = React.useState('');
   const [isModalOpen, setIsModalOpen] = React.useState(false);
-  const [markdownContent, setMarkdownContent] = React.useState(initialMarkdown);
-  const [copiedIndex, setCopiedIndex] = React.useState<number | null>(null);
-
-  const onDrop = React.useCallback((acceptedFiles: File[]) => {
-    const file = acceptedFiles[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setActiveImage(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  }, []);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
-      'image/*': ['.png', '.jpg', '.jpeg', '.gif'],
-    },
-    multiple: false,
-  });
-
-  const handleSendMessage = () => {
-    if (inputValue.trim()) {
-      setChatMessages([...chatMessages, { role: 'user', content: inputValue }]);
-      setInputValue('');
-    }
-  };
-
-  const handleSave = (event: React.FormEvent) => {
-    event.preventDefault();
-    // Here you would typically handle the saving logic
-    console.log('Saving project...');
-    setIsModalOpen(false);
-  };
-
-  const handleCopy = (index: number) => {
-    const message = chatMessages[index].content;
-    navigator.clipboard.writeText(message).then(() => {
-      setCopiedIndex(index);
-      setTimeout(() => setCopiedIndex(null), 2000);
-    });
-  };
+  const [codeOutput, setCodeOutput] = React.useState(mockCodeOutput);
+  const [activeCodeTab, setActiveCodeTab] = React.useState('html');
+  const [copiedStates, setCopiedStates] = React.useState({ html: false, style: false, js: false });
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden">
-      <Tabs defaultValue="requirement" className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex items-center justify-between border-b px-4 py-2">
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/">
-                  <Home className="h-4 w-4" />
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator>
-                <ChevronRight className="h-4 w-4" />
-              </BreadcrumbSeparator>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/projects">Projects</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator>
-                <ChevronRight className="h-4 w-4" />
-              </BreadcrumbSeparator>
-              <BreadcrumbItem>
-                <BreadcrumbPage>Current Project</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-          <TabsList className="grid w-[400px] grid-cols-4">
-            <TabsTrigger value="requirement">Requirement</TabsTrigger>
-            <TabsTrigger value="frontend">FE</TabsTrigger>
-            <TabsTrigger value="backend">BE</TabsTrigger>
-            <TabsTrigger value="test">Test</TabsTrigger>
-          </TabsList>
-          <div className="flex gap-2">
-            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline">Save to Draft</Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>Save Project</DialogTitle>
-                  <DialogDescription>Enter the details for your project draft.</DialogDescription>
-                </DialogHeader>
-                <form onSubmit={handleSave}>
-                  <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="project-name" className="text-right">
-                        Name
-                      </Label>
-                      <Input id="project-name" className="col-span-3" />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="project-description" className="text-right">
-                        Description
-                      </Label>
-                      <Textarea id="project-description" className="col-span-3" />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="project-tags" className="text-right">
-                        Tags
-                      </Label>
-                      <Input
-                        id="project-tags"
-                        className="col-span-3"
-                        placeholder="Separate tags with commas"
-                      />
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button type="submit">Save Draft</Button>
-                  </DialogFooter>
-                </form>
-              </DialogContent>
-            </Dialog>
-            <Button>Publish</Button>
+    <SharedProvider initialMarkdown={initialMarkdown}>
+      <div className="flex flex-col h-screen overflow-scroll">
+        <Tabs defaultValue="requirement" className="flex-1 flex flex-col overflow-hidden">
+          <ChatHeader isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} />
+
+          <div className="flex-1 overflow-hidden">
+            <TabsContent value="requirement" className="h-full overflow-auto">
+              <RequirementContent />
+            </TabsContent>
+
+            <TabsContent value="frontend" className="h-full p-4">
+              <FrontendContent />
+            </TabsContent>
+
+            <TabsContent value="backend" className="h-full p-4">
+              <div className="text-center text-muted-foreground">Backend development content</div>
+            </TabsContent>
+
+            <TabsContent value="test" className="h-full p-4">
+              <div className="text-center text-muted-foreground">Testing content</div>
+            </TabsContent>
           </div>
-        </div>
-
-        <div className="flex-1 overflow-hidden">
-          <TabsContent value="requirement" className="h-full overflow-auto">
-            <div className="grid h-full gap-4 p-4 md:grid-cols-3 overflow-hidden">
-              {/* Left Panel - Drag & Drop */}
-              <Card className="flex flex-col overflow-hidden">
-                <CardContent className="flex-1 p-4 overflow-auto">
-                  <div
-                    {...getRootProps()}
-                    className={cn(
-                      'flex h-full flex-col items-center justify-center rounded-lg border-2 border-dashed p-4 text-center',
-                      isDragActive && 'border-primary bg-muted'
-                    )}
-                  >
-                    <input {...getInputProps()} />
-                    {activeImage ? (
-                      <img
-                        src={activeImage}
-                        alt="Uploaded content"
-                        className="max-h-full w-full object-contain"
-                      />
-                    ) : (
-                      <>
-                        <Upload className="mb-4 h-10 w-10 text-muted-foreground" />
-                        <p className="mb-2 text-sm font-medium">Drag & drop to display an image</p>
-                        <p className="text-xs text-muted-foreground">PNG, JPG, GIF up to 10MB</p>
-                      </>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Middle Panel - Chat Interface */}
-              <Card className="flex flex-col overflow-hidden">
-                <CardContent className="flex flex-1 flex-col gap-4 p-4 overflow-auto">
-                  <div className="flex-1 space-y-4 overflow-auto">
-                    {chatMessages.map((message, index) => (
-                      <div
-                        key={index}
-                        className={cn(
-                          'rounded-lg p-3 text-sm',
-                          message.role === 'user'
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-muted'
-                        )}
-                      >
-                        <div className="flex justify-between items-start">
-                          <div>{message.content}</div>
-                          {message.role === 'assistant' && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleCopy(index)}
-                              className="ml-2 h-6 w-6"
-                            >
-                              {copiedIndex === index ? (
-                                <Check className="h-4 w-4" />
-                              ) : (
-                                <Copy className="h-4 w-4" />
-                              )}
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="flex items-end gap-2">
-                    <Textarea
-                      placeholder="Type your message..."
-                      value={inputValue}
-                      onChange={(e) => setInputValue(e.target.value)}
-                      className="min-h-[80px]"
-                    />
-                    <Button onClick={handleSendMessage} size="icon" className="h-10 w-10">
-                      <Send className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Right Panel - Editable Output */}
-              <Card className="flex flex-col overflow-hidden">
-                <CardContent className="flex-1 p-4 overflow-auto">
-                  <div className="h-full overflow-auto rounded-lg border p-4">
-                    <Textarea
-                      value={markdownContent}
-                      onChange={(e) => setMarkdownContent(e.target.value)}
-                      className="min-h-full w-full resize-none"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="frontend" className="h-full p-4">
-            <div className="text-center text-muted-foreground">Frontend development content</div>
-          </TabsContent>
-
-          <TabsContent value="backend" className="h-full p-4">
-            <div className="text-center text-muted-foreground">Backend development content</div>
-          </TabsContent>
-
-          <TabsContent value="test" className="h-full p-4">
-            <div className="text-center text-muted-foreground">Testing content</div>
-          </TabsContent>
-        </div>
-      </Tabs>
-    </div>
+        </Tabs>
+      </div>
+    </SharedProvider>
   );
 }
