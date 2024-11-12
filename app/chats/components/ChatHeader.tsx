@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ChevronRight, Home } from 'lucide-react';
+import { ChevronRight, Home, Trash2 } from 'lucide-react';
 import {
   Breadcrumb,
   BreadcrumbItem,

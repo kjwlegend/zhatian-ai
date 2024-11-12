@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useFrontendCode } from '@/app/store/codeStore';
+import { useTestCode } from '@/app/store/codeStore';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BaseChatInterface } from './components/BaseChatInterface';
 import { ClearChatButton } from './components/ClearChatButton';
@@ -12,31 +12,19 @@ import {
   getLanguageByTab,
 } from './components/FrameworkSelector';
 import { SharedFirstColumn } from './components/SharedFirstColumn';
-import { getFrontendPrompt } from './constants/prompts';
+import { getTestPrompt } from './constants/prompts';
 import { useSharedContext } from './contexts/SharedContext';
 import { useChatMessages } from './hooks/useChatMessages';
 import { useCodeParser } from './hooks/useCodeParser';
 
-const mockChatMessages = [
-  { role: 'user', content: 'Can you create a login form?' },
-  { role: 'assistant', content: "I'll create a basic login form for you." },
-];
-
-const mockCodeOutput = {
-  html: '<form>\n  <input type="text" placeholder="Username" />\n  <input type="password" placeholder="Password" />\n  <button type="submit">Login</button>\n</form>',
-  style:
-    '.form-input {\n  margin-bottom: 10px;\n}\n\n.form-button {\n  background-color: #007bff;\n  color: white;\n}',
-  js: 'document.querySelector("form").addEventListener("submit", (e) => {\n  e.preventDefault();\n  // Handle form submission\n});',
-};
-
-export function FrontendContent() {
+export function TestContent() {
   const {
     activeImage,
     setActiveImage,
     markdownContent,
     setMarkdownContent,
-    frontendMessages,
-    setFrontendMessages,
+    testMessages,
+    setTestMessages,
   } = useSharedContext();
 
   const {
@@ -47,28 +35,25 @@ export function FrontendContent() {
     clearCodeOutput,
     activeTab,
     setActiveTab,
-  } = useFrontendCode();
+  } = useTestCode();
 
   const { parseResponse } = useCodeParser();
 
   const { messages, isLoading, handleSendMessage, clearMessages } = useChatMessages({
-    systemPrompt: getFrontendPrompt(selectedFramework),
-    initialMessages: frontendMessages,
+    systemPrompt: getTestPrompt(selectedFramework),
+    initialMessages: testMessages,
     onMessagesChange: (newMessages) => {
-      setFrontendMessages(newMessages);
+      setTestMessages(newMessages);
     },
     onResponse: (content) => {
-      console.log('content', content);
-      const parsed = parseResponse(content, selectedFramework, 'frontend');
-
-      // Update code output if there are code blocks
+      const parsed = parseResponse(content, selectedFramework, 'test');
       if (Object.keys(parsed.code).length > 0) {
         updateCodeOutput(parsed.code);
       }
     },
   });
 
-  const frameworkConfig = FRAMEWORK_OPTIONS.frontend.find((f) => f.value === selectedFramework)!;
+  const frameworkConfig = FRAMEWORK_OPTIONS.test.find((f) => f.value === selectedFramework)!;
   const [copiedStates, setCopiedStates] = React.useState<Record<string, boolean>>({});
 
   const handleFrameworkChange = (value: string) => {
@@ -96,11 +81,11 @@ export function FrontendContent() {
         headerContent={
           <div className="flex items-center gap-2">
             <FrameworkSelector
-              type="frontend"
+              type="test"
               value={selectedFramework}
               onValueChange={handleFrameworkChange}
             />
-            <ClearChatButton onClear={handleClearAll} tabName="Frontend" />
+            <ClearChatButton onClear={handleClearAll} tabName="Test" />
           </div>
         }
       />

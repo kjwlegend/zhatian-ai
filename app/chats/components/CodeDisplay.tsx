@@ -14,14 +14,11 @@ interface CodeDisplayProps {
 export function CodeDisplay({ code, language, onCopy, isCopied }: CodeDisplayProps) {
   return (
     <div className="relative h-full w-full flex flex-col">
-      <SyntaxHighlighter
-        language={language}
-        style={vs}
-        customStyle={{ margin: 0, height: '100%', flex: 1 }}
-        PreTag="div"
-      >
-        {code}
-      </SyntaxHighlighter>
+      <div className="h-full overflow-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent hover:scrollbar-thumb-gray-400 dark:hover:scrollbar-thumb-gray-500">
+        <SyntaxHighlighter language={language} style={vs} customStyle={{ margin: 0 }} PreTag="div">
+          {code}
+        </SyntaxHighlighter>
+      </div>
       <Button onClick={onCopy} className="absolute top-2 right-2" size="sm">
         {isCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
       </Button>

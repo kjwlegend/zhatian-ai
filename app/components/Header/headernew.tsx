@@ -29,11 +29,11 @@ type NavItem = {
 };
 
 const navItems: NavItem[] = [
-  { href: '/workspace', label: '工作区', icon: <LayoutDashboard className="mr-2 h-4 w-4" /> },
+  { href: '/about', label: '介绍', icon: <HelpCircle className="mr-2 h-4 w-4" /> },
   { href: '/chats', label: '聊天', icon: <MessageCircle className="mr-2 h-4 w-4" /> },
+  { href: '/workspace', label: '工作区', icon: <LayoutDashboard className="mr-2 h-4 w-4" /> },
   { href: '/library', label: '组件市场', icon: <Library className="mr-2 h-4 w-4" /> },
   { href: '/doc', label: '使用说明', icon: <FileText className="mr-2 h-4 w-4" /> },
-  { href: '/faq', label: '介绍', icon: <HelpCircle className="mr-2 h-4 w-4" /> },
   { href: '/founders', label: '创始人', icon: <Users className="mr-2 h-4 w-4" /> },
 ];
 
