@@ -8,9 +8,7 @@ const componentsDir = path.resolve(__dirname, 'components-light');
 const components = fs.readdirSync(componentsDir)
     .filter(file => fs.statSync(path.join(componentsDir, file)).isDirectory());
 
-console.error('%c  components', 'background-image:color:transparent;color:red;');
-console.error('🚀~ => ', components);
-console.error('🚀~ => ', componentsDir);
+
 // 基础配置
 const baseConfig = {
     mode: 'production',
@@ -36,6 +34,28 @@ const baseConfig = {
                 test: /\.scss$/,
                 use: ['style-loader', 'css-loader', 'sass-loader'],
             },
+            {
+                test: /\.css$/i,
+                use: ['style-loader', 'css-loader'],
+            },
+            {
+                test: /\.(jpg|png|svg|gif)$/,
+                use: ['url-loader', 'file-loader'],
+            },
+            {
+                test: /\.(woff|woff2|eot|otf|ttf|ttc)$/,
+                use: ['file-loader'],
+            },
+            {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                    loader: 'babel-loader',
+                    options: {
+                        presets: [['@babel/preset-env', { targets: 'defaults' }]],
+                    },
+                },
+            },
         ]
     },
     plugins: [new VueLoaderPlugin()],
@@ -44,11 +64,13 @@ const baseConfig = {
     },
 };
 
+
 // 为每个组件创建配置
 module.exports = components.map(component => merge(baseConfig, {
     entry: path.resolve(componentsDir, component),
     output: {
         filename: `${component}.js`,
+        // filename: `[name].js`,
         library: {
             name: `Gucci-${component}`,
             type: 'window',

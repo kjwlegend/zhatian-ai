@@ -1,11 +1,11 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
-import fs from 'fs/promises'
-import path from 'path'
 import { exec } from 'child_process'
+import fs from 'fs/promises'
+import type { NextApiRequest, NextApiResponse } from 'next'
+import path from 'path'
 import { promisify } from 'util'
 
 import { CodeContent } from '@/app/services/db/schema'
-import { useChatStore } from '@/app/store/chatStore'
+import { entryTemplate, panelTemplate, vueTemplate } from '@/template/light'
 
 const execAsync = promisify(exec);
 
@@ -28,28 +28,56 @@ const CUSTOM_TABS: (keyof CodeContent)[] = ['html', 'js', 'scss', 'panel']
 /**
  * 创建演示文件
  * @param {string} currentTopic - 当前主题
+ * @param {Record<keyof CodeContent, string>} topicCode - 主题代码内容
  */
-async function createDemoFiles(currentTopic: string, topicCode: any): Promise<void> {
-    const demoDir = buildPath('components-light', 'demo')
+async function createDemoFiles(currentTopic: string, topicCode: Record<keyof CodeContent, string>): Promise<void> {
+    const defaultComponentName = 'demo'
+    const demoDir = buildPath('components-light', defaultComponentName)
 
+    // 清理并创建目录
     await fs.rm(demoDir, { recursive: true, force: true })
     await fs.mkdir(demoDir, { recursive: true })
 
-    const fileWritePromises = CUSTOM_TABS.map(async (type) => {
+    // 生成入口文件
+    await fs.writeFile(
+        path.join(demoDir, 'index.js'),
+        entryTemplate(defaultComponentName)
+    )
+
+    // TODO 生成面板配置文件 后续修改
+    await fs.writeFile(
+        path.join(demoDir, 'panel.js'),
+        panelTemplate()
+    )
+
+    // 生成其他文件
+    await Promise.all(CUSTOM_TABS.map(async (type) => {
         try {
             const content = topicCode[type]
-            if (content === undefined) {
+            if (!content) {
                 console.warn(`Content for type ${type} is undefined`)
                 return
             }
-            await fs.writeFile(path.join(demoDir, FILES_MAP[type]), content)
-            console.error(`File written for ${type}`);
-        } catch (error) {
-            console.error(`Error writing file for ${type}:`, error)
-        }
-    })
+            const filePath = path.join(demoDir, FILES_MAP[type])
 
-    await Promise.all(fileWritePromises)
+            switch (type) {
+                case 'html':
+                    await fs.writeFile(filePath, vueTemplate(defaultComponentName, content))
+                    break
+                case 'scss':
+                case 'panel':
+                    await fs.writeFile(filePath, content)
+                    break
+                case 'js':
+                    // 跳过js文件,因为已经生成了入口文件
+                    break
+            }
+            console.log(`File written: ${FILES_MAP[type]}`)
+        } catch (error) {
+            console.error(`Error writing ${type} file:`, error)
+            throw error // 向上传播错误
+        }
+    }))
 }
 
 async function copyBuildFiles(): Promise<void> {
@@ -85,17 +113,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     try {
         // 使用传递过来的 topicCode
-        await createDemoFiles(currentTopic, topicCode)
-
+        try {
+            await createDemoFiles(currentTopic, topicCode)
+        } catch (error) {
+            console.error('%c  createDemoFiles', 'background-image:color:transparent;color:red;');
+            console.error('🚀~ => ', error);
+        }
         // 运行 build:packages 脚本
         const { stdout, stderr } = await execAsync('pnpm run build:packages')
-        if (stderr) {
-            console.error(`Build error: ${stderr}`)
-            return res.status(500).json({ message: 'Error during build', error: stderr })
-        }
-        console.log(`Build output: ${stdout}`)
+        //  打包完成 successfully
+        console.error('%c stderr.includes ', 'background-image:color:transparent;color:red;');
+        console.error('🚀~ => ', stdout.includes('successfully'));
+        console.error('%c  ====================== ', 'background-image:color:transparent;color:red;');
 
-        res.status(200).json({ message: 'Demo files created and package built successfully' })
+        console.error('🚀~ => ', stderr);
+        console.error('%c ====================== ', 'background-image:color:transparent;color:red;');
+
+        console.error('🚀~ => ', stdout);
+
+        if (stdout.includes('successfully')) {
+            console.log(`Build output: ${stdout}`)
+            return res.status(200).json({ message: 'Demo files created and package built successfully' })
+        }
+        console.error(`Build error: ${stderr}`)
+        return res.status(500).json({ message: 'Error during build', error: stderr })
+
     } catch (error) {
         console.error('Error during demo files creation or build:', error)
         res.status(500).json({
