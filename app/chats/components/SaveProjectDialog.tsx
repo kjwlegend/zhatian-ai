@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { useChatStore } from '@/app/store/chatStore';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -12,6 +12,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import * as React from 'react';
 
 interface SaveProjectDialogProps {
   isOpen: boolean;
@@ -19,9 +20,30 @@ interface SaveProjectDialogProps {
 }
 
 export function SaveProjectDialog({ isOpen, setIsOpen }: SaveProjectDialogProps) {
-  const handleSave = (event: React.FormEvent) => {
+  const [projectName, setProjectName] = React.useState('');
+  const [projectDescription, setProjectDescription] = React.useState('');
+  const [projectTags, setProjectTags] = React.useState('');
+  const addProject = useChatStore((state) => state.addProject);
+
+  const handleSave = async (event: React.FormEvent) => {
     event.preventDefault();
     console.log('Saving project...');
+
+    const tagsArray = projectTags.split(',').map(tag => tag.trim());
+    const topicId = Date.now().toString();
+
+    const project = {
+      id: topicId,
+      name: projectName,
+      description: projectDescription,
+      tags: tagsArray,
+      createdAt: Date.now(),
+      lastUpdated: Date.now(),
+      creator: 'xiaoguang'
+    };
+
+    await addProject(project);
+
     setIsOpen(false);
   };
 
@@ -41,13 +63,23 @@ export function SaveProjectDialog({ isOpen, setIsOpen }: SaveProjectDialogProps)
               <Label htmlFor="project-name" className="text-right">
                 Name
               </Label>
-              <Input id="project-name" className="col-span-3" />
+              <Input
+                id="project-name"
+                className="col-span-3"
+                value={projectName}
+                onChange={(e) => setProjectName(e.target.value)}
+              />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="project-description" className="text-right">
                 Description
               </Label>
-              <Textarea id="project-description" className="col-span-3" />
+              <Textarea
+                id="project-description"
+                className="col-span-3"
+                value={projectDescription}
+                onChange={(e) => setProjectDescription(e.target.value)}
+              />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="project-tags" className="text-right">
@@ -57,6 +89,8 @@ export function SaveProjectDialog({ isOpen, setIsOpen }: SaveProjectDialogProps)
                 id="project-tags"
                 className="col-span-3"
                 placeholder="Separate tags with commas"
+                value={projectTags}
+                onChange={(e) => setProjectTags(e.target.value)}
               />
             </div>
           </div>

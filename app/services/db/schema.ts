@@ -1,3 +1,4 @@
+import { Message } from '@/app/chats/hooks/useChatMessages';
 import { DBSchema } from 'idb';
 
 export interface Project {
@@ -5,7 +6,7 @@ export interface Project {
   name: string;
   creator: string;
   createdAt: number;
-  codeType: string;
+  codeType?: string;
   lastUpdated: number;
 }
 
@@ -46,9 +47,25 @@ export interface CodeContent {
 
 export interface ChatTopic {
   id: string;
-  viewId: string;
+  viewId?: string;
   title: string;
+  type: string;
   lastUpdated: number;
+  activeImage: string | null;
+  markdownContent: string | null;
+  requirementMessages: Message[];
+  frontend: {
+    frontendMessages: Message[];
+    frontendFramework: string | null;
+  },
+  backend: {
+    backendMessages: Message[];
+    backendFramework: string | null;
+  },
+  test: {
+    testMessages: Message[];
+    testFramework: string | null;
+  },
 }
 
 export interface ChatView {

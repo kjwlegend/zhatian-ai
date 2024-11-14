@@ -1,8 +1,5 @@
 'use client';
 
-import React, { useState } from 'react';
-import Link from 'next/link';
-import { IconMoonStars, IconSun } from '@tabler/icons-react';
 import {
   ActionIcon,
   Button,
@@ -11,16 +8,19 @@ import {
   useComputedColorScheme,
   useMantineColorScheme,
 } from '@mantine/core';
+import { IconMoonStars, IconSun } from '@tabler/icons-react';
+import Link from 'next/link';
+import { useState } from 'react';
 // import classes from "./Header.module.css";
 import './Header.scss';
 
-import Image from 'next/image';
 import { CodeContent } from '@/app/services/db/schema';
 import { useChatStore } from '@/app/store/chatStore';
+import Image from 'next/image';
 
 const Header = () => {
-  const { currentTopic, getTopicCode, customTabs } = useChatStore();
-
+  const { currentTopic, getTopicCode, customTabs, initializeDB } = useChatStore();
+  initializeDB()
   const { setColorScheme } = useMantineColorScheme();
   const computedColorScheme = useComputedColorScheme('light', { getInitialValueInEffect: true });
 

@@ -28,7 +28,7 @@ interface ChatStore {
   addMessage: (topicId: string, message: ChatMessage) => Promise<void>;
   updateMessage: (topicId: string, messageId: string, updatedMessage: ChatMessage) => Promise<void>;
   getTopicMessages: (topicId: string) => Promise<ChatMessage[]>;
-  addTopic: (viewId: string, title: string) => Promise<string>;
+  addTopic: (topicData: ChatTopic) => Promise<string>;
   updateTopicTitle: (topicId: string, newTitle: string) => Promise<void>;
   deleteTopic: (viewId: string, topicId: string) => Promise<void>;
   getViewTopics: (viewId: string) => Promise<ChatTopic[]>;
@@ -72,6 +72,9 @@ interface ChatStore {
   setCustomTabs: (tabs: string[]) => void;
   addCustomTab: (tab: string) => void;
   removeCustomTab: (tab: string) => void;
+
+  updateTopic: (topicId: string, updatedData: Partial<ChatTopic>) => Promise<void>;
+  getTopic: (topicId: string, field?: keyof ChatTopic) => Promise<any>;
 }
 
 export const useChatStore = create<ChatStore>()(
@@ -98,75 +101,7 @@ export const useChatStore = create<ChatStore>()(
         return await dbService.getTopicMessages(topicId);
       },
 
-      addTopic: async (viewId, title) => {
-        const topicId = Date.now().toString();
-        const newTopic: ChatTopic = {
-          id: topicId,
-          viewId,
-          title,
-          lastUpdated: Date.now(),
-        };
-        await dbService.addTopic(newTopic);
-        return topicId;
-      },
-      // addTopic: (topicId, title) =>
-      //   set((state) => ({
-      //     topics: {
-      //       ...state.topics,
-      //       [topicId]: [{ id: topicId, content: title, isUser: false }],
-      //     },
-      //     topicCode: {
-      //       ...state.topicCode,
-      //       [topicId]: { html: '', index: '', panel: '', scss: '' },
-      //     },
-      //     currentTopic: topicId,
-      //   })),
-
-      updateTopicTitle: async (topicId, newTitle) => {
-        const topic = await dbService.getTopic(topicId);
-        if (topic) {
-          topic.title = newTitle;
-          topic.lastUpdated = Date.now();
-          await dbService.updateTopic(topic);
-        }
-      },
-
-      deleteTopic: async (viewId, topicId) => {
-        await dbService.deleteTopic(topicId);
-        // You might want to also delete associated messages and code here
-      },
-
-      getViewTopics: async (viewId) => {
-        return await dbService.getViewTopics(viewId);
-      },
-
-      getTopicCode: async (topicId, codeType) => {
-        const code = await dbService.getCode(topicId, codeType);
-        return code || '';
-      },
-      updateTopicCode: async (topicId, codeType, code) => {
-        await dbService.updateCode(topicId, codeType, code);
-      },
-      // getLocalTopicCode:  (topicId, codeType) => {
-      //   return get().topicCode[topicId]?.[codeType] || ''
-      // },
-      // updateLocalTopicCode: (topicId, newCode) =>
-      //   set((state) => {
-      //     const updatedTopicCode = {
-      //       ...state.topicCode,
-      //       [topicId]: {
-      //         ...state.topicCode[topicId],
-      //         ...newCode
-      //       },
-      //     };
-      //     console.error('Updating topicCode:', updatedTopicCode);
-      //     return { topicCode: updatedTopicCode };
-      //   }),
-
-      setCurrentView: (viewId) => set({ currentView: viewId }),
-      setCurrentTopic: (topicId) => set({ currentTopic: topicId }),
-
-      // 实现项目相关方法
+      // 项目内容 =================================== start
       addProject: async (project) => {
         await dbService.addProject(project);
       },
@@ -179,8 +114,76 @@ export const useChatStore = create<ChatStore>()(
       getAllProjects: async () => {
         return await dbService.getAllProjects();
       },
+      // 项目内容 =================================== end
 
-      // 实现页面相关方法
+      // 组件内容 =================================== start
+      addTopic: async (topicData) => {
+        const { id, title, type, activeImage, markdownContent, requirementMessages, frontend, backend, test } = topicData;
+        const newTopic: ChatTopic = {
+          id,
+          title,
+          type,
+          activeImage,
+          markdownContent,
+          requirementMessages,
+          frontend,
+          backend,
+          test,
+          lastUpdated: Date.now(),
+        };
+        set({ currentTopic: id });
+        await dbService.addTopic(newTopic);
+        const { currentTopic } = get();
+        console.error('%c  currentTopic', 'background-image:color:transparent;color:red;');
+        console.error('🚀~ => ', currentTopic);
+        return id
+      },
+
+      updateTopic: async (topicId, updatedData) => {
+        const topic = await dbService.getTopic(topicId);
+        if (topic) {
+          const updatedTopic = { ...topic, ...updatedData, lastUpdated: Date.now() };
+          // const updatedTopic = Object.assign({}, topic, updatedData, { lastUpdated: Date.now() });
+          await dbService.updateTopic(updatedTopic);
+        }
+      },
+
+      getTopic: async (topicId, field) => {
+        const topic = await dbService.getTopic(topicId);
+        if (topic) {
+          return field ? topic[field] : topic;
+        }
+        return null;
+      },
+
+      deleteTopic: async (topicId) => {
+        await dbService.deleteTopic(topicId);
+      },
+
+
+      updateTopicTitle: async (topicId, newTitle) => {
+        const topic = await dbService.getTopic(topicId);
+        if (topic) {
+          topic.title = newTitle;
+          topic.lastUpdated = Date.now();
+          await dbService.updateTopic(topic);
+        }
+      },
+      getViewTopics: async (viewId) => {
+        return await dbService.getViewTopics(viewId);
+      },
+      getTopicCode: async (topicId, codeType) => {
+        const code = await dbService.getCode(topicId, codeType);
+        return code || '';
+      },
+      updateTopicCode: async (topicId, codeType, code) => {
+        await dbService.updateCode(topicId, codeType, code);
+      },
+      // 组件内容 =================================== end
+
+      setCurrentView: (viewId) => set({ currentView: viewId }),
+      setCurrentTopic: (topicId) => set({ currentTopic: topicId }),
+
       addPage: async (page) => {
         await dbService.addPage(page);
       },
@@ -198,7 +201,6 @@ export const useChatStore = create<ChatStore>()(
       addCustomTab: (tab) => set((state) => ({ customTabs: [...state.customTabs, tab] })),
       removeCustomTab: (tab) => set((state) => ({ customTabs: state.customTabs.filter(t => t !== tab) })),
 
-      // 实现组件相关方法
       addComponent: async (component) => {
         await dbService.addComponent(component);
       },
