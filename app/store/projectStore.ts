@@ -159,9 +159,12 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
 
   moveComponent: async (componentId, sourcePageId, targetPageId, newIndex) => {
     const component = await dbService.getComponent(componentId);
+    console.log('component', component);
     if (component) {
       const updatedComponent = { ...component, pageId: targetPageId };
       await dbService.updateComponent(updatedComponent);
+
+      console.log('updatedComponent', updatedComponent);
 
       set((state) => {
         const newSourceComponents = state.components[sourcePageId].filter(

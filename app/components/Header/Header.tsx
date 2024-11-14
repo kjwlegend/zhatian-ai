@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react'
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { IconMoonStars, IconSun } from '@tabler/icons-react';
 import {
@@ -13,11 +13,13 @@ import {
 } from '@mantine/core';
 // import classes from "./Header.module.css";
 import './Header.scss';
-import { useChatStore } from '@/app/store/chatStore'
+
+import Image from 'next/image';
 import { CodeContent } from '@/app/services/db/schema';
+import { useChatStore } from '@/app/store/chatStore';
 
 const Header = () => {
-  const { currentTopic, getTopicCode, customTabs } = useChatStore()
+  const { currentTopic, getTopicCode, customTabs } = useChatStore();
 
   const { setColorScheme } = useMantineColorScheme();
   const computedColorScheme = useComputedColorScheme('light', { getInitialValueInEffect: true });
@@ -31,11 +33,13 @@ const Header = () => {
   const handlePackageDownload = async () => {
     setIsPackaging(true);
     try {
-      let topicCode = {} as Record<string, string>
-      await Promise.all(customTabs.map(async type => {
-        const res = await getTopicCode(currentTopic, type as keyof CodeContent);
-        topicCode[type] = res
-      }));
+      let topicCode = {} as Record<string, string>;
+      await Promise.all(
+        customTabs.map(async (type) => {
+          const res = await getTopicCode(currentTopic, type as keyof CodeContent);
+          topicCode[type] = res;
+        })
+      );
 
       const response = await fetch('/api/package-download', {
         method: 'POST',
@@ -64,9 +68,12 @@ const Header = () => {
       <Container size="xxl" className="inner">
         <Group justify="space-between" w="100%">
           <Group>
-            <Button component={Link} href="/" variant="subtle">
-              下一代吊炸天的网站加小程序页面自然语言一站式生成系统
-            </Button>
+            <a href="/" className="logo-container">
+              <Image width={160} height={50} src={'/logo1.png'} alt="logo" />
+              <span className="logo-text">
+                下一代吊炸天的网站加小程序页面自然语言一站式生成系统
+              </span>
+            </a>
           </Group>
 
           <Group>
@@ -87,11 +94,7 @@ const Header = () => {
               创始人
             </Button>
 
-            <Button
-              onClick={handlePackageDownload}
-              loading={isPackaging}
-              disabled={isPackaging}
-            >
+            <Button onClick={handlePackageDownload} loading={isPackaging} disabled={isPackaging}>
               {isPackaging ? '打包中...' : '打包下载'}
             </Button>
 
@@ -108,6 +111,6 @@ const Header = () => {
       </Container>
     </header>
   );
-}
+};
 
 export default Header;

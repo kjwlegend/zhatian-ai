@@ -1,11 +1,11 @@
-// 'use client'
+// 'use client';
+
 import React from 'react';
-import { ColorSchemeScript, MantineProvider } from '@mantine/core';
-import { theme } from '../theme';
 import AppLayout from './components/AppLayout/AppLayout';
 
-import '@mantine/core/styles.css';
 import './styles/global.scss';
+
+import { MantineProvider } from '@mantine/core';
 
 export const metadata = {
   title: '下一代吊炸天的网站加小程序页面自然语言一站式生成系统',
@@ -16,7 +16,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <head>
-        <ColorSchemeScript />
         <link rel="shortcut icon" href="/favicon.svg" />
         <meta
           name="viewport"
@@ -24,7 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
-        <MantineProvider theme={theme}>
+        <MantineProvider>
           <AppLayout>{children}</AppLayout>
         </MantineProvider>
       </body>
