@@ -1,5 +1,5 @@
-import { Message } from '@/app/chats/hooks/useChatMessages';
 import { DBSchema } from 'idb';
+import { Message } from '@/app/chats/hooks/useChatMessages';
 
 export interface Project {
   id: string;
@@ -20,13 +20,37 @@ export interface Page {
   componentsCount: number;
 }
 
+export interface ComponentReference {
+  componentId: string;
+  projectId?: string;
+  pageId?: string;
+  addedAt: number;
+  addedBy: string;
+  config?: Record<string, any>;
+}
+
 export interface Component {
   id: string;
-  pageId: string;
   name: string;
-  type: string;
-  content: string;
-  lastUpdated: number;
+  thumbnail: string;
+  status: 'draft' | 'Done';
+  tags: ('requirement' | 'design' | 'FE' | 'BE' | 'Test')[];
+  published: boolean;
+  verified: boolean;
+  description: string;
+  designFile: string;
+  code: {
+    frontend: Record<string, string>;
+    backend: Record<string, string>;
+    test: Record<string, string>;
+  };
+  codeFramework: string;
+  componentDoc: string;
+  createdAt: number;
+  updatedAt: number;
+  creator: string;
+  version: string;
+  dependencies?: string[];
 }
 
 export interface ChatMessage {
@@ -36,13 +60,6 @@ export interface ChatMessage {
   isUser: boolean;
   timestamp: number;
   image?: string;
-}
-
-export interface CodeContent {
-  html: string;
-  js: string;
-  scss: string;
-  panel: string;
 }
 
 export interface ChatTopic {
@@ -57,15 +74,15 @@ export interface ChatTopic {
   frontend: {
     frontendMessages: Message[];
     frontendFramework: string | null;
-  },
+  };
   backend: {
     backendMessages: Message[];
     backendFramework: string | null;
-  },
+  };
   test: {
     testMessages: Message[];
     testFramework: string | null;
-  },
+  };
 }
 
 export interface ChatView {
@@ -88,7 +105,13 @@ export interface ChatDBSchema extends DBSchema {
   components: {
     key: string;
     value: Component;
-    indexes: { 'by-page': string; 'by-last-updated': number };
+    indexes: {
+      'by-creator': string;
+      'by-framework': string;
+      'by-status': string;
+      'by-tags': string[];
+      'by-last-updated': number;
+    };
   };
   views: {
     key: string;
@@ -103,16 +126,6 @@ export interface ChatDBSchema extends DBSchema {
   messages: {
     key: string;
     value: ChatMessage;
-    indexes: { 'by-topic': string };
-  };
-  code: {
-    key: string;
-    value: {
-      topicId: string;
-      codeType: keyof CodeContent;
-      content: string;
-      lastUpdated: number;
-    };
     indexes: { 'by-topic': string };
   };
 }

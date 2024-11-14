@@ -26,13 +26,23 @@ type NavItem = {
   href: string;
   label: string;
   icon: React.ReactNode;
+  disabled?: boolean;
 };
 
 const navItems: NavItem[] = [
   { href: '/about', label: '介绍', icon: <HelpCircle className="mr-2 h-4 w-4" /> },
   { href: '/chats', label: '聊天', icon: <MessageCircle className="mr-2 h-4 w-4" /> },
-  { href: '/workspace', label: '工作区', icon: <LayoutDashboard className="mr-2 h-4 w-4" /> },
-  { href: '/library', label: '组件市场', icon: <Library className="mr-2 h-4 w-4" /> },
+  {
+    href: '/workspace',
+    label: '工作区',
+    icon: <LayoutDashboard className="mr-2 h-4 w-4" />,
+  },
+  {
+    href: '/library',
+    label: '组件市场',
+    icon: <Library className="mr-2 h-4 w-4" />,
+    disabled: true,
+  },
   { href: '/doc', label: '使用说明', icon: <FileText className="mr-2 h-4 w-4" /> },
   { href: '/founders', label: '创始人', icon: <Users className="mr-2 h-4 w-4" /> },
 ];
@@ -65,9 +75,15 @@ export default function Header({ user = null }: { user?: { name: string; image: 
                 <Button
                   key={item.href}
                   variant={pathname === item.href ? 'default' : 'ghost'}
+                  disabled={item.disabled}
                   asChild
                 >
-                  <Link href={item.href} className="flex items-center">
+                  <Link
+                    href={item.href}
+                    className={`flex items-center ${item.disabled ? 'pointer-events-none opacity-50' : ''}`}
+                    aria-disabled={item.disabled}
+                    tabIndex={item.disabled ? -1 : undefined}
+                  >
                     {item.icon}
                     {item.label}
                   </Link>

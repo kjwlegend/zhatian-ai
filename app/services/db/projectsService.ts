@@ -1,48 +1,32 @@
-import { initDB } from './index';
-import { Page, Project } from './schema';
+import { db } from './index';
+import { Project } from './schema';
 
 export async function getProject(id: string): Promise<Project | undefined> {
-  const db = await initDB();
-  return db.get('projects', id);
+  const database = await db;
+  return database.get('projects', id);
 }
 
 export async function addProject(project: Project): Promise<void> {
-  const db = await initDB();
-  await db.put('projects', project);
+  const database = await db;
+  await database.put('projects', project);
 }
 
 export async function updateProject(project: Project): Promise<void> {
-  const db = await initDB();
-  await db.put('projects', project);
+  const database = await db;
+  await database.put('projects', project);
 }
 
 export async function deleteProject(id: string): Promise<void> {
-  const db = await initDB();
-  await db.delete('projects', id);
+  const database = await db;
+  await database.delete('projects', id);
 }
 
 export async function getAllProjects(): Promise<Project[]> {
-  const db = await initDB();
-  return db.getAll('projects');
+  const database = await db;
+  return database.getAll('projects');
 }
 
 export async function getProjectsByCreator(creator: string): Promise<Project[]> {
-  const db = await initDB();
-  return db.getAllFromIndex('projects', 'by-creator', creator);
-}
-
-// export async function getProjectPages(projectId: string): Promise<Page[]> {
-//   const db = await initDB();
-//   const pages = await db.getAllFromIndex('pages', 'by-project', projectId);
-//   return pages as Page[];
-// }
-
-export async function getProjectComponents(projectId: string): Promise<number> {
-  const db = await initDB();
-  const pages = await db.getAllFromIndex('pages', 'by-project', projectId);
-  const componentsPromises = pages.map((page) =>
-    db.getAllFromIndex('components', 'by-page', page.id)
-  );
-  const componentsPerPage = await Promise.all(componentsPromises);
-  return componentsPerPage.reduce((total, components) => total + components.length, 0);
+  const database = await db;
+  return database.getAllFromIndex('projects', 'by-creator', creator);
 }

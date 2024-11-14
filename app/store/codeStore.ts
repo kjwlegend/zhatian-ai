@@ -19,6 +19,14 @@ interface CodeState {
   // Active tab state
   activeTabs: Record<CodeType, string>;
   setActiveTab: (type: CodeType, tab: string) => void;
+
+  // Component Doc state
+  componentDoc: string;
+  setComponentDoc: (doc: string) => void;
+
+  // Design File state
+  designFile: string | null;
+  setDesignFile: (file: string | null) => void;
 }
 
 const getInitialFramework = (type: CodeType) => {
@@ -55,18 +63,19 @@ export const useCodeStore = create<CodeState>()(
         test: getInitialTab('test'),
       },
 
+      // Initialize component doc and design file
+      componentDoc: '',
+      designFile: null,
+
       setSelectedFramework: (type, framework) =>
         set((state) => ({
           selectedFrameworks: {
             ...state.selectedFrameworks,
             [type]: framework,
           },
-          // Reset active tab when framework changes
           activeTabs: {
             ...state.activeTabs,
-            [type]:
-              FRAMEWORK_OPTIONS[type].find((f) => f.value === framework)?.tabs[0] ||
-              state.activeTabs[type],
+            [type]: FRAMEWORK_OPTIONS[type].find((f) => f.value === framework)?.tabs[0] || state.activeTabs[type],
           },
         })),
 
@@ -98,13 +107,13 @@ export const useCodeStore = create<CodeState>()(
         })),
 
       clearAllCodeOutputs: () =>
-        set((state) => ({
+        set({
           codeOutputs: {
             frontend: {},
             backend: {},
             test: {},
           },
-        })),
+        }),
 
       setActiveTab: (type, tab) =>
         set((state) => ({
@@ -113,6 +122,9 @@ export const useCodeStore = create<CodeState>()(
             [type]: tab,
           },
         })),
+
+      setComponentDoc: (doc) => set({ componentDoc: doc }),
+      setDesignFile: (file) => set({ designFile: file }),
     }),
     {
       name: 'code-storage',

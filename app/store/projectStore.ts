@@ -20,18 +20,6 @@ interface ProjectStore {
   addPage: (page: Omit<Page, 'id' | 'lastUpdated'>) => Promise<void>;
   updatePage: (page: Page) => Promise<void>;
   deletePage: (id: string) => Promise<void>;
-
-  // Component actions
-  loadComponents: (pageIds: string[]) => Promise<void>;
-  addComponent: (component: Omit<Component, 'id' | 'lastUpdated'>) => Promise<void>;
-  updateComponent: (component: Component) => Promise<void>;
-  deleteComponent: (id: string) => Promise<void>;
-  moveComponent: (
-    componentId: string,
-    sourcePageId: string,
-    targetPageId: string,
-    newIndex: number
-  ) => Promise<void>;
 }
 
 export const useProjectStore = create<ProjectStore>((set, get) => ({
@@ -104,83 +92,5 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
     set((state) => ({
       pages: state.pages.filter((p) => p.id !== id),
     }));
-  },
-
-  loadComponents: async (pageIds) => {
-    const componentsMap: Record<string, Component[]> = {};
-    console.log('pageIds', pageIds);
-    for (const pageId of pageIds) {
-      const pageComponents = await dbService.getPageComponents(pageId);
-      componentsMap[pageId] = pageComponents;
-      console.log('pageComponents', pageComponents);
-    }
-    set({ components: componentsMap });
-  },
-
-  addComponent: async (componentData) => {
-    const newComponent: Component = {
-      ...componentData,
-      id: Date.now().toString(),
-      lastUpdated: Date.now(),
-    };
-    await dbService.addComponent(newComponent);
-    set((state) => ({
-      components: {
-        ...state.components,
-        [newComponent.pageId]: [...(state.components[newComponent.pageId] || []), newComponent],
-      },
-    }));
-  },
-
-  updateComponent: async (component) => {
-    await dbService.updateComponent(component);
-    set((state) => ({
-      components: {
-        ...state.components,
-        [component.pageId]: state.components[component.pageId].map((c) =>
-          c.id === component.id ? component : c
-        ),
-      },
-    }));
-  },
-
-  deleteComponent: async (id) => {
-    const component = await dbService.getComponent(id);
-    if (component) {
-      await dbService.deleteComponent(id);
-      set((state) => ({
-        components: {
-          ...state.components,
-          [component.pageId]: state.components[component.pageId].filter((c) => c.id !== id),
-        },
-      }));
-    }
-  },
-
-  moveComponent: async (componentId, sourcePageId, targetPageId, newIndex) => {
-    const component = await dbService.getComponent(componentId);
-    console.log('component', component);
-    if (component) {
-      const updatedComponent = { ...component, pageId: targetPageId };
-      await dbService.updateComponent(updatedComponent);
-
-      console.log('updatedComponent', updatedComponent);
-
-      set((state) => {
-        const newSourceComponents = state.components[sourcePageId].filter(
-          (c) => c.id !== componentId
-        );
-        const newTargetComponents = [...(state.components[targetPageId] || [])];
-        newTargetComponents.splice(newIndex, 0, updatedComponent);
-
-        return {
-          components: {
-            ...state.components,
-            [sourcePageId]: newSourceComponents,
-            [targetPageId]: newTargetComponents,
-          },
-        };
-      });
-    }
   },
 }));

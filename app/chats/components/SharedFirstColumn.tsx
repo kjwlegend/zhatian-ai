@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useSharedContext } from '../contexts/SharedContext';
+import { useCodeStore } from '@/app/store/codeStore';
 import { ImageUploader } from './ImageUploader';
 import { MarkdownEditor } from './MarkdownEditor';
 
 export function SharedFirstColumn() {
-  const { activeImage, setActiveImage, markdownContent, setMarkdownContent } = useSharedContext();
+  const { componentDoc, setComponentDoc, designFile, setDesignFile } = useCodeStore();
 
   return (
     <div className="w-full h-full">
@@ -15,10 +15,16 @@ export function SharedFirstColumn() {
           <TabsTrigger value="markdown">Markdown</TabsTrigger>
         </TabsList>
         <TabsContent value="image">
-          <ImageUploader activeImage={activeImage} setActiveImage={setActiveImage} />
+          <ImageUploader 
+            activeImage={designFile} 
+            setActiveImage={setDesignFile} 
+          />
         </TabsContent>
         <TabsContent value="markdown" className="h-full">
-          <MarkdownEditor content={markdownContent} onChange={setMarkdownContent} />
+          <MarkdownEditor 
+            content={componentDoc} 
+            onChange={setComponentDoc} 
+          />
         </TabsContent>
       </Tabs>
     </div>

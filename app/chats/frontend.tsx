@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { useFrontendCode } from '@/app/store/codeStore';
+import { useChatStore } from '@/app/store/chatStore';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BaseChatInterface } from './components/BaseChatInterface';
 import { ClearChatButton } from './components/ClearChatButton';
@@ -13,32 +14,12 @@ import {
 } from './components/FrameworkSelector';
 import { SharedFirstColumn } from './components/SharedFirstColumn';
 import { getFrontendPrompt } from './constants/prompts';
-import { useSharedContext } from './contexts/SharedContext';
 import { useChatMessages } from './hooks/useChatMessages';
 import { useCodeParser } from './hooks/useCodeParser';
-
-const mockChatMessages = [
-  { role: 'user', content: 'Can you create a login form?' },
-  { role: 'assistant', content: "I'll create a basic login form for you." },
-];
-
-const mockCodeOutput = {
-  html: '<form>\n  <input type="text" placeholder="Username" />\n  <input type="password" placeholder="Password" />\n  <button type="submit">Login</button>\n</form>',
-  style:
-    '.form-input {\n  margin-bottom: 10px;\n}\n\n.form-button {\n  background-color: #007bff;\n  color: white;\n}',
-  js: 'document.querySelector("form").addEventListener("submit", (e) => {\n  e.preventDefault();\n  // Handle form submission\n});',
-};
+import { Message } from './hooks/useChatMessages';
 
 export function FrontendContent() {
-  const {
-    activeImage,
-    setActiveImage,
-    markdownContent,
-    setMarkdownContent,
-    frontendMessages,
-    setFrontendMessages,
-  } = useSharedContext();
-
+  const { frontendMessages, setFrontendMessages } = useChatStore();
   const {
     selectedFramework,
     setSelectedFramework,
@@ -50,46 +31,42 @@ export function FrontendContent() {
   } = useFrontendCode();
 
   const { parseResponse } = useCodeParser();
+  const [copiedStates, setCopiedStates] = React.useState<Record<string, boolean>>({});
 
   const { messages, isLoading, handleSendMessage, clearMessages } = useChatMessages({
     systemPrompt: getFrontendPrompt(selectedFramework),
     initialMessages: frontendMessages,
-    onMessagesChange: (newMessages) => {
+    onMessagesChange: React.useCallback((newMessages: Message[]) => {
       setFrontendMessages(newMessages);
-    },
-    onResponse: (content) => {
-      console.log('content', content);
+    }, [setFrontendMessages]),
+    onResponse: React.useCallback((content: string) => {
       const parsed = parseResponse(content, selectedFramework, 'frontend');
-
-      // Update code output if there are code blocks
       if (Object.keys(parsed.code).length > 0) {
         updateCodeOutput(parsed.code);
       }
-    },
+    }, [parseResponse, selectedFramework, updateCodeOutput]),
   });
 
-  const frameworkConfig = FRAMEWORK_OPTIONS.frontend.find((f) => f.value === selectedFramework)!;
-  const [copiedStates, setCopiedStates] = React.useState<Record<string, boolean>>({});
-
-  const handleFrameworkChange = (value: string) => {
+  const handleFrameworkChange = React.useCallback((value: string) => {
     setSelectedFramework(value);
-  };
+  }, [setSelectedFramework]);
 
-  const handleClearAll = () => {
+  const handleClearAll = React.useCallback(() => {
     clearMessages();
     clearCodeOutput();
-  };
+  }, [clearMessages, clearCodeOutput]);
 
-  const handleCopyCode = (type: string) => {
+  const handleCopyCode = React.useCallback((type: string) => {
     navigator.clipboard.writeText(codeOutput[type] || '');
-    setCopiedStates({ ...copiedStates, [type]: true });
-    setTimeout(() => setCopiedStates({ ...copiedStates, [type]: false }), 2000);
-  };
+    setCopiedStates((prev) => ({ ...prev, [type]: true }));
+    setTimeout(() => setCopiedStates((prev) => ({ ...prev, [type]: false })), 2000);
+  }, [codeOutput]);
+
+  const frameworkConfig = FRAMEWORK_OPTIONS.frontend.find((f) => f.value === selectedFramework)!;
 
   return (
     <div className="grid h-full gap-4 p-4 md:grid-cols-3 overflow-hidden">
       <SharedFirstColumn />
-
       <BaseChatInterface
         messages={messages}
         onSendMessage={handleSendMessage}

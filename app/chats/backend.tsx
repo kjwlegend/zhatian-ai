@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { useBackendCode } from '@/app/store/codeStore';
+import { useChatStore } from '@/app/store/chatStore';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BaseChatInterface } from './components/BaseChatInterface';
 import { ClearChatButton } from './components/ClearChatButton';
@@ -13,20 +14,11 @@ import {
 } from './components/FrameworkSelector';
 import { SharedFirstColumn } from './components/SharedFirstColumn';
 import { getBackendPrompt } from './constants/prompts';
-import { useSharedContext } from './contexts/SharedContext';
 import { useChatMessages } from './hooks/useChatMessages';
 import { useCodeParser } from './hooks/useCodeParser';
 
 export function BackendContent() {
-  const {
-    activeImage,
-    setActiveImage,
-    markdownContent,
-    setMarkdownContent,
-    backendMessages,
-    setBackendMessages,
-  } = useSharedContext();
-
+  const { backendMessages, setBackendMessages } = useChatStore();
   const {
     selectedFramework,
     setSelectedFramework,
@@ -38,38 +30,38 @@ export function BackendContent() {
   } = useBackendCode();
 
   const { parseResponse } = useCodeParser();
+  const [copiedStates, setCopiedStates] = React.useState<Record<string, boolean>>({});
 
   const { messages, isLoading, handleSendMessage, clearMessages } = useChatMessages({
     systemPrompt: getBackendPrompt(selectedFramework),
     initialMessages: backendMessages,
-    onMessagesChange: (newMessages) => {
+    onMessagesChange: React.useCallback((newMessages) => {
       setBackendMessages(newMessages);
-    },
-    onResponse: (content) => {
+    }, [setBackendMessages]),
+    onResponse: React.useCallback((content: string) => {
       const parsed = parseResponse(content, selectedFramework, 'backend');
       if (Object.keys(parsed.code).length > 0) {
         updateCodeOutput(parsed.code);
       }
-    },
+    }, [parseResponse, selectedFramework, updateCodeOutput]),
   });
 
-  const frameworkConfig = FRAMEWORK_OPTIONS.backend.find((f) => f.value === selectedFramework)!;
-  const [copiedStates, setCopiedStates] = React.useState<Record<string, boolean>>({});
-
-  const handleFrameworkChange = (value: string) => {
+  const handleFrameworkChange = React.useCallback((value: string) => {
     setSelectedFramework(value);
-  };
+  }, [setSelectedFramework]);
 
-  const handleClearAll = () => {
+  const handleClearAll = React.useCallback(() => {
     clearMessages();
     clearCodeOutput();
-  };
+  }, [clearMessages, clearCodeOutput]);
 
-  const handleCopyCode = (type: string) => {
+  const handleCopyCode = React.useCallback((type: string) => {
     navigator.clipboard.writeText(codeOutput[type] || '');
-    setCopiedStates({ ...copiedStates, [type]: true });
-    setTimeout(() => setCopiedStates({ ...copiedStates, [type]: false }), 2000);
-  };
+    setCopiedStates((prev) => ({ ...prev, [type]: true }));
+    setTimeout(() => setCopiedStates((prev) => ({ ...prev, [type]: false })), 2000);
+  }, [codeOutput]);
+
+  const frameworkConfig = FRAMEWORK_OPTIONS.backend.find((f) => f.value === selectedFramework)!;
 
   return (
     <div className="grid h-full gap-4 p-4 md:grid-cols-3 overflow-hidden">
