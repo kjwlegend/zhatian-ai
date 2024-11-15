@@ -1,3 +1,5 @@
+'use client';
+
 import { create } from 'zustand';
 import * as dbService from '../services/db';
 import { Component, Page, Project } from '../services/db/schema';

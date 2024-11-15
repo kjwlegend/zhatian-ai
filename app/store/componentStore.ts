@@ -1,3 +1,5 @@
+'use client';
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import * as componentsService from '@/app/services/db/componentsService';
@@ -40,7 +42,7 @@ export const useComponentStore = create<ComponentState>()(
 
       loadComponents: async () => {
         if (get().loading) return;
-        
+
         try {
           set({ loading: true, error: null });
           const data = await componentsService.getAllComponents();

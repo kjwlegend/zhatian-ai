@@ -1,52 +1,76 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import { NextResponse } from 'next/server';
 import { exec } from 'child_process';
+import fs from 'fs/promises';
+import path from 'path';
 import { promisify } from 'util';
-import { createDemoFiles } from '@/app/services/webpack/package-download';
+import { cleanupFiles, createDemoFiles } from '@/app/services/webpack/package-download';
 
 const execAsync = promisify(exec);
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Method Not Allowed' });
-  }
-  const { currentTopic, topicCode } = req.body;
-  console.error('Received in API:', { currentTopic, topicCode });
-
-  if (!currentTopic) {
-    return res.status(400).json({ message: 'Missing currentTopic in request body' });
-  }
+export async function POST(request: Request) {
+  let buildId: string | undefined;
 
   try {
-    // 使用传递过来的 topicCode
-    try {
-      await createDemoFiles(currentTopic, topicCode);
-    } catch (error) {
-      console.error('%c  createDemoFiles', 'background-image:color:transparent;color:red;');
-      console.error('🚀~ => ', error);
+    const body = await request.json();
+    const { componentName, frontendCode } = body;
+
+    if (!componentName || !frontendCode) {
+      return NextResponse.json(
+        { message: 'Missing required fields: componentName and frontendCode' },
+        { status: 400 }
+      );
     }
-    // 运行 build:packages 脚本
-    const { stdout, stderr } = await execAsync('pnpm run build:packages');
-    //  打包完成 successfully
-    console.error('%c stderr.includes ', 'background-image:color:transparent;color:red;');
-    console.error('🚀~ => ', stdout.includes('successfully'));
-    console.error('%c  ====================== ', 'background-image:color:transparent;color:red;');
 
-    console.error('🚀~ => ', stderr);
-    console.error('%c ====================== ', 'background-image:color:transparent;color:red;');
+    // 确保前端代码包含所需的文件
+    const requiredFiles = ['panel', 'vue', 'index'];
+    const missingFiles = requiredFiles.filter((file) => !frontendCode[file]);
 
-    console.error('🚀~ => ', stdout);
+    if (missingFiles.length > 0) {
+      return NextResponse.json(
+        { message: `Missing required files: ${missingFiles.join(', ')}` },
+        { status: 400 }
+      );
+    }
+
+    // 创建组件文件，获取构建ID
+    buildId = await createDemoFiles(componentName, frontendCode);
+
+    // 运行构建脚本
+    const { stdout, stderr } = await execAsync(
+      'ace light-build --project Gucci --main src/components/lightPage'
+    );
 
     if (stdout.includes('successfully')) {
-      console.log(`Build output: ${stdout}`);
-      return res.status(200).json({ message: 'Demo files created and package built successfully' });
+      // 读取打包后的文件
+      const distPath = path.join(process.cwd(), 'dist', 'pagebuilder', `${buildId}.js`);
+      const fileContent = await fs.readFile(distPath);
+
+      // 创建包含文件内容的 Response
+      const response = new NextResponse(fileContent);
+      response.headers.set('Content-Type', 'application/javascript');
+      response.headers.set('Content-Disposition', `attachment; filename="${componentName}.js"`);
+
+      // 下载完成后清理文件
+      // await cleanupFiles(buildId);
+
+      return response;
     }
+
     console.error(`Build error: ${stderr}`);
-    return res.status(500).json({ message: 'Error during build', error: stderr });
+    return NextResponse.json({ message: 'Error during build', error: stderr }, { status: 500 });
   } catch (error) {
-    console.error('Error during demo files creation or build:', error);
-    res.status(500).json({
-      message: 'Error during demo files creation or build',
-      error: error instanceof Error ? error.message : String(error),
-    });
+    // 确保在错误时也清理文件
+    if (buildId) {
+      // await cleanupFiles(buildId).catch(console.error);
+    }
+
+    console.error('Error during component files creation or build:', error);
+    return NextResponse.json(
+      {
+        message: 'Error during component files creation or build',
+        error: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 }
+    );
   }
 }

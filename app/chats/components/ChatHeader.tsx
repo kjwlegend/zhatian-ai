@@ -1,4 +1,7 @@
-import { ChevronRight, Home, Save } from 'lucide-react';
+import { ChevronRight, Home, RotateCcw, Save } from 'lucide-react';
+import { Component } from '@/app/services/db/schema';
+import { useCodeStore } from '@/app/store/codeStore';
+import { useComponentStore } from '@/app/store/componentStore';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,8 +13,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SaveProjectDialog } from './SaveProjectDialog';
-import { useComponentStore } from '@/app/store/componentStore';
-import { Component } from '@/app/services/db/schema';
 
 interface ChatHeaderProps {
   isModalOpen: boolean;
@@ -20,13 +21,20 @@ interface ChatHeaderProps {
 
 export function ChatHeader({ isModalOpen, setIsModalOpen }: ChatHeaderProps) {
   const addComponent = useComponentStore((state) => state.addComponent);
+  const clearAllCodeOutputs = useCodeStore((state) => state.clearAllCodeOutputs);
 
-  const handleSaveComponent = async (componentData: Omit<Component, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const handleSaveComponent = async (
+    componentData: Omit<Component, 'id' | 'createdAt' | 'updatedAt'>
+  ) => {
     try {
       await addComponent(componentData);
     } catch (error) {
       console.error('Failed to save component:', error);
     }
+  };
+
+  const handleReset = () => {
+    clearAllCodeOutputs();
   };
 
   return (
@@ -61,6 +69,10 @@ export function ChatHeader({ isModalOpen, setIsModalOpen }: ChatHeaderProps) {
       </TabsList>
 
       <div className="flex gap-2">
+        <Button variant="outline" onClick={handleReset} className="flex items-center gap-2">
+          <RotateCcw className="h-4 w-4" />
+          Reset
+        </Button>
         <Button
           variant="outline"
           onClick={() => setIsModalOpen(true)}

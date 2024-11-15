@@ -1,3 +1,5 @@
+'use client';
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { FRAMEWORK_OPTIONS } from '@/app/chats/components/FrameworkSelector';
@@ -75,7 +77,9 @@ export const useCodeStore = create<CodeState>()(
           },
           activeTabs: {
             ...state.activeTabs,
-            [type]: FRAMEWORK_OPTIONS[type].find((f) => f.value === framework)?.tabs[0] || state.activeTabs[type],
+            [type]:
+              FRAMEWORK_OPTIONS[type].find((f) => f.value === framework)?.tabs[0] ||
+              state.activeTabs[type],
           },
         })),
 
@@ -113,6 +117,8 @@ export const useCodeStore = create<CodeState>()(
             backend: {},
             test: {},
           },
+          designFile: null,
+          componentDoc: '',
         }),
 
       setActiveTab: (type, tab) =>

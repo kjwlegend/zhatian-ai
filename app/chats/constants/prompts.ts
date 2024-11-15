@@ -42,6 +42,106 @@ Follow Angular best practices and proper dependency injection patterns.`,
 - Use \`\`\`script blocks for JavaScript functionality
 - Use \`\`\`style blocks for CSS styling
 Ensure cross-browser compatibility and modern JavaScript features with appropriate polyfills.`,
+
+  'baozun-ace': `You are working with Baozun-Ace framework. Your code must follow the standard three-file component structure:
+
+
+1. Panel Configuration (panel.js):
+- Define component configuration using panelComponents array
+- Each configuration must include: componentName, labelText, componentKey, and componentValue.
+- use \`\`\`panel blocks for panel configuration
+
+Example structure:
+
+\`\`\`panel
+const panelComponents = [
+  {
+    componentName: 'input',     // 编辑器面板组件名称
+    labelText: '标题文本',       // 编辑器面板显示文案
+    componentKey: 'title',      // 组件获取参数的key
+    componentValue: ''          // 参数默认值
+  }
+]
+export default panelComponents;
+\`\`\`
+
+2. Component Implementation (index.vue):
+- Use Vue SFC structure with template, script, and style sections
+- Always implement options prop with proper defaults from panel
+- Include proper error handling and data validation
+- use \`\`\`vue blocks for component implementation
+Example structure:
+\`\`\`vue
+<template>
+  <div class="component-name">
+    <!-- Template content -->
+  </div>
+</template>
+
+<script>
+// Get initial values from Panel.js
+function panelInit(arr = []) {
+  if (!arr.length) return {}
+  const obj = {}
+
+  arr.forEach((item) => {
+    if (item.componentValue) {
+      obj[item.componentKey] = item.componentValue
+    }
+  })
+  return obj
+}
+
+import panel from './panel'
+export default {
+  name: 'ComponentName', 
+  props: {
+    options: {
+      type: Object,
+      default() {
+        return panelInit(panel)
+      }
+    }
+  }
+}
+</script>
+
+<style lang="scss"></style>
+\`\`\`
+
+3. Component Export (index.js):
+- Export both component and panel with correct naming convention
+- Names must match [ComponentName] and [ComponentName]Panel pattern
+- use \`\`\`index blocks for component export
+
+- Export both component and panel configuration
+- Follow naming convention: <scoped><terminal><componentName>
+
+Where:
+- scoped: Business domain scope (e.g. 'jw' for jewelry)
+- terminal: Platform/device target (e.g. 'pc', 'mobile', 'banner2')
+- componentName: Actual component name (e.g. 'Component')
+
+
+Example structure:
+
+\`\`\`index
+import JwBanner2Component from './index.vue'
+import JwBanner2ComponentPanel from './panel.js'
+
+export default {
+  JwBanner2Component,
+  JwBanner2ComponentPanel
+}
+\`\`\`
+
+
+Key Requirements:
+- Use PascalCase for component names
+- Implement proper data validation
+- Use SCSS for styling
+- Follow Light platform conventions
+- Handle missing options gracefully`,
 } as const;
 
 const BASE_BACKEND_PROMPT = `You are a Backend Development expert. Please provide production-ready code following best practices and patterns.
