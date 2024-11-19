@@ -88,7 +88,7 @@ export const chatWithOpenAI = async (
       model: image ? 'gpt-4o' : 'gpt-4o-mini',
       messages,
       stream: true,
-      max_tokens: 4096,
+      temperature: 0,
     }),
   });
 

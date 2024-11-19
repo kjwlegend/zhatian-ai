@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { chatWithOpenAI } from '@/app/services/openai';
-import { useSharedContext } from '../contexts/SharedContext';
+import { useCodeStore } from '@/app/store/codeStore';
 
 export interface Message {
   role: 'user' | 'assistant';
@@ -23,7 +23,7 @@ export function useChatMessages({
 }: UseChatMessagesProps) {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [isLoading, setIsLoading] = useState(false);
-  const { activeImage } = useSharedContext();
+  const { designFile } = useCodeStore();
 
   const clearMessages = useCallback(() => {
     setMessages([]);
@@ -40,8 +40,8 @@ export function useChatMessages({
         setIsLoading(true);
 
         let imageFile: File | undefined;
-        if (activeImage) {
-          const response = await fetch(activeImage);
+        if (designFile) {
+          const response = await fetch(designFile);
           const blob = await response.blob();
           imageFile = new File([blob], 'image.png', { type: blob.type });
         }
@@ -96,7 +96,7 @@ export function useChatMessages({
         setIsLoading(false);
       }
     },
-    [messages, systemPrompt, onResponse, activeImage]
+    [messages, systemPrompt, onResponse, designFile]
   );
 
   return {

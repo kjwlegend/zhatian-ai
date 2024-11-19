@@ -1,4 +1,4 @@
-import { initDB } from './index';
+import { db } from './index';
 import { ChatView } from './schema';
 
 const DEFAULT_VIEWS: ChatView[] = [
@@ -9,8 +9,8 @@ const DEFAULT_VIEWS: ChatView[] = [
 ];
 
 export async function initializeViews(): Promise<void> {
-  const db = await initDB();
-  const tx = db.transaction('views', 'readwrite');
+  const database = await db;
+  const tx = database.transaction('views', 'readwrite');
   const viewStore = tx.objectStore('views');
 
   for (const view of DEFAULT_VIEWS) {
@@ -21,13 +21,13 @@ export async function initializeViews(): Promise<void> {
 }
 
 export async function getView(id: string): Promise<ChatView | undefined> {
-  const db = await initDB();
-  return db.get('views', id);
+  const database = await db;
+  return database.get('views', id);
 }
 
 export async function getAllViews(): Promise<ChatView[]> {
-  const db = await initDB();
-  return db.getAll('views');
+  const database = await db;
+  return database.getAll('views');
 }
 
 // We don't need add, update, or delete methods for views anymore

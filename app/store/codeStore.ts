@@ -1,3 +1,5 @@
+'use client';
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { FRAMEWORK_OPTIONS } from '@/app/chats/components/FrameworkSelector';
@@ -19,6 +21,14 @@ interface CodeState {
   // Active tab state
   activeTabs: Record<CodeType, string>;
   setActiveTab: (type: CodeType, tab: string) => void;
+
+  // Component Doc state
+  componentDoc: string;
+  setComponentDoc: (doc: string) => void;
+
+  // Design File state
+  designFile: string | null;
+  setDesignFile: (file: string | null) => void;
 }
 
 const getInitialFramework = (type: CodeType) => {
@@ -55,13 +65,16 @@ export const useCodeStore = create<CodeState>()(
         test: getInitialTab('test'),
       },
 
+      // Initialize component doc and design file
+      componentDoc: '',
+      designFile: null,
+
       setSelectedFramework: (type, framework) =>
         set((state) => ({
           selectedFrameworks: {
             ...state.selectedFrameworks,
             [type]: framework,
           },
-          // Reset active tab when framework changes
           activeTabs: {
             ...state.activeTabs,
             [type]:
@@ -98,13 +111,15 @@ export const useCodeStore = create<CodeState>()(
         })),
 
       clearAllCodeOutputs: () =>
-        set((state) => ({
+        set({
           codeOutputs: {
             frontend: {},
             backend: {},
             test: {},
           },
-        })),
+          designFile: null,
+          componentDoc: '',
+        }),
 
       setActiveTab: (type, tab) =>
         set((state) => ({
@@ -113,6 +128,9 @@ export const useCodeStore = create<CodeState>()(
             [type]: tab,
           },
         })),
+
+      setComponentDoc: (doc) => set({ componentDoc: doc }),
+      setDesignFile: (file) => set({ designFile: file }),
     }),
     {
       name: 'code-storage',

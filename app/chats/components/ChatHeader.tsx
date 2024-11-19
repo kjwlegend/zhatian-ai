@@ -1,6 +1,7 @@
-import { useSharedContext } from '@/app/chats/contexts/SharedContext';
-import { useChatStore } from '@/app/store/chatStore';
-import { useBackendCode, useFrontendCode, useTestCode } from '@/app/store/codeStore';
+import { ChevronRight, Home, RotateCcw, Save } from 'lucide-react';
+import { Component } from '@/app/services/db/schema';
+import { useCodeStore } from '@/app/store/codeStore';
+import { useComponentStore } from '@/app/store/componentStore';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -11,8 +12,6 @@ import {
 } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
 import { TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ChevronRight, Home } from 'lucide-react';
-import * as React from 'react';
 import { SaveProjectDialog } from './SaveProjectDialog';
 
 interface ChatHeaderProps {
@@ -21,39 +20,21 @@ interface ChatHeaderProps {
 }
 
 export function ChatHeader({ isModalOpen, setIsModalOpen }: ChatHeaderProps) {
-  const addTopic = useChatStore((state) => state.addTopic);
-  const { activeImage, markdownContent, requirementMessages, frontendMessages, backendMessages, testMessages } = useSharedContext();
-  const { selectedFramework: frontendFramework } = useFrontendCode();
-  const { selectedFramework: backendFramework } = useBackendCode();
-  const { selectedFramework: testFramework } = useTestCode();
-  const [currentTab, setCurrentTab] = React.useState('requirement');
+  const addComponent = useComponentStore((state) => state.addComponent);
+  const clearAllCodeOutputs = useCodeStore((state) => state.clearAllCodeOutputs);
 
-  const handlePublish = async () => {
-    const topicId = Date.now().toString();
-    const title = 'Current Project';
-    const topicData = {
-      id: topicId,
-      title,
-      type: currentTab,
-      activeImage,
-      markdownContent,
-      requirementMessages,
-      frontend: {
-        frontendMessages,
-        frontendFramework
-      },
-      backend: {
-        backendMessages,
-        backendFramework
-      },
-      test: {
-        testMessages,
-        testFramework
-      },
-      lastUpdated: Date.now()
-    };
-    await addTopic(topicData);
-    console.log('Project published:', topicData);
+  const handleSaveComponent = async (
+    componentData: Omit<Component, 'id' | 'createdAt' | 'updatedAt'>
+  ) => {
+    try {
+      await addComponent(componentData);
+    } catch (error) {
+      console.error('Failed to save component:', error);
+    }
+  };
+
+  const handleReset = () => {
+    clearAllCodeOutputs();
   };
 
   return (
@@ -79,15 +60,35 @@ export function ChatHeader({ isModalOpen, setIsModalOpen }: ChatHeaderProps) {
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
+
       <TabsList className="grid w-[400px] grid-cols-4">
-        <TabsTrigger value="requirement" onClick={() => setCurrentTab('requirement')}>Requirement</TabsTrigger>
-        <TabsTrigger value="frontend" onClick={() => setCurrentTab('frontend')}>FE</TabsTrigger>
-        <TabsTrigger value="backend" onClick={() => setCurrentTab('backend')}>BE</TabsTrigger>
-        <TabsTrigger value="test" onClick={() => setCurrentTab('test')}>Test</TabsTrigger>
+        <TabsTrigger value="requirement">Requirement</TabsTrigger>
+        <TabsTrigger value="frontend">FE</TabsTrigger>
+        <TabsTrigger value="backend">BE</TabsTrigger>
+        <TabsTrigger value="test">Test</TabsTrigger>
       </TabsList>
+
       <div className="flex gap-2">
-        <SaveProjectDialog isOpen={isModalOpen} setIsOpen={setIsModalOpen} />
-        <Button onClick={handlePublish}>Publish</Button>
+        <Button variant="outline" onClick={handleReset} className="flex items-center gap-2">
+          <RotateCcw className="h-4 w-4" />
+          Reset
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center gap-2"
+        >
+          <Save className="h-4 w-4" />
+          Save Component
+        </Button>
+        {isModalOpen && (
+          <SaveProjectDialog
+            isOpen={isModalOpen}
+            setIsOpen={setIsModalOpen}
+            onSave={handleSaveComponent}
+          />
+        )}
+        <Button>Publish</Button>
       </div>
     </div>
   );

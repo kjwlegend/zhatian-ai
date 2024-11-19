@@ -53,6 +53,15 @@ export const FRAMEWORK_OPTIONS = {
         'style', // 样式
       ],
     },
+    {
+      value: 'baozun-ace',
+      label: 'Baozun-Ace',
+      tabs: [
+        'panel', // 面板配置
+        'vue', // Vue 组件
+        'index', // 入口文件
+      ],
+    },
   ],
   backend: [
     { value: 'node', label: 'Node.js', tabs: ['controller', 'model', 'service', 'route'] },
@@ -96,6 +105,12 @@ export function getLanguageByTab(tab: string): string {
     case 'view':
     case 'serializer':
       return 'python';
+    case 'panel':
+      return 'javascript';
+    case 'vue':
+      return 'vue';
+    case 'index':
+      return 'javascript';
     default:
       return 'typescript';
   }
