@@ -36,13 +36,7 @@ export async function POST(request: Request) {
     buildId = await createDemoFiles(componentName, frontendCode);
 
     // 运行构建脚本
-<<<<<<< HEAD
     const { stdout, stderr } = await execAsync('pnpm run build:packages');
-=======
-    const { stdout, stderr } = await execAsync(
-      'ace light-build --project Gucci --main src/components/lightPage'
-    );
->>>>>>> v1-dev
 
     if (stdout.includes('successfully')) {
       // 读取打包后的文件
