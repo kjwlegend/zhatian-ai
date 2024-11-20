@@ -94,7 +94,7 @@ function panelInit(arr = []) {
 
 import panel from './panel'
 export default {
-  name: 'ComponentName', 
+  name: 'ComponentName',
   props: {
     options: {
       type: Object,
@@ -106,7 +106,7 @@ export default {
 }
 </script>
 
-<style lang="scss" src="./componentName.scss"></style>
+<style lang="scss" src="./index.scss"></style>
 \`\`\`
 
 3. Component Export (index.js):

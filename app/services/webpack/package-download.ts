@@ -14,7 +14,7 @@ const FILES_MAP: Record<keyof CodeContent, string> = {
   panel: 'panel.js',
   vue: 'index.vue',
   index: 'index.js',
-  style: 'style.scss',
+  style: 'index.scss',
 };
 
 /**
@@ -55,6 +55,7 @@ export async function createDemoFiles(
       fs.writeFile(path.join(componentDir, FILES_MAP.index), codeContent.index),
       fs.writeFile(path.join(componentDir, FILES_MAP.panel), codeContent.panel),
       fs.writeFile(path.join(componentDir, FILES_MAP.vue), codeContent.vue),
+      fs.writeFile(path.join(componentDir, FILES_MAP.style), codeContent.style),
     ]);
 
     console.log(`Files written in directory ${directoryName}`);

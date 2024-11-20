@@ -34,9 +34,8 @@ export async function POST(request: Request) {
 
     // 创建组件文件，获取构建ID
     buildId = await createDemoFiles(componentName, frontendCode);
-
     // 运行构建脚本
-    const { stdout, stderr } = await execAsync('pnpm run build:packages');
+    const { stdout, stderr } = await execAsync('npm run build:packages');
 
     if (stdout.includes('successfully')) {
       // 读取打包后的文件
@@ -57,6 +56,8 @@ export async function POST(request: Request) {
     console.error(`Build error: ${stderr}`);
     return NextResponse.json({ message: 'Error during build', error: stderr }, { status: 500 });
   } catch (error) {
+    console.error('%c error ', 'background-image:color:transparent;color:red;');
+    console.error('🚀~ => ', error);
     // 确保在错误时也清理文件
     if (buildId) {
       // await cleanupFiles(buildId).catch(console.error);
