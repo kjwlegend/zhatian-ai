@@ -60,6 +60,7 @@ export const FRAMEWORK_OPTIONS = {
         'panel', // 面板配置
         'vue', // Vue 组件
         'index', // 入口文件
+        'style', // 样式
       ],
     },
   ],

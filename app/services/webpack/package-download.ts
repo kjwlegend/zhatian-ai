@@ -5,6 +5,7 @@ interface CodeContent {
   panel: string;
   vue: string;
   index: string;
+  style: string;
 }
 
 const buildPath = (...paths: string[]): string => path.join(process.cwd(), ...paths);
@@ -13,6 +14,7 @@ const FILES_MAP: Record<keyof CodeContent, string> = {
   panel: 'panel.js',
   vue: 'index.vue',
   index: 'index.js',
+  style: 'style.scss',
 };
 
 /**
