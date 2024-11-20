@@ -106,7 +106,7 @@ export default {
 }
 </script>
 
-<style lang="scss"></style>
+<style lang="scss" src="./componentName.scss"></style>
 \`\`\`
 
 3. Component Export (index.js):
@@ -133,6 +133,15 @@ export default {
   JwBanner2Component,
   JwBanner2ComponentPanel
 }
+
+4. Component Styling (style.scss):
+- Use SCSS for styling
+- Use \`\`\`style blocks for component styling
+
+Example structure:
+
+\`\`\`style
+/* Your SCSS styling here */
 \`\`\`
 
 
