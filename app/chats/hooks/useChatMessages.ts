@@ -23,7 +23,7 @@ export function useChatMessages({
 }: UseChatMessagesProps) {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [isLoading, setIsLoading] = useState(false);
-  const { designFile } = useCodeStore();
+  const { designFile, componentDoc } = useCodeStore();
 
   const clearMessages = useCallback(() => {
     setMessages([]);
@@ -67,6 +67,7 @@ export function useChatMessages({
         await chatWithOpenAI(
           message,
           history,
+          componentDoc,
           systemPrompt,
           (partialResponse) => {
             setMessages((prev) => {

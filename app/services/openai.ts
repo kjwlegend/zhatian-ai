@@ -38,6 +38,7 @@ async function convertImageToBase64(file: File): Promise<string> {
 export const chatWithOpenAI = async (
   message: string,
   history: Message[],
+  componentDoc: string,
   systemPrompt: string,
   onPartialResponse: (content: string) => void,
   image?: File
@@ -46,6 +47,10 @@ export const chatWithOpenAI = async (
     {
       role: 'system',
       content: systemPrompt,
+    },
+    {
+      role: 'user',
+      content: 'Please use the following component documentation to help you answer the question: ' + componentDoc,
     },
     ...history.map((msg) => ({
       role: msg.role,
