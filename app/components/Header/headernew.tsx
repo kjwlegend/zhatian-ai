@@ -11,6 +11,7 @@ import {
   MessageCircle,
   Users,
 } from 'lucide-react';
+import Image from 'next/image';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -56,19 +57,7 @@ export default function Header({ user = null }: { user?: { name: string; image: 
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-4">
             <Link href="/" className="flex-shrink-0">
-              <svg
-                className="h-8 w-8 text-primary"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 10V3L4 14h7v7l9-11h-7z"
-                />
-              </svg>
+              <Image src="/logo.png" alt="Logo" width={120} height={40} />
             </Link>
             <nav className="hidden md:flex md:space-x-4">
               {navItems.map((item) => (
