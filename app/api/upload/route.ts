@@ -15,16 +15,23 @@ async function handle(req: NextRequest) {
 		const file = formData.get("file") as File; // 处理任意类型的文件
 		const folderName = formData.get("folderName") as string | undefined;
 		console.log(formData);
+
+		// 使用更高效的方式处理文件数据
+		const chunks: Uint8Array[] = [];
 		const fileReader = file.stream().getReader();
-		const fileData: number[] = [];
-
-		while (true) {
-			const { done, value } = await fileReader.read();
-			if (done) break;
-			fileData.push(...value);
+		
+		try {
+			while (true) {
+				const { done, value } = await fileReader.read();
+				if (done) break;
+				chunks.push(value);
+			}
+		} finally {
+			fileReader.releaseLock();
 		}
-
-		const buffer = Buffer.from(fileData);
+		
+		// 使用 Buffer.concat 更高效地合并数据
+		const buffer = Buffer.concat(chunks);
 		const fileName = `${Date.now()}_${file.name}`; // 使用原文件名
 
 		console.log("fileName: ", fileName);
