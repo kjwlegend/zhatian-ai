@@ -2,9 +2,9 @@ import axios from 'axios';
 import { createParser, ParsedEvent, ReconnectInterval } from 'eventsource-parser';
 
 const openaiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_OPENAI_API_URL,
+  baseURL: process.env.OPENAI_API_URL,
   headers: {
-    Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`,
+    Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
     'Content-Type': 'application/json',
   },
 });
@@ -41,7 +41,7 @@ export const chatWithOpenAI = async (
   componentDoc: string,
   systemPrompt: string,
   onPartialResponse: (content: string) => void,
-  image?: File
+  image?: string
 ) => {
   let messages: Message[] = [
     {
@@ -58,9 +58,7 @@ export const chatWithOpenAI = async (
     })),
   ];
 
-  // Handle the latest message with potential image
   if (image) {
-    const base64Image = await convertImageToBase64(image);
     messages.push({
       role: 'user',
       content: [
@@ -71,7 +69,7 @@ export const chatWithOpenAI = async (
         {
           type: 'image_url',
           image_url: {
-            url: base64Image,
+            url: image,
           },
         },
       ],
@@ -83,17 +81,14 @@ export const chatWithOpenAI = async (
     });
   }
 
-  const response = await fetch(`${process.env.NEXT_PUBLIC_OPENAI_API_URL}/chat/completions`, {
+  const response = await fetch('/api/openai', {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: image ? 'gpt-4o' : 'gpt-4o-mini',
       messages,
-      stream: true,
-      temperature: 0,
+      image: !!image,
     }),
   });
 

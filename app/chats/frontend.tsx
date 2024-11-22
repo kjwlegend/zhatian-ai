@@ -45,6 +45,7 @@ export function FrontendContent() {
         updateCodeOutput(parsed.code);
       }
     }, [parseResponse, selectedFramework, updateCodeOutput]),
+    api: selectedFramework === 'baozun-ace' ? 'dify' : 'openai'
   });
 
   const handleFrameworkChange = React.useCallback((value: string) => {

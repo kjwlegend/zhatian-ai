@@ -83,7 +83,7 @@ class Request {
 
     async httpFactory<T>({ url = '', params = {}, method }: Props): Promise<T> {
         const req = this.interceptorsRequest({
-            url: process.env.NEXT_PUBLIC_BASEURL + url,
+            url: process.env.BASEURL + url,
             method,
             params: params.params,
             cacheTime: params.cacheTime,

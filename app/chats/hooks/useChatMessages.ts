@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { chatWithOpenAI } from '@/app/services/openai';
 import { useCodeStore } from '@/app/store/codeStore';
+import { chatWithDify } from '@/app/services/dify';
 
 export interface Message {
   role: 'user' | 'assistant';
@@ -13,6 +14,7 @@ interface UseChatMessagesProps {
   initialMessages?: Message[];
   onMessagesChange?: (messages: Message[]) => void;
   onResponse?: (response: string) => void;
+  api?: 'openai' | 'dify';
 }
 
 export function useChatMessages({
@@ -20,14 +22,17 @@ export function useChatMessages({
   initialMessages = [],
   onMessagesChange,
   onResponse,
+  api = 'openai',
 }: UseChatMessagesProps) {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [isLoading, setIsLoading] = useState(false);
   const { designFile, componentDoc } = useCodeStore();
+  const [conversationId, setConversationId] = useState<string | undefined>(undefined);
 
   const clearMessages = useCallback(() => {
     setMessages([]);
     onMessagesChange?.([]);
+    setConversationId(undefined);
   }, [onMessagesChange]);
 
   useEffect(() => {
@@ -39,11 +44,9 @@ export function useChatMessages({
       try {
         setIsLoading(true);
 
-        let imageFile: File | undefined;
+        let imageFile: string | undefined;
         if (designFile) {
-          const response = await fetch(designFile);
-          const blob = await response.blob();
-          imageFile = new File([blob], 'image.png', { type: blob.type });
+          imageFile = designFile;
         }
 
         const userMessage: Message = {
@@ -64,26 +67,53 @@ export function useChatMessages({
           content: msg.content,
         }));
 
-        await chatWithOpenAI(
-          message,
-          history,
-          componentDoc,
-          systemPrompt,
-          (partialResponse) => {
-            setMessages((prev) => {
-              const newMessages = [...prev];
-              const lastMessage = newMessages[newMessages.length - 1];
-              if (lastMessage.role === 'assistant') {
-                lastMessage.content = partialResponse;
-                lastMessage.isLoading = false;
-              }
-              return newMessages;
-            });
-
-            onResponse?.(partialResponse);
-          },
-          imageFile
-        );
+        if (api === 'dify') {
+          const inputs = {
+            designFile: designFile,
+            componentDoc: componentDoc,
+          };
+          await chatWithDify(
+            message,
+            inputs,
+            (partialResponse) => {
+              setMessages((prev) => {
+                const newMessages = [...prev];
+                const lastMessage = newMessages[newMessages.length - 1];
+                if (lastMessage.role === 'assistant') {
+                  lastMessage.content = partialResponse;
+                  lastMessage.isLoading = false;
+                }
+                return newMessages;
+              });
+              onResponse?.(partialResponse);
+            },
+            (content, conversationId) => {
+              setConversationId(conversationId);
+            },
+            conversationId,
+            imageFile
+          );
+        } else {
+          await chatWithOpenAI(
+            message,
+            history,
+            componentDoc,
+            systemPrompt,
+            (partialResponse) => {
+              setMessages((prev) => {
+                const newMessages = [...prev];
+                const lastMessage = newMessages[newMessages.length - 1];
+                if (lastMessage.role === 'assistant') {
+                  lastMessage.content = partialResponse;
+                  lastMessage.isLoading = false;
+                }
+                return newMessages;
+              });
+              onResponse?.(partialResponse);
+            },
+            imageFile
+          );
+        }
       } catch (error) {
         console.error('Error in handleSendMessage:', error);
         setMessages((prev) => [
