@@ -36,10 +36,11 @@ export async function POST(request: Request) {
     buildId = await createDemoFiles(componentName, frontendCode);
     // 运行构建脚本
     const { stdout, stderr } = await execAsync('npm run build:packages');
-
-    if (stdout.includes('successfully')) {
+    console.error('%c stdout ', 'background-image:color:transparent;color:red;');
+    console.error('🚀~ => ', stdout);
+    if (!stdout.includes('ERROR')) {
       // 读取打包后的文件
-      const distPath = path.join(process.cwd(), 'dist', 'pagebuilder', `${buildId}.js`);
+      const distPath = path.join(process.cwd(), 'dist',  `${buildId}.js`);
       const fileContent = await fs.readFile(distPath);
 
       // 创建包含文件内容的 Response

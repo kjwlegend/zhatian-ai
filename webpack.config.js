@@ -5,13 +5,20 @@ const webpackMerge = require('webpack-merge'); // 使用解构导入
 
 // 读取 components-light 目录下的文件
 const componentsDir = path.join(process.cwd(), 'src', 'components', 'lightPage');
-// const componentsDir = path.resolve(__dirname, 'components-light');
-console.error('%c  componentsDir', 'background-image:color:transparent;color:red;');
-console.error('🚀~ => ', componentsDir);
 const components = fs.readdirSync(componentsDir)
     .filter(file => fs.statSync(path.join(componentsDir, file)).isDirectory());
-console.error('%c components ', 'background-image:color:transparent;color:red;');
-console.error('🚀~ => ', components);
+
+class BuildWebpackPlugin {
+    apply(compiler) {
+        compiler.hooks.done.tap('BuildWebpackPlugin', (stats) => {
+            if (stats.hasErrors()) {
+                console.error('FAILED_BUILD'); // 处理构建失败逻辑
+            } else {
+                console.error('SUCCESSFUL_BUILD'); // 处理构建成功逻辑
+            }
+        });
+    }
+}
 
 // 基础配置
 const baseConfig = {
@@ -62,7 +69,7 @@ const baseConfig = {
             },
         ]
     },
-    plugins: [new VueLoaderPlugin()],
+    plugins: [new VueLoaderPlugin(), new BuildWebpackPlugin()],
     optimization: {
         minimize: true,
     },
