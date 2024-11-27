@@ -48,11 +48,11 @@ export function ComponentCard({
     <Card>
       <CardContent className="p-4">
         <img
-          src={component.thumbnail}
+          src={component.designFile ? component.designFile : component.thumbnail}
           alt={component.name}
           className="w-full h-32 object-cover mb-2"
         />
-        <h2 className="text-lg font-semibold">{component.name}</h2>
+        <h2 className="text-lg font-semibold">{component.name} </h2>
         <div className="flex flex-wrap gap-1 my-2">
           {component.tags.map((tag) => (
             <Badge key={tag} variant="secondary">
@@ -72,6 +72,7 @@ export function ComponentCard({
           </Badge>
         </div>
         <div className="mt-2 text-sm text-gray-600">Framework: {component.codeFramework}</div>
+        <div className="text-xs text-gray-600">Updated: {new Date(component.updatedAt).toLocaleDateString() + ' ' + new Date(component.updatedAt).toLocaleTimeString()}</div>
       </CardContent>
       <CardFooter className="flex justify-between">
         <Dialog open={isEditing} onOpenChange={onEditingChange}>

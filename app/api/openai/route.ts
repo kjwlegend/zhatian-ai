@@ -12,7 +12,7 @@ export async function POST(req: Request) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: image ? 'gpt-4o' : 'gpt-4o-mini',
+        model:  'gpt-4o' ,
         messages,
         stream: true,
         temperature: 0,

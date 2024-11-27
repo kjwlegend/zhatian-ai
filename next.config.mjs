@@ -30,6 +30,10 @@ export default withBundleAnalyzer({
       {
         protocol: 'https',
         hostname: 'placehold.co',
+      },
+      {
+        protocol: 'https',
+        hostname: 'xiaoguangai.oss-cn-shanghai.aliyuncs.com',
       }
     ],
   },

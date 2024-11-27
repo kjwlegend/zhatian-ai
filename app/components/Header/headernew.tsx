@@ -39,10 +39,10 @@ const navItems: NavItem[] = [
     icon: <LayoutDashboard className="mr-2 h-4 w-4" />,
   },
   {
-    href: '/library',
+    href: '/market-place',
     label: '组件市场',
     icon: <Library className="mr-2 h-4 w-4" />,
-    disabled: true,
+    // disabled: true,
   },
   { href: '/doc', label: '使用说明', icon: <FileText className="mr-2 h-4 w-4" /> },
   { href: '/founders', label: '创始人', icon: <Users className="mr-2 h-4 w-4" /> },

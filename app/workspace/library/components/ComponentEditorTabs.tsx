@@ -50,7 +50,7 @@ export function ComponentEditorTabs({
       <div className="flex gap-6">
         <div className="w-1/3">
           <Image
-            src={editedComponent.thumbnail}
+            src={editedComponent.designFile ? editedComponent.designFile : editedComponent.thumbnail}
             alt={editedComponent.name}
             width={300}
             height={200}
