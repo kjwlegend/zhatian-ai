@@ -29,6 +29,12 @@ interface CodeState {
   // Design File state
   designFile: string | null;
   setDesignFile: (file: string | null) => void;
+
+  // CMS state
+  cmsCode: Record<string, string>;
+  setCmsCode: (code: Record<string, string>) => void;
+  updateCmsCode: (code: Record<string, string>) => void;
+  clearCmsCode: () => void;
 }
 
 const getInitialFramework = (type: CodeType) => {
@@ -68,6 +74,9 @@ export const useCodeStore = create<CodeState>()(
       // Initialize component doc and design file
       componentDoc: '',
       designFile: null,
+
+      // Initialize CMS code
+      cmsCode: {},
 
       setSelectedFramework: (type, framework) =>
         set((state) => ({
@@ -119,6 +128,7 @@ export const useCodeStore = create<CodeState>()(
           },
           designFile: null,
           componentDoc: '',
+          cmsCode: {},
         }),
 
       setActiveTab: (type, tab) =>
@@ -131,6 +141,9 @@ export const useCodeStore = create<CodeState>()(
 
       setComponentDoc: (doc) => set({ componentDoc: doc }),
       setDesignFile: (file) => set({ designFile: file }),
+      setCmsCode: (code) => set({ cmsCode: code }),
+      updateCmsCode: (code) => set({ cmsCode: code }),
+      clearCmsCode: () => set({ cmsCode: {} }),
     }),
     {
       name: 'code-storage',
@@ -177,3 +190,17 @@ export const useTestCode = () => {
     setActiveTab: (tab: string) => store.setActiveTab('test', tab),
   };
 };
+
+export const useCmsCode = create<{
+  codeOutput: Record<string, string>;
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+  updateCodeOutput: (code: Record<string, string>) => void;
+  clearCodeOutput: () => void;
+}>((set) => ({
+  codeOutput: {},
+  activeTab: 'gutenberg',
+  setActiveTab: (tab) => set({ activeTab: tab }),
+  updateCodeOutput: (code) => set({ codeOutput: code }),
+  clearCodeOutput: () => set({ codeOutput: {} }),
+}));

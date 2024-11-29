@@ -37,6 +37,18 @@ export default function WorkspaceLayout({
           >
             Component Library
           </Link>
+
+          <Link
+            href="/workspace/page-manage"
+            className={cn(
+              "px-4 py-2 hover:text-primary transition-colors",
+              pathname === '/workspace/page-manage'
+                ? "border-b-2 border-primary text-primary"
+                : "text-muted-foreground"
+            )}
+          >
+            Page Manage
+          </Link>
         </nav>
         {children}
       </div>

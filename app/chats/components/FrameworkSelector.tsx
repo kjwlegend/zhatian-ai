@@ -74,6 +74,9 @@ export const FRAMEWORK_OPTIONS = {
     { value: 'cypress', label: 'Cypress', tabs: ['e2e', 'component'] },
     { value: 'playwright', label: 'Playwright', tabs: ['e2e', 'api'] },
   ],
+  cms: [
+    { value: 'wordpress', label: 'WordPress', tabs: ['html'] },
+  ],
 } as const;
 
 export function getLanguageByTab(tab: string): string {

@@ -8,6 +8,7 @@ interface ChatState {
   frontendMessages: Message[];
   backendMessages: Message[];
   testMessages: Message[];
+  cmsMessages: Message[];
 
   // Framework 选择
   frontendFramework: string | null;
@@ -19,6 +20,7 @@ interface ChatState {
   setFrontendMessages: (messages: Message[]) => void;
   setBackendMessages: (messages: Message[]) => void;
   setTestMessages: (messages: Message[]) => void;
+  setCmsMessages: (messages: Message[]) => void;
 
   setFrontendFramework: (framework: string | null) => void;
   setBackendFramework: (framework: string | null) => void;
@@ -36,6 +38,7 @@ export const useChatStore = create<ChatState>()(
       frontendMessages: [],
       backendMessages: [],
       testMessages: [],
+      cmsMessages: [],
       frontendFramework: null,
       backendFramework: null,
       testFramework: null,
@@ -52,6 +55,9 @@ export const useChatStore = create<ChatState>()(
       
       setTestMessages: (messages) => 
         set({ testMessages: messages }),
+      
+      setCmsMessages: (messages) => 
+        set({ cmsMessages: messages }),
 
       setFrontendFramework: (framework) => 
         set({ frontendFramework: framework }),
@@ -68,6 +74,7 @@ export const useChatStore = create<ChatState>()(
         frontendMessages: [],
         backendMessages: [],
         testMessages: [],
+        cmsMessages: [],
         frontendFramework: null,
         backendFramework: null,
         testFramework: null,

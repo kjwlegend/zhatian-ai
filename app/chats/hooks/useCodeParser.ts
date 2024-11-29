@@ -9,7 +9,7 @@ export interface ParsedResponse {
   explanation?: string;
 }
 
-export type CodeType = 'frontend' | 'backend' | 'test';
+export type CodeType = 'frontend' | 'backend' | 'test' | 'cms';
 
 export function useCodeParser() {
   const parseResponse = (content: string, framework: string, type: CodeType): ParsedResponse => {

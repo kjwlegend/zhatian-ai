@@ -83,6 +83,10 @@ export interface ChatTopic {
     testMessages: Message[];
     testFramework: string | null;
   };
+  cms: {
+    cmsMessages: Message[];
+    cmsFramework: string | null;
+  };
 }
 
 export interface ChatView {

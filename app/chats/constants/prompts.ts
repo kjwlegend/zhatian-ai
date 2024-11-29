@@ -294,6 +294,147 @@ Follow Cypress best practices, including proper selector usage, custom commands,
 Follow Playwright best practices, including proper selector usage, fixtures, and parallel testing.`,
 } as const;
 
+
+export const WORDPRESS_PROMPT = `
+请作为一个 WordPress 页面构建专家，根据以下需求生成完整的区块标记代码：
+
+技术环境：
+1. WordPress Gutenberg 核心区块
+2. Elementor 页面构建器（如需要）
+3. Kadence Blocks（如已安装）
+
+目标页面描述：
+[在这里描述你想要的页面布局和内容]
+
+区块类型选择指南：
+1. 基础内容区块（Gutenberg）：
+   - 段落、标题、列表
+   - 图片和图库
+   - 按钮和链接
+   
+2. 布局区块（优先使用）：
+   - Gutenberg 列布局
+   - Kadence 行布局
+   - Group 和 Stack 布局
+
+
+请作为一个 WordPress Gutenberg 区块编辑器专家，根据以下需求生成完整的区块标记代码：
+
+目标页面描述：
+[在这里描述你想要的页面布局和内容]
+
+要求：
+1. 使用 WordPress Gutenberg 区块标记语法（HTML 注释格式）
+2. 代码需包含完整的属性配置（包括但不限于：布局、间距、响应式设置等）
+3. 对于图片内容：
+   - 优先使用 https://picsum.photos/ 作为占位图（例如：https://picsum.photos/800/600）
+
+4. 响应式设计要求：
+   - 需包含桌面端、平板端、移动端的适配
+   - 明确指定不同设备下的间距、字体大小等属性
+
+5. 支持 Elementor 主题的高级布局区块
+   - 复杂交互效果
+   - 高级动画
+   - 特殊布局需求
+
+输出格式要求：
+1. 按照区块嵌套层级进行适当的代码缩进
+2. 每个主要区块都需要添加注释说明其用途
+3. 确保所有区块都有正确的开始和结束标记
+4. 属性配置需要采用合理的换行和格式化
+
+支持的核心区块和功能：
+- 标准区块（段落、标题、图片等）
+- 布局区块（列、组、媒体文本等）
+- Kadence 主题区块（如果需要）
+- 其他特定主题或插件的区块（请指定）
+
+示例参考：
+\`\`\`html
+<!-- wp:heading {"textAlign":"center","style":{"typography":{"fontSize":"42px","fontWeight":"500","letterSpacing":"1px"},"spacing":{"margin":{"bottom":"60px"}}}} -->
+<h2 class="has-text-align-center">GUCCI服务</h2>
+<!-- /wp:heading -->
+
+<!-- wp:columns {"align":"wide","style":{"spacing":{"padding":{"top":"4em","bottom":"4em"},"blockGap":"3em"}}} -->
+<div class="wp-block-columns alignwide">
+    <!-- wp:column -->
+    <div class="wp-block-column">
+        <!-- wp:image {"align":"center","sizeSlug":"large"} -->
+        <figure class="wp-block-image aligncenter size-large">
+            <img src="https://picsum.photos/600/600?random=1" alt="Gucci包装与赠礼"/>
+        </figure>
+        <!-- /wp:image -->
+
+        <!-- wp:heading {"textAlign":"center","level":3,"style":{"typography":{"fontSize":"28px","fontWeight":"500","letterSpacing":"0.5px"},"spacing":{"margin":{"bottom":"20px"}}}} -->
+        <h3 class="has-text-align-center">包装与赠礼</h3>
+        <!-- /wp:heading -->
+
+        <!-- wp:paragraph {"align":"center","style":{"typography":{"fontSize":"16px","lineHeight":"1.8"},"spacing":{"margin":{"bottom":"30px"}}}} -->
+        <p class="has-text-align-center">品牌假日限定包装将让您的礼品更加别致，是提升礼品魅力的理想之选。</p>
+        <!-- /wp:paragraph -->
+
+        <!-- wp:paragraph {"align":"center","style":{"typography":{"fontSize":"14px","textDecoration":"underline"},"elements":{"link":{"color":{"text":"var:preset|color|black"}}}},"className":"gucci-link"} -->
+        <p class="has-text-align-center gucci-link"><a href="#">了解Gucci包装</a></p>
+        <!-- /wp:paragraph -->
+    </div>
+    <!-- /wp:column -->
+
+    <!-- wp:column -->
+    <div class="wp-block-column">
+        <!-- wp:image {"align":"center","sizeSlug":"large"} -->
+        <figure class="wp-block-image aligncenter size-large">
+            <img src="https://picsum.photos/600/600?random=2" alt="Gucci个性化定制"/>
+        </figure>
+        <!-- /wp:image -->
+
+        <!-- wp:heading {"textAlign":"center","level":3,"style":{"typography":{"fontSize":"28px","fontWeight":"500","letterSpacing":"0.5px"},"spacing":{"margin":{"bottom":"20px"}}}} -->
+        <h3 class="has-text-align-center">个性化定制</h3>
+        <!-- /wp:heading -->
+
+        <!-- wp:paragraph {"align":"center","style":{"typography":{"fontSize":"16px","lineHeight":"1.8"},"spacing":{"margin":{"bottom":"30px"}}}} -->
+        <p class="has-text-align-center">在部分包袋、旅行箱包、腰带、皮革配饰和宠物系列商品上压印姓名首字母，打造您的专属礼物。</p>
+        <!-- /wp:paragraph -->
+
+        <!-- wp:paragraph {"align":"center","style":{"typography":{"fontSize":"14px","textDecoration":"underline"},"elements":{"link":{"color":{"text":"var:preset|color|black"}}}},"className":"gucci-link"} -->
+        <p class="has-text-align-center gucci-link"><a href="#">了解所有选项</a></p>
+        <!-- /wp:paragraph -->
+    </div>
+    <!-- /wp:column -->
+
+    <!-- wp:column -->
+    <div class="wp-block-column">
+        <!-- wp:image {"align":"center","sizeSlug":"large"} -->
+        <figure class="wp-block-image aligncenter size-large">
+            <img src="https://picsum.photos/600/600?random=3" alt="Gucci预约服务"/>
+        </figure>
+        <!-- /wp:image -->
+
+        <!-- wp:heading {"textAlign":"center","level":3,"style":{"typography":{"fontSize":"28px","fontWeight":"500","letterSpacing":"0.5px"},"spacing":{"margin":{"bottom":"20px"}}}} -->
+        <h3 class="has-text-align-center">预约</h3>
+        <!-- /wp:heading -->
+
+        <!-- wp:paragraph {"align":"center","style":{"typography":{"fontSize":"16px","lineHeight":"1.8"},"spacing":{"margin":{"bottom":"30px"}}}} -->
+        <p class="has-text-align-center">在您选择合适的时间和日期到您选择的门店先选先购商品。我们的客户顾问将引导您浏览甄选单品，协助您找到适合的贴心好礼。</p>
+        <!-- /wp:paragraph -->
+
+        <!-- wp:paragraph {"align":"center","style":{"typography":{"fontSize":"14px","textDecoration":"underline"},"elements":{"link":{"color":{"text":"var:preset|color|black"}}}},"className":"gucci-link"} -->
+        <p class="has-text-align-center gucci-link"><a href="#">门店预约</a></p>
+        <!-- /wp:paragraph -->
+    </div>
+    <!-- /wp:column -->
+</div>
+<!-- /wp:columns -->
+
+
+\`\`\`
+
+特殊要求：
+1. 使用 Elementor 主题的高级布局区块
+2. 所有图片需使用 picsum.photos
+3. 确保移动端良好显示
+`;
+
 export function getFrontendPrompt(framework: string): string {
   return `${BASE_FRONTEND_PROMPT}
 
@@ -322,3 +463,6 @@ Current Framework: ${framework.toUpperCase()}
 Please ensure all test examples follow ${framework.toUpperCase()} best practices.
 Focus on test coverage, maintainability, and reliability.`;
 }
+
+
+

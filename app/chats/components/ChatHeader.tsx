@@ -61,11 +61,12 @@ export function ChatHeader({ isModalOpen, setIsModalOpen }: ChatHeaderProps) {
         </BreadcrumbList>
       </Breadcrumb>
 
-      <TabsList className="grid w-[400px] grid-cols-4">
+      <TabsList className="grid w-[ 00px] grid-cols-5">
         <TabsTrigger value="requirement">Requirement</TabsTrigger>
         <TabsTrigger value="frontend">FE</TabsTrigger>
         <TabsTrigger value="backend">BE</TabsTrigger>
         <TabsTrigger value="test">Test</TabsTrigger>
+        <TabsTrigger value="cms">CMS</TabsTrigger>
       </TabsList>
 
       <div className="flex gap-2">
