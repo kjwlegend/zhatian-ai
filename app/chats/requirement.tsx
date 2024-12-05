@@ -21,13 +21,13 @@ export function RequirementContent() {
     systemPrompt: REQUIREMENT_SYSTEM_PROMPT,
     initialMessages: requirementMessages,
     onMessagesChange: React.useCallback(
-      (newMessages) => {
+      (newMessages: any) => {
         setRequirementMessages(newMessages);
       },
       [setRequirementMessages]
     ),
     onResponse: React.useCallback(
-      (content) => {
+      (content: any) => {
         const parsedContent = parseContent(content);
         if (parsedContent) {
           setComponentDoc(parsedContent);

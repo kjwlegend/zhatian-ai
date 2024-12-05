@@ -1,12 +1,10 @@
-// 'use client';
-
 import React from 'react';
-import AppLayout from './components/AppLayout/AppLayout';
 
 import './styles/global.scss';
 
 import { MantineProvider } from '@mantine/core';
 import { Toaster } from '@/components/ui/toaster';
+import { DefaultLayout } from './components/DefaultLayout';
 
 export const metadata = {
   title: '下一代吊炸天的网站加小程序页面自然语言一站式生成系统',
@@ -25,7 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <MantineProvider>
-          <AppLayout>{children}</AppLayout>
+          <DefaultLayout>{children}</DefaultLayout>
           <Toaster />
         </MantineProvider>
       </body>

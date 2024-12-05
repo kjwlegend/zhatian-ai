@@ -80,7 +80,16 @@ export function ChatInterface({ messages, onSendMessage }: ChatInterfaceProps) {
                         )}
                         components={{
                           // 自定义代码块样式
-                          code({ node, inline, className, children, ...props }) {
+                          code({
+                            node,
+                            inline,
+                            className,
+                            children,
+                            ...props
+                          }: React.ComponentPropsWithoutRef<'code'> & {
+                            inline?: boolean;
+                            node?: any;
+                          }) {
                             return (
                               <code
                                 className={cn(

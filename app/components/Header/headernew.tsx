@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -11,7 +12,6 @@ import {
   MessageCircle,
   Users,
 } from 'lucide-react';
-import Image from 'next/image';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -33,6 +33,8 @@ type NavItem = {
 const navItems: NavItem[] = [
   { href: '/about', label: '介绍', icon: <HelpCircle className="mr-2 h-4 w-4" /> },
   { href: '/chats', label: '聊天', icon: <MessageCircle className="mr-2 h-4 w-4" /> },
+  { href: '/bd', label: 'BD助手', icon: <MessageCircle className="mr-2 h-4 w-4" /> },
+
   {
     href: '/workspace',
     label: '工作区',
@@ -44,7 +46,7 @@ const navItems: NavItem[] = [
     icon: <Library className="mr-2 h-4 w-4" />,
     // disabled: true,
   },
-  { href: '/doc', label: '使用说明', icon: <FileText className="mr-2 h-4 w-4" /> },
+  { href: '/faq', label: '常见问题', icon: <FileText className="mr-2 h-4 w-4" /> },
   { href: '/founders', label: '创始人', icon: <Users className="mr-2 h-4 w-4" /> },
 ];
 

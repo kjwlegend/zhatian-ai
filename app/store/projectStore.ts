@@ -1,98 +1,142 @@
 'use client';
 
 import { create } from 'zustand';
-import * as dbService from '../services/db';
-import { Component, Page, Project } from '../services/db/schema';
+import { Project, ProjectSummary } from '@/app/workspace/projects/types/project';
+import { openChatDB } from '../services/db';
 
-interface ProjectStore {
+interface ProjectState {
+  projects: ProjectSummary[];
   currentProject: Project | null;
-  projects: Project[];
-  pages: Page[];
-  components: { [pageId: string]: Component[] };
+  isLoading: boolean;
+  error: Error | null;
 
-  // Project actions
-  loadProjects: () => Promise<void>;
-  addProject: (project: Omit<Project, 'id' | 'createdAt' | 'lastUpdated'>) => Promise<void>;
-  updateProject: (project: Project) => Promise<void>;
+  // Actions
+  fetchProjects: () => Promise<void>;
+  fetchProjectById: (id: string) => Promise<void>;
+  createProject: (project: Partial<Project>) => Promise<Project>;
+  updateProject: (id: string, updates: Partial<Project>) => Promise<void>;
   deleteProject: (id: string) => Promise<void>;
   setCurrentProject: (project: Project | null) => void;
-
-  // Page actions
-  loadPages: (projectId: string) => Promise<void>;
-  addPage: (page: Omit<Page, 'id' | 'lastUpdated'>) => Promise<void>;
-  updatePage: (page: Page) => Promise<void>;
-  deletePage: (id: string) => Promise<void>;
 }
 
-export const useProjectStore = create<ProjectStore>((set, get) => ({
-  currentProject: null,
+export const useProjectStore = create<ProjectState>((set, get) => ({
   projects: [],
-  pages: [],
-  components: {},
+  currentProject: null,
+  isLoading: false,
+  error: null,
 
-  loadProjects: async () => {
-    const projects = await dbService.getAllProjects();
-    set({ projects });
+  fetchProjects: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const db = await openChatDB();
+      const projects = await db.getAll('projects');
+      set({
+        projects: projects.map((p) => ({
+          id: p.id,
+          name: p.name,
+          description: p.description,
+          status: p.status,
+          platforms: p.platforms,
+          pagesCount: p.pages.length,
+          componentsCount: p.components.length,
+          thumbnail: p.thumbnail,
+          updatedAt: p.updatedAt,
+        })),
+        isLoading: false,
+      });
+    } catch (error) {
+      set({ error: error as Error, isLoading: false });
+    }
   },
 
-  addProject: async (projectData) => {
-    const newProject: Project = {
-      ...projectData,
-      id: Date.now().toString(),
-      createdAt: Date.now(),
-      lastUpdated: Date.now(),
-    };
-    await dbService.addProject(newProject);
-    set((state) => ({ projects: [...state.projects, newProject] }));
+  fetchProjectById: async (id: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      const db = await openChatDB();
+      const project = await db.get('projects', id);
+      if (project) {
+        set({ currentProject: project, isLoading: false });
+      } else {
+        throw new Error('Project not found');
+      }
+    } catch (error) {
+      set({ error: error as Error, isLoading: false });
+    }
   },
 
-  updateProject: async (project) => {
-    await dbService.updateProject(project);
-    set((state) => ({
-      projects: state.projects.map((p) => (p.id === project.id ? project : p)),
-      currentProject: state.currentProject?.id === project.id ? project : state.currentProject,
-    }));
+  createProject: async (projectData: Partial<Project>) => {
+    set({ isLoading: true, error: null });
+    try {
+      const db = await openChatDB();
+      const newProject: Project = {
+        id: crypto.randomUUID(),
+        name: projectData.name || 'New Project',
+        description: projectData.description || '',
+        status: projectData.status || 'active',
+        platforms: projectData.platforms || [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        members: projectData.members || [],
+        components: projectData.components || [],
+        pages: projectData.pages || [],
+        creator: 'current-user', // TODO: Get from auth
+        lastModifiedBy: 'current-user',
+        ...projectData,
+      };
+
+      await db.add('projects', newProject);
+      await get().fetchProjects();
+      set({ isLoading: false });
+      return newProject;
+    } catch (error) {
+      set({ error: error as Error, isLoading: false });
+      throw error;
+    }
   },
 
-  deleteProject: async (id) => {
-    await dbService.deleteProject(id);
-    set((state) => ({
-      projects: state.projects.filter((p) => p.id !== id),
-      currentProject: state.currentProject?.id === id ? null : state.currentProject,
-    }));
+  updateProject: async (id: string, updates: Partial<Project>) => {
+    set({ isLoading: true, error: null });
+    try {
+      const db = await openChatDB();
+      const project = await db.get('projects', id);
+      if (!project) throw new Error('Project not found');
+
+      const updatedProject = {
+        ...project,
+        ...updates,
+        updatedAt: new Date().toISOString(),
+        lastModifiedBy: 'current-user', // TODO: Get from auth
+      };
+
+      await db.put('projects', updatedProject);
+      await get().fetchProjects();
+      if (get().currentProject?.id === id) {
+        set({ currentProject: updatedProject });
+      }
+      set({ isLoading: false });
+    } catch (error) {
+      set({ error: error as Error, isLoading: false });
+      throw error;
+    }
   },
 
-  setCurrentProject: (project) => {
+  deleteProject: async (id: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      const db = await openChatDB();
+      await db.delete('projects', id);
+      await get().fetchProjects();
+      if (get().currentProject?.id === id) {
+        set({ currentProject: null });
+      }
+      set({ isLoading: false });
+    } catch (error) {
+      set({ error: error as Error, isLoading: false });
+      throw error;
+    }
+  },
+
+  setCurrentProject: (project: Project | null) => {
     set({ currentProject: project });
-  },
-
-  loadPages: async (projectId) => {
-    const pages = await dbService.getProjectPages(projectId);
-    set({ pages });
-  },
-
-  addPage: async (pageData) => {
-    const newPage: Page = {
-      ...pageData,
-      id: Date.now().toString(),
-      lastUpdated: Date.now(),
-    };
-    await dbService.addPage(newPage);
-    set((state) => ({ pages: [...state.pages, newPage] }));
-    console.log('newPage', newPage, 'allpages', get().pages);
-  },
-
-  updatePage: async (page) => {
-    await dbService.updatePage(page);
-    set((state) => ({
-      pages: state.pages.map((p) => (p.id === page.id ? page : p)),
-    }));
-  },
-
-  deletePage: async (id) => {
-    await dbService.deletePage(id);
-    set((state) => ({
-      pages: state.pages.filter((p) => p.id !== id),
-    }));
   },
 }));

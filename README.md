@@ -1,62 +1,118 @@
-# Mantine Next.js template
+# AI 驱动的全栈开发助手
 
-This is a template for [Next.js](https://nextjs.org/) app router + [Mantine](https://mantine.dev/).
-If you want to use pages router instead, see [next-pages-template](https://github.com/mantinedev/next-pages-template).
+一个基于 AI 的全栈开发辅助系统,通过自然语言交互方式,帮助开发团队快速构建高质量的应用。
 
-## Features
+## 核心功能
 
-This template comes with the following features:
+### 1. 售前支持
 
-- [PostCSS](https://postcss.org/) with [mantine-postcss-preset](https://mantine.dev/styles/postcss-preset)
-- [TypeScript](https://www.typescriptlang.org/)
-- [Storybook](https://storybook.js.org/)
-- [Jest](https://jestjs.io/) setup with [React Testing Library](https://testing-library.com/docs/react-testing-library/intro)
-- ESLint setup with [eslint-config-mantine](https://github.com/mantinedev/eslint-config-mantine)
+- 历史投标检索与分析
+- 品牌新闻分析
+- 投标方案评估
+- 演讲稿生成与演练
 
-## npm scripts
+### 2. 需求分析
 
-### Build and dev scripts
+- 业务需求分析
+- 基于设计稿的代码生成
+- 快速需求文档撰写
+- 产品文档生成
 
-- `dev` – start dev server
-- `build` – bundle application for production
-- `analyze` – analyzes application bundle with [@next/bundle-analyzer](https://www.npmjs.com/package/@next/bundle-analyzer)
+### 3. 开发辅助
 
-### Testing scripts
+- 前端框架代码生成
+- 宝塔 UNEX/LIGHT 配置
+- UNEX 接口生成与对接
+- 测试用例编写
+- 测试脚本生成
 
-- `typecheck` – checks TypeScript types
-- `lint` – runs ESLint
-- `prettier:check` – checks files with Prettier
-- `jest` – runs jest tests
-- `jest:watch` – starts jest watch
-- `test` – runs `jest`, `prettier:check`, `lint` and `typecheck` scripts
+### 4. 运营支持
 
-### Other scripts
+- 自然语言页面内容生成
+- 客服话术演练
 
-- `storybook` – starts storybook dev server
-- `storybook:build` – build production storybook bundle to `storybook-static`
-- `prettier:write` – formats all files with Prettier
+## 技术特性
 
+### 框架集成
 
+- ACE/UNEX 框架集成
+- 多语言支持 (Vue, React, Python, Node.js, Java)
+- CMS 框架标准集成 (WordPress, Drupal)
 
-# 下面是我对一个工作区的规划
+### 知识沉淀
 
-## 产品文档
-左: 对话区
-右: 文本编辑区
-通过对话生成信息后, 自动填充到文本编辑区
+- 售前 BD 方法论沉淀
+- 开发组件库沉淀
+- 技术经验沉淀
 
-## 前端组件
-左: 对话区
-右: 代码区
+### AI 调优
 
-## 数据库
+- 输出模板调优
+- 工作流链路调优
+- 底层思维链调优
 
-左: 对话区
-右: SQL 语法去
+## 工作区规划
 
-## 后端区
+### 产品文档区
 
-左: 对话区
-右: 语言选择(JAVA / PYTHON) , 代码区
+- 左侧对话区
+- 右侧文本编辑区
+- 通过对话自动填充文档
 
-## 组件库
+### 前端组件区
+
+- 左侧对话区
+- 右侧代码区
+
+### 数据库区
+
+- 左侧对话区
+- 右侧 SQL 语法区
+
+### 后端开发区
+
+- 左侧对话区
+- 右侧语言选择 (JAVA/PYTHON) 和代码区
+
+## 开发脚本
+
+### 构建和开发
+
+- `dev` - 启动开发服务器
+- `build` - 构建生产版本
+- `analyze` - 分析打包体积
+
+### 测试相关
+
+- `typecheck` - 检查 TypeScript 类型
+- `lint` - 运行 ESLint 检查
+- `jest` - 运行单元测试
+- `test` - 运行所有测试和检查
+
+### 其他工具
+
+- `storybook` - 启动 Storybook
+- `prettier:write` - 格式化代码
+
+## 技术栈
+
+- Next.js (App Router)
+- TypeScript
+- Tailwind CSS
+- Framer Motion
+- Mantine UI
+- Jest & React Testing Library
+- ESLint & Prettier
+
+## 贡献指南
+
+欢迎提交 Pull Request 和 Issue。在提交代码前,请确保:
+
+1. 通过所有测试
+2. 符合代码规范
+3. 更新相关文档
+4. 添加必要的测试用例
+
+## 许可证
+
+MIT License

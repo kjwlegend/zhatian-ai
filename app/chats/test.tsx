@@ -1,8 +1,8 @@
 'use client';
 
 import * as React from 'react';
-import { useTestCode } from '@/app/store/codeStore';
 import { useChatStore } from '@/app/store/chatStore';
+import { useTestCode } from '@/app/store/codeStore';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BaseChatInterface } from './components/BaseChatInterface';
 import { ClearChatButton } from './components/ClearChatButton';
@@ -35,31 +35,43 @@ export function TestContent() {
   const { messages, isLoading, handleSendMessage, clearMessages } = useChatMessages({
     systemPrompt: getTestPrompt(selectedFramework),
     initialMessages: testMessages,
-    onMessagesChange: React.useCallback((newMessages) => {
-      setTestMessages(newMessages);
-    }, [setTestMessages]),
-    onResponse: React.useCallback((content: string) => {
-      const parsed = parseResponse(content, selectedFramework, 'test');
-      if (Object.keys(parsed.code).length > 0) {
-        updateCodeOutput(parsed.code);
-      }
-    }, [parseResponse, selectedFramework, updateCodeOutput]),
+    onMessagesChange: React.useCallback(
+      (newMessages: any) => {
+        setTestMessages(newMessages);
+      },
+      [setTestMessages]
+    ),
+    onResponse: React.useCallback(
+      (content: string) => {
+        const parsed = parseResponse(content, selectedFramework, 'test');
+        if (Object.keys(parsed.code).length > 0) {
+          updateCodeOutput(parsed.code);
+        }
+      },
+      [parseResponse, selectedFramework, updateCodeOutput]
+    ),
   });
 
-  const handleFrameworkChange = React.useCallback((value: string) => {
-    setSelectedFramework(value);
-  }, [setSelectedFramework]);
+  const handleFrameworkChange = React.useCallback(
+    (value: string) => {
+      setSelectedFramework(value);
+    },
+    [setSelectedFramework]
+  );
 
   const handleClearAll = React.useCallback(() => {
     clearMessages();
     clearCodeOutput();
   }, [clearMessages, clearCodeOutput]);
 
-  const handleCopyCode = React.useCallback((type: string) => {
-    navigator.clipboard.writeText(codeOutput[type] || '');
-    setCopiedStates((prev) => ({ ...prev, [type]: true }));
-    setTimeout(() => setCopiedStates((prev) => ({ ...prev, [type]: false })), 2000);
-  }, [codeOutput]);
+  const handleCopyCode = React.useCallback(
+    (type: string) => {
+      navigator.clipboard.writeText(codeOutput[type] || '');
+      setCopiedStates((prev) => ({ ...prev, [type]: true }));
+      setTimeout(() => setCopiedStates((prev) => ({ ...prev, [type]: false })), 2000);
+    },
+    [codeOutput]
+  );
 
   const frameworkConfig = FRAMEWORK_OPTIONS.test.find((f) => f.value === selectedFramework)!;
 

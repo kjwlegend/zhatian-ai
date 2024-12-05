@@ -14,7 +14,7 @@ const FILES_MAP: Record<keyof CodeContent, string> = {
   panel: 'panel.js',
   vue: 'index.vue',
   index: 'index.js',
-  style: 'index.scss',
+  style: 'style.scss',
 };
 
 /**

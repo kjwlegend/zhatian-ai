@@ -18,6 +18,7 @@ export interface Page {
   description: string;
   type: string;
   componentsCount: number;
+  components: PageComponent[];
 }
 
 export interface ComponentReference {
@@ -95,11 +96,43 @@ export interface ChatView {
   lastUpdated: number;
 }
 
+export interface PageComponent {
+  id: string;
+  componentId: string;
+  pageId: string;
+  order: number;
+  config?: Record<string, any>;
+  addedAt: number;
+}
+
 export interface ChatDBSchema extends DBSchema {
   projects: {
     key: string;
-    value: Project;
-    indexes: { 'by-creator': string; 'by-last-updated': number };
+    value: {
+      id: string;
+      name: string;
+      description: string;
+      thumbnail?: string;
+      status: 'active' | 'archived' | 'completed';
+      platforms: Array<'website' | 'wechat' | 'app'>;
+      createdAt: string;
+      updatedAt: string;
+      members: Array<{
+        id: string;
+        name: string;
+        avatar: string;
+        role: 'owner' | 'editor' | 'viewer';
+      }>;
+      components: string[];
+      pages: string[];
+      creator: string;
+      lastModifiedBy: string;
+    };
+    indexes: {
+      'by-creator': string;
+      'by-status': string;
+      'by-last-updated': string;
+    };
   };
   pages: {
     key: string;
