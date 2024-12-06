@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
 import { TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { CodePreview } from './CodePreview';
 import { SaveProjectDialog } from './SaveProjectDialog';
 
 interface ChatHeaderProps {
@@ -39,28 +40,6 @@ export function ChatHeader({ isModalOpen, setIsModalOpen }: ChatHeaderProps) {
 
   return (
     <div className="flex items-center justify-between border-b px-4 py-2">
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/">
-              <Home className="h-4 w-4" />
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator>
-            <ChevronRight className="h-4 w-4" />
-          </BreadcrumbSeparator>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/projects">Projects</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator>
-            <ChevronRight className="h-4 w-4" />
-          </BreadcrumbSeparator>
-          <BreadcrumbItem>
-            <BreadcrumbPage>Current Project</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-
       <TabsList className="grid w-[ 00px] grid-cols-5">
         <TabsTrigger value="requirement">Requirement</TabsTrigger>
         <TabsTrigger value="frontend">FE</TabsTrigger>
@@ -69,7 +48,7 @@ export function ChatHeader({ isModalOpen, setIsModalOpen }: ChatHeaderProps) {
         <TabsTrigger value="cms">CMS</TabsTrigger>
       </TabsList>
 
-      <div className="flex gap-2">
+      <div className="flex items-center gap-2">
         <Button variant="outline" onClick={handleReset} className="flex items-center gap-2">
           <RotateCcw className="h-4 w-4" />
           Reset
@@ -80,8 +59,10 @@ export function ChatHeader({ isModalOpen, setIsModalOpen }: ChatHeaderProps) {
           className="flex items-center gap-2"
         >
           <Save className="h-4 w-4" />
-          Save Component
+          Save
         </Button>
+        <CodePreview />
+
         {isModalOpen && (
           <SaveProjectDialog
             isOpen={isModalOpen}
