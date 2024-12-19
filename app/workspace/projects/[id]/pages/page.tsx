@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Plus } from 'lucide-react';
 import { DragDropContext, DropResult } from 'react-beautiful-dnd';
+import { openChatDB } from '@/app/services/db';
 import { Component } from '@/app/services/db/schema';
 import { usePageStore } from '@/app/store/pageStore';
 import { Button } from '@/components/ui/button';

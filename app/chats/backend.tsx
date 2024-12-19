@@ -12,6 +12,7 @@ import {
   FrameworkSelector,
   getLanguageByTab,
 } from './components/FrameworkSelector';
+import { ResizableLayout } from './components/ResizableLayout';
 import { SharedFirstColumn } from './components/SharedFirstColumn';
 import { getBackendPrompt } from './constants/prompts';
 import { useChatMessages } from './hooks/useChatMessages';
@@ -75,46 +76,56 @@ export function BackendContent() {
 
   const frameworkConfig = FRAMEWORK_OPTIONS.backend.find((f) => f.value === selectedFramework)!;
 
-  return (
-    <div className="grid h-full gap-4 p-4 md:grid-cols-3 overflow-hidden">
-      <SharedFirstColumn />
+  const firstColumn = <SharedFirstColumn />;
 
-      <BaseChatInterface
-        messages={messages}
-        onSendMessage={handleSendMessage}
-        headerContent={
-          <div className="flex items-center gap-2">
-            <FrameworkSelector
-              type="backend"
-              value={selectedFramework}
-              onValueChange={handleFrameworkChange}
-            />
-            <ClearChatButton onClear={handleClearAll} tabName="Backend" />
-          </div>
-        }
-      />
+  const secondColumn = (
+    <BaseChatInterface
+      messages={messages}
+      onSendMessage={handleSendMessage}
+      headerContent={
+        <div className="flex items-center gap-2">
+          <FrameworkSelector
+            type="backend"
+            value={selectedFramework}
+            onValueChange={handleFrameworkChange}
+          />
+          <ClearChatButton onClear={handleClearAll} tabName="Backend" />
+        </div>
+      }
+    />
+  );
 
-      <div className="w-full h-full overflow-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent hover:scrollbar-thumb-gray-400 dark:hover:scrollbar-thumb-gray-500">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-          <TabsList>
-            {frameworkConfig.tabs.map((tab) => (
-              <TabsTrigger key={tab} value={tab}>
-                {tab.toUpperCase()}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+  const thirdColumn = (
+    <div className="w-full h-full overflow-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent hover:scrollbar-thumb-gray-400 dark:hover:scrollbar-thumb-gray-500">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
+        <TabsList>
           {frameworkConfig.tabs.map((tab) => (
-            <TabsContent key={tab} value={tab} className="flex-grow overflow-y-auto h-full">
-              <CodeDisplay
-                code={codeOutput[tab] || '// No code generated yet'}
-                language={getLanguageByTab(tab)}
-                onCopy={() => handleCopyCode(tab)}
-                isCopied={copiedStates[tab]}
-              />
-            </TabsContent>
+            <TabsTrigger key={tab} value={tab}>
+              {tab.toUpperCase()}
+            </TabsTrigger>
           ))}
-        </Tabs>
-      </div>
+        </TabsList>
+        {frameworkConfig.tabs.map((tab) => (
+          <TabsContent key={tab} value={tab} className="flex-grow overflow-y-auto h-full">
+            <CodeDisplay
+              code={codeOutput[tab] || '// No code generated yet'}
+              language={getLanguageByTab(tab)}
+              onCopy={() => handleCopyCode(tab)}
+              isCopied={copiedStates[tab]}
+            />
+          </TabsContent>
+        ))}
+      </Tabs>
+    </div>
+  );
+
+  return (
+    <div className="h-full p-4">
+      <ResizableLayout
+        firstColumn={firstColumn}
+        secondColumn={secondColumn}
+        thirdColumn={thirdColumn}
+      />
     </div>
   );
 }

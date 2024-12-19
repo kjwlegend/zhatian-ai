@@ -6,6 +6,7 @@ import { useCodeStore } from '@/app/store/codeStore';
 import { BaseChatInterface } from './components/BaseChatInterface';
 import { ClearChatButton } from './components/ClearChatButton';
 import { MarkdownEditor } from './components/MarkdownEditor';
+import { ResizableLayout } from './components/ResizableLayout';
 import { SharedFirstColumn } from './components/SharedFirstColumn';
 import { REQUIREMENT_SYSTEM_PROMPT } from './constants/prompts';
 import { useChatMessages } from './hooks/useChatMessages';
@@ -37,22 +38,29 @@ export function RequirementContent() {
     ),
   });
 
+  const firstColumn = <SharedFirstColumn variant="requirement" />;
+
+  const secondColumn = (
+    <BaseChatInterface
+      messages={messages}
+      onSendMessage={handleSendMessage}
+      headerContent={
+        <div className="flex items-center gap-2">
+          <ClearChatButton onClear={clearMessages} tabName="Requirement" />
+        </div>
+      }
+    />
+  );
+
+  const thirdColumn = <MarkdownEditor content={componentDoc} onChange={setComponentDoc} />;
+
   return (
-    <div className="grid h-full gap-4 p-4 md:grid-cols-3 overflow-hidden">
-      <SharedFirstColumn variant="requirement" />
-      <div className="w-full h-full">
-        <BaseChatInterface
-          messages={messages}
-          onSendMessage={handleSendMessage}
-          headerContent={
-            <div className="flex items-center gap-2">
-              <ClearChatButton onClear={clearMessages} tabName="Requirement" />
-            </div>
-          }
-        />
-      </div>
-      <MarkdownEditor content={componentDoc} onChange={setComponentDoc} />
-      {/* <div>{componentDoc}</div> */}
+    <div className="h-full p-4">
+      <ResizableLayout
+        firstColumn={firstColumn}
+        secondColumn={secondColumn}
+        thirdColumn={thirdColumn}
+      />
     </div>
   );
 }

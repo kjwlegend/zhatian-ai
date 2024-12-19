@@ -1,13 +1,12 @@
 'use client';
 
-import { Plus } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Loader2, Plus, Upload } from 'lucide-react';
+import { Component } from '@/app/services/db/schema';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { ComponentCard } from './components/ComponentCard';
 import { useComponents } from './hooks/useComponents';
-import { useState, useEffect } from 'react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2 } from 'lucide-react';
-import { Component } from '@/app/services/db/schema';
 
 export default function LibraryPage() {
   const {
@@ -41,6 +40,10 @@ export default function LibraryPage() {
     }
   };
 
+  const handleUpload = () => {
+    // TODO: 上传组件
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-[50vh]">
@@ -60,13 +63,19 @@ export default function LibraryPage() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Component Library</h1>
-        <Button onClick={handleCreateClick}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add Component
-        </Button>
+        <h1 className="text-2xl font-bold">组件库</h1>
+        <div className="flex gap-2">
+          <Button onClick={handleCreateClick}>
+            <Plus className="w-4 h-4 mr-2" />
+            添加组件
+          </Button>
+          <Button variant="outline" onClick={handleUpload}>
+            <Upload className="w-4 h-4 mr-2" />
+            上传组件
+          </Button>
+        </div>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {components.map((component: Component) => (
           <ComponentCard

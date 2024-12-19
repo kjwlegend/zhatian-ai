@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
+import { chatWithDify } from '@/app/services/dify';
 import { chatWithOpenAI } from '@/app/services/openai';
 import { useCodeStore } from '@/app/store/codeStore';
-import { chatWithDify } from '@/app/services/dify';
 
 export interface Message {
   role: 'user' | 'assistant';
@@ -40,13 +40,14 @@ export function useChatMessages({
   }, [messages, onMessagesChange]);
 
   const handleSendMessage = useCallback(
-    async (message: string) => {
+    async (message: string, attachments: string[]) => {
       try {
         setIsLoading(true);
-
-        let imageFile: string | undefined;
-        if (designFile) {
-          imageFile = designFile;
+        let imageFile: string[] | undefined;
+        if (attachments && attachments.length > 0) {
+          imageFile = attachments;
+        } else if (designFile) {
+          imageFile = [designFile];
         }
 
         const userMessage: Message = {

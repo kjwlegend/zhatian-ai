@@ -41,7 +41,7 @@ export const chatWithOpenAI = async (
   componentDoc: string,
   systemPrompt: string,
   onPartialResponse: (content: string) => void,
-  image?: string
+  image?: string[]
 ) => {
   let messages: Message[] = [
     {
@@ -50,14 +50,15 @@ export const chatWithOpenAI = async (
     },
     {
       role: 'user',
-      content: 'Please use the following component documentation to help you answer the question: ' + componentDoc,
+      content:
+        'Please use the following component documentation to help you answer the question: ' +
+        componentDoc,
     },
     ...history.map((msg) => ({
       role: msg.role,
       content: msg.content,
     })),
   ];
-
   if (image) {
     messages.push({
       role: 'user',
@@ -66,12 +67,12 @@ export const chatWithOpenAI = async (
           type: 'text',
           text: message,
         },
-        {
-          type: 'image_url',
+        ...image.map((url) => ({
+          type: 'image_url' as const,
           image_url: {
-            url: image,
+            url: url,
           },
-        },
+        })),
       ],
     });
   } else {

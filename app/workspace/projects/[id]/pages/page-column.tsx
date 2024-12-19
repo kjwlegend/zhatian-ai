@@ -40,7 +40,7 @@ export function PageColumn({
   onEdit,
   onComponentSelect,
 }: PageColumnProps) {
-  const { deletePage } = usePageStore();
+  const { deletePage, removeComponentFromPage } = usePageStore();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isGenerateCodeDialogOpen, setIsGenerateCodeDialogOpen] = useState(false);
 
@@ -50,6 +50,14 @@ export function PageColumn({
       setIsDeleteDialogOpen(false);
     } catch (error) {
       console.error('Failed to delete page:', error);
+    }
+  };
+
+  const handleComponentDelete = async (componentId: string) => {
+    try {
+      await removeComponentFromPage(page.id, componentId);
+    } catch (error) {
+      console.error('Failed to remove component:', error);
     }
   };
 
@@ -102,15 +110,14 @@ export function PageColumn({
                       const component = components.get(pageComponent.componentId);
                       if (!component) return null;
 
-                      const instanceId = pageComponent.id;
-
                       return (
                         <ComponentItem
-                          key={instanceId}
-                          instanceId={instanceId}
+                          key={pageComponent.id}
+                          instanceId={pageComponent.id}
                           component={component}
                           index={index}
                           onClick={() => onComponentSelect(component)}
+                          onDelete={() => handleComponentDelete(pageComponent.id)}
                         />
                       );
                     })}

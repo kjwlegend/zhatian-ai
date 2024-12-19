@@ -51,7 +51,7 @@ export function ChatHeader({ isModalOpen, setIsModalOpen }: ChatHeaderProps) {
       <div className="flex items-center gap-2">
         <Button variant="outline" onClick={handleReset} className="flex items-center gap-2">
           <RotateCcw className="h-4 w-4" />
-          Reset
+          重置代码
         </Button>
         <Button
           variant="outline"
@@ -59,7 +59,7 @@ export function ChatHeader({ isModalOpen, setIsModalOpen }: ChatHeaderProps) {
           className="flex items-center gap-2"
         >
           <Save className="h-4 w-4" />
-          Save
+          保存组件
         </Button>
         <CodePreview />
 
@@ -70,7 +70,6 @@ export function ChatHeader({ isModalOpen, setIsModalOpen }: ChatHeaderProps) {
             onSave={handleSaveComponent}
           />
         )}
-        <Button>Publish</Button>
       </div>
     </div>
   );

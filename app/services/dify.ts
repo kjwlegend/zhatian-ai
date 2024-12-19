@@ -12,23 +12,21 @@ interface FileUpload {
   upload_file_id?: string;
 }
 
-
-
 export const chatWithDify = async (
   message: string,
   inputs: any,
   onPartialResponse: (content: string) => void,
   onResponseEnd?: (content: string, conversationId: string) => void,
   conversationId?: string,
-  image?: string
+  image?: string[]
 ) => {
   let files: FileUpload[] = [];
-  
+
   if (image) {
     files.push({
       type: 'image',
       transfer_method: 'remote_url',
-      url: image
+      url: image[0],
     });
   }
 
@@ -47,14 +45,11 @@ export const chatWithDify = async (
         files: files.length > 0 ? files : undefined,
       }),
     });
-    
-
 
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
     }
-
 
     let fullContent = '';
 
@@ -71,9 +66,9 @@ export const chatWithDify = async (
               fullContent += json.answer;
               onPartialResponse(fullContent);
             }
-            if(json.event === 'message_end') {
-                const conversationId = json.conversation_id;
-                onResponseEnd?.(fullContent, conversationId);
+            if (json.event === 'message_end') {
+              const conversationId = json.conversation_id;
+              onResponseEnd?.(fullContent, conversationId);
             }
           }
         } catch (e) {
