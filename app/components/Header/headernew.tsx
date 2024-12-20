@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   ChevronDown,
   FileText,
@@ -12,6 +12,8 @@ import {
   MessageCircle,
   Users,
 } from 'lucide-react';
+import { toast } from 'sonner';
+import { useAuth } from '@/app/hooks/useAuth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -50,8 +52,23 @@ const navItems: NavItem[] = [
   { href: '/founders', label: '创始人', icon: <Users className="mr-2 h-4 w-4" /> },
 ];
 
-export default function Header({ user = null }: { user?: { name: string; image: string } | null }) {
+export default function Header() {
+  const router = useRouter();
   const pathname = usePathname();
+  const { user, logout } = useAuth();
+
+  const handleLogin = () => {
+    router.push('/auth');
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast.success('已安全退出');
+    } catch (error) {
+      toast.error('退出失败，请重试');
+    }
+  };
 
   return (
     <header className="bg-background border-b">
@@ -114,12 +131,12 @@ export default function Header({ user = null }: { user?: { name: string; image: 
                     <DropdownMenuItem>个人资料</DropdownMenuItem>
                     <DropdownMenuItem>设置</DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem>登出</DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleLogout}>登出</DropdownMenuItem>
                   </>
                 ) : (
                   <>
-                    <DropdownMenuItem>登录</DropdownMenuItem>
-                    <DropdownMenuItem>注册</DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleLogin}>登录</DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleLogin}>注册</DropdownMenuItem>
                   </>
                 )}
               </DropdownMenuContent>

@@ -94,15 +94,37 @@
 - `storybook` - 启动 Storybook
 - `prettier:write` - 格式化代码
 
-## 技术栈
+### 前端技术栈
 
-- Next.js (App Router)
-- TypeScript
-- Tailwind CSS
-- Framer Motion
-- Mantine UI
-- Jest & React Testing Library
-- ESLint & Prettier
+- **框架**: Next.js (App Router)
+- **语言**: TypeScript
+- **样式**: Tailwind CSS
+- **动画**: Framer Motion
+- **测试**: Jest & React Testing Library
+- **代码质量**: ESLint & Prettier
+
+### 后端技术栈
+
+- **框架**: Express.js (Node.js) / Flask (Python)
+- **语言**: Node.js / Python
+- **数据库**: MySQL (关系型数据库)
+- **向量数据库**: Milvus
+- **缓存**: Redis
+- **网关**: OpenResty
+- **容器化**: Docker
+
+### 部署技术栈
+
+- **容器化**: Docker
+- **容器编排**: Kubernetes (可选)
+- **CI/CD**: GitHub Actions / GitLab CI
+- **监控**: Prometheus & Grafana
+- **日志管理**: ELK Stack (Elasticsearch, Logstash, Kibana)
+- **负载均衡**: Nginx
+- **服务发现**: Consul
+- **配置中心**: Nacos
+- **消息队列**: RabbitMQ
+- **服务网格**: Istio (可选)
 
 ## 贡献指南
 
@@ -124,3 +146,90 @@ APACHE 3.0 License
 - 增加代码预览功能
 - 优化组件库
 - 增加页面部分的预览功能
+
+# Architecture Diagram
+
+![Architecture Diagram](./docs/bombai-architecture.png)
+
+```mermaid
+graph TD
+    subgraph Frontend [前端架构]
+        Next[Next.js App Router]
+        TS[TypeScript]
+        UI[UI层]
+        Store[状态管理]
+        Hooks[Hooks层]
+
+        UI --> |样式| Tailwind[Tailwind CSS]
+        UI --> |动画| Framer[Framer Motion]
+        UI --> |组件| Shadcn[Shadcn UI]
+
+        Next --> TS
+        TS --> UI
+        TS --> Store
+        TS --> Hooks
+
+        subgraph QA [质量保证]
+            Jest[Jest测试]
+            RTL[React Testing Library]
+            ESLint[ESLint]
+            Prettier[Prettier]
+        end
+    end
+
+    subgraph Backend [后端架构]
+        LB[Nginx负载均衡]
+        Gateway[OpenResty网关]
+
+        subgraph Services [服务层]
+            Express1[Express.js服务1]
+            Express2[Express.js服务2]
+            Flask1[Flask服务1]
+            Flask2[Flask服务2]
+            AI[AI服务]
+        end
+
+        subgraph Storage [存储层]
+            MySQL[(MySQL数据库)]
+            Milvus[(Milvus向量库)]
+            Redis[(Redis缓存)]
+            OSS[(阿里云OSS)]
+        end
+
+        LB --> Gateway
+        Gateway --> |负载分发| Express1 & Express2
+        Gateway --> |负载分发| Flask1 & Flask2
+        Gateway --> AI
+
+        Services --> Storage
+        AI --> |调用| OpenAI[OpenAI API]
+        AI --> |调用| Dify[Dify API]
+    end
+
+    subgraph DevOps [运维架构]
+        subgraph Container [容器化]
+            Docker[Docker]
+            K8s[Kubernetes]
+        end
+
+        subgraph CICD [持续集成/部署]
+            Actions[GitHub Actions]
+            GitLab[GitLab CI]
+        end
+
+        subgraph Monitor [监控系统]
+            Prometheus[Prometheus]
+            Grafana[Grafana]
+        end
+
+        subgraph Logging [日志系统]
+            ES[Elasticsearch]
+            Logstash[Logstash]
+            Kibana[Kibana]
+        end
+    end
+
+    Client[客户端] --> Frontend
+    Frontend --> LB
+    Backend --> DevOps
+```

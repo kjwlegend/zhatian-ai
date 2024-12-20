@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  web:
+    build:
+      target: runner # 使用生产优化的 runner 阶段
+    environment:
+      - NODE_ENV=production
+    env_file:
+      - .env

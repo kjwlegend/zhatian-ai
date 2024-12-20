@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { motion, useInView, useScroll, useTransform } from 'framer-motion';
 import {
   ArrowRight,
@@ -192,8 +193,8 @@ function AboutPage() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <div className="w-[500px] h-[400px] bg-gray-700/30 rounded-lg backdrop-blur-sm flex items-center justify-center">
-              <span className="text-gray-400">Placeholder Image</span>
+            <div className="w-[600px] h-[600px] rounded-lg overflow-hidden relative">
+              <Image src="/banner.jpg" alt="Banner image" fill className="object-cover" priority />
             </div>
           </motion.div>
         </div>

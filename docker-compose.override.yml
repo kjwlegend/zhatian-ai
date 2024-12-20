@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  web:
+    build:
+      target: builder # 在开发环境使用 builder 阶段，包含完整的源代码
+    command: npm run dev
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      - NODE_ENV=development
+    env_file:
+      - .env.development

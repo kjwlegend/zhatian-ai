@@ -138,3 +138,8 @@ pnpm-workspace.yaml
 
 .DS_Store
 components-light
+
+
+.env.development
+.env.production
+.env

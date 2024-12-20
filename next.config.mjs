@@ -33,6 +33,10 @@ export default withBundleAnalyzer({
       },
       {
         protocol: 'https',
+        hostname: 'picsum.photos',
+      },
+      {
+        protocol: 'https',
         hostname: 'xiaoguangai.oss-cn-shanghai.aliyuncs.com',
       },
       {
