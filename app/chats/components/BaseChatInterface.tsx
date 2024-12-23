@@ -9,7 +9,7 @@ interface Message {
 
 interface BaseChatInterfaceProps {
   messages: Message[];
-  onSendMessage: (message: string) => void;
+  onSendMessage: (message: string, attachments: string[]) => void;
   headerContent?: React.ReactNode;
 }
 

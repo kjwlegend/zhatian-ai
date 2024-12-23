@@ -13,7 +13,7 @@ interface Message {
 
 interface ChatInterfaceProps {
   messages: Message[];
-  onSendMessage: (message: string) => void;
+  onSendMessage: (message: string, attachments: string[]) => void;
 }
 
 export function ChatInterface({ messages, onSendMessage }: ChatInterfaceProps) {
@@ -28,7 +28,7 @@ export function ChatInterface({ messages, onSendMessage }: ChatInterfaceProps) {
 
   const handleSendMessage = () => {
     if (inputValue.trim()) {
-      onSendMessage(inputValue);
+      onSendMessage(inputValue, []);
       setInputValue('');
     }
   };

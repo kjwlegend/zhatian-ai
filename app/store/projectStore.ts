@@ -1,22 +1,25 @@
 'use client';
 
 import { create } from 'zustand';
-import { Project, ProjectSummary } from '@/app/workspace/projects/types/project';
-import { openChatDB } from '../services/db';
+import { Project } from '@/app/workspace/projects/types/project';
+import {
+  addProject,
+  deleteProject,
+  getAllProjects,
+  getProject,
+  updateProject,
+} from '../services/db/projectsService';
 
 interface ProjectState {
-  projects: ProjectSummary[];
+  projects: Project[];
   currentProject: Project | null;
   isLoading: boolean;
   error: Error | null;
-
-  // Actions
   fetchProjects: () => Promise<void>;
-  fetchProjectById: (id: string) => Promise<void>;
-  createProject: (project: Partial<Project>) => Promise<Project>;
-  updateProject: (id: string, updates: Partial<Project>) => Promise<void>;
+  fetchProject: (id: string) => Promise<void>;
+  createProject: (projectData: Partial<Project>) => Promise<Project>;
+  updateProject: (id: string, projectData: Partial<Project>) => Promise<void>;
   deleteProject: (id: string) => Promise<void>;
-  setCurrentProject: (project: Project | null) => void;
 }
 
 export const useProjectStore = create<ProjectState>((set, get) => ({
@@ -28,36 +31,19 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   fetchProjects: async () => {
     set({ isLoading: true, error: null });
     try {
-      const db = await openChatDB();
-      const projects = await db.getAll('projects');
-      set({
-        projects: projects.map((p) => ({
-          id: p.id,
-          name: p.name,
-          description: p.description,
-          status: p.status,
-          platforms: p.platforms,
-          pagesCount: p.pages.length,
-          componentsCount: p.components.length,
-          thumbnail: p.thumbnail,
-          updatedAt: p.updatedAt,
-        })),
-        isLoading: false,
-      });
+      const projects = await getAllProjects();
+      set({ projects, isLoading: false });
     } catch (error) {
       set({ error: error as Error, isLoading: false });
     }
   },
 
-  fetchProjectById: async (id: string) => {
+  fetchProject: async (id: string) => {
     set({ isLoading: true, error: null });
     try {
-      const db = await openChatDB();
-      const project = await db.get('projects', id);
+      const project = await getProject(id);
       if (project) {
         set({ currentProject: project, isLoading: false });
-      } else {
-        throw new Error('Project not found');
       }
     } catch (error) {
       set({ error: error as Error, isLoading: false });
@@ -67,7 +53,6 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   createProject: async (projectData: Partial<Project>) => {
     set({ isLoading: true, error: null });
     try {
-      const db = await openChatDB();
       const newProject: Project = {
         id: crypto.randomUUID(),
         name: projectData.name || 'New Project',
@@ -84,7 +69,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
         ...projectData,
       };
 
-      await db.add('projects', newProject);
+      await addProject(newProject);
       await get().fetchProjects();
       set({ isLoading: false });
       return newProject;
@@ -94,25 +79,23 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
     }
   },
 
-  updateProject: async (id: string, updates: Partial<Project>) => {
+  updateProject: async (id: string, projectData: Partial<Project>) => {
     set({ isLoading: true, error: null });
     try {
-      const db = await openChatDB();
-      const project = await db.get('projects', id);
-      if (!project) throw new Error('Project not found');
+      const existingProject = await getProject(id);
+      if (!existingProject) {
+        throw new Error('Project not found');
+      }
 
-      const updatedProject = {
-        ...project,
-        ...updates,
+      const updatedProject: Project = {
+        ...existingProject,
+        ...projectData,
         updatedAt: new Date().toISOString(),
         lastModifiedBy: 'current-user', // TODO: Get from auth
       };
 
-      await db.put('projects', updatedProject);
+      await updateProject(updatedProject);
       await get().fetchProjects();
-      if (get().currentProject?.id === id) {
-        set({ currentProject: updatedProject });
-      }
       set({ isLoading: false });
     } catch (error) {
       set({ error: error as Error, isLoading: false });
@@ -123,12 +106,8 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   deleteProject: async (id: string) => {
     set({ isLoading: true, error: null });
     try {
-      const db = await openChatDB();
-      await db.delete('projects', id);
+      await deleteProject(id);
       await get().fetchProjects();
-      if (get().currentProject?.id === id) {
-        set({ currentProject: null });
-      }
       set({ isLoading: false });
     } catch (error) {
       set({ error: error as Error, isLoading: false });

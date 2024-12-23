@@ -40,7 +40,7 @@ export function useChatMessages({
   }, [messages, onMessagesChange]);
 
   const handleSendMessage = useCallback(
-    async (message: string, attachments: string[]) => {
+    async (message: string, attachments?: string[]) => {
       try {
         setIsLoading(true);
         let imageFile: string[] | undefined;

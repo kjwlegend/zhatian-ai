@@ -19,6 +19,13 @@ interface ProjectFiles {
 
 type FrameworkType = 'vue' | 'react' | 'ace';
 
+// 添加自定义的 Project 类型来扩展原有的接口
+interface CustomProject extends Omit<Project, 'files'> {
+  files: {
+    [key: string]: string;
+  };
+}
+
 export class StackBlitzService {
   private static readonly FRAMEWORK_CONFIGS = {
     vue: {
@@ -65,7 +72,7 @@ export class StackBlitzService {
       const sdk = await getStackBlitzSDK();
       const config = this.FRAMEWORK_CONFIGS[framework];
 
-      const project: Project = {
+      const project: CustomProject = {
         title: config.title,
         description: config.description,
         template: 'node',
@@ -148,23 +155,22 @@ export default defineConfig({
     );
   }
 
-  private static createProjectFiles(files: ProjectFiles, framework: FrameworkType) {
+  private static createProjectFiles(
+    files: ProjectFiles,
+    framework: FrameworkType
+  ): Record<string, string> {
     if (framework === 'vue') {
       return {
         'src/App.vue': `
-${files.template?.content || '<div>No template provided</div>'}
-
-${files.style?.content ? `<style src="./style.scss"></style>` : ''}
-
-`,
+${files.template?.content ?? '<div>No template provided</div>'}
+${files.style?.content ? `<style src="./style.scss"></style>` : ''}`,
         'src/main.js': `
 import { createApp } from 'vue'
 import App from './App.vue'
 import './style.scss'
 
-createApp(App).mount('#app')
-        `,
-        'src/style.scss': `${files.style?.content || ''}`,
+createApp(App).mount('#app')`,
+        'src/style.scss': files.style?.content ?? '',
         'index.html': `
 <!DOCTYPE html>
 <html lang="en">
@@ -184,10 +190,11 @@ createApp(App).mount('#app')
 
     if (framework === 'react') {
       return {
-        'src/App.tsx':
-          files.script?.content ||
-          'export default function App() { return <div>No content provided</div> }',
-        'src/style.scss': files.style?.content || '/* No styles provided */',
+        'src/App.tsx': `
+${files.script?.content ? files.script?.content : 'export default function App() { return <div>No content provided</div> }'}
+${files.style?.content ? `<style src="./style.scss"></style>` : ''}
+`,
+        'src/style.scss': `${files.style?.content ? files.style?.content : '/* No styles provided */'}`,
         'src/main.tsx': `
 import React from 'react'
 import ReactDOM from 'react-dom/client'
@@ -220,9 +227,11 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 
     if (framework === 'ace') {
       return {
-        'src/App.vue':
-          files.template?.content || '<template><div>No content provided</div></template>',
-        'src/panel.js': files.script?.content || '',
+        'src/App.vue': `
+${files.template?.content ? files.template?.content : '<template><div>No content provided</div></template>'}
+${files.style?.content ? `<style src="./style.scss"></style>` : ''}
+`,
+        'src/panel.js': `${files.script?.content ? files.script?.content : ''}`,
         'src/main.js': `
 import Vue from 'vue'
 import App from './App.vue'
@@ -232,7 +241,7 @@ new Vue({
   render: h => h(App)
 }).$mount('#app')
         `,
-        'src/style.scss': files.style?.content || '',
+        'src/style.scss': `${files.style?.content ? files.style?.content : ''}`,
         'index.html': `
 <!DOCTYPE html>
 <html lang="en">
@@ -260,5 +269,12 @@ export default defineConfig({
         'public/placeholder3.jpg': '',
       };
     }
+
+    return {
+      'src/App.vue': '',
+      'src/main.js': '',
+      'src/style.scss': '',
+      'index.html': '',
+    };
   }
 }

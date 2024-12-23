@@ -68,7 +68,11 @@ export default function ProjectsPage() {
           {projects.map((project) => (
             <ProjectCard
               key={project.id}
-              project={project}
+              project={{
+                ...project,
+                pagesCount: project.pages.length,
+                componentsCount: project.components.length,
+              }}
               onDelete={handleDeleteProject}
               onEdit={handleEditProject}
             />

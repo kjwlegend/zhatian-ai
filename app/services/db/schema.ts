@@ -1,14 +1,11 @@
 import { DBSchema } from 'idb';
 import { Message } from '@/app/chats/hooks/useChatMessages';
-
-export interface Project {
-  id: string;
-  name: string;
-  creator: string;
-  createdAt: number;
-  codeType?: string;
-  lastUpdated: number;
-}
+import {
+  Platform,
+  Project,
+  ProjectMember,
+  ProjectStatus,
+} from '@/app/workspace/projects/types/project';
 
 export interface Page {
   id: string;
@@ -108,26 +105,7 @@ export interface PageComponent {
 export interface ChatDBSchema extends DBSchema {
   projects: {
     key: string;
-    value: {
-      id: string;
-      name: string;
-      description: string;
-      thumbnail?: string;
-      status: 'active' | 'archived' | 'completed';
-      platforms: Array<'website' | 'wechat' | 'app'>;
-      createdAt: string;
-      updatedAt: string;
-      members: Array<{
-        id: string;
-        name: string;
-        avatar: string;
-        role: 'owner' | 'editor' | 'viewer';
-      }>;
-      components: string[];
-      pages: string[];
-      creator: string;
-      lastModifiedBy: string;
-    };
+    value: Project;
     indexes: {
       'by-creator': string;
       'by-status': string;
