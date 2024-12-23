@@ -112,7 +112,6 @@
     "@types/react-syntax-highlighter": "^15",
     "@typescript-eslint/eslint-plugin": "^7.13.1",
     "@typescript-eslint/parser": "^7.13.1",
-    "adapter": "link:@atlaskit/pragmatic-drag-and-drop/element/adapter",
     "autoprefixer": "^10.4.20",
     "babel-loader": "^8.1.0",
     "css-loader": "^3.5.2",

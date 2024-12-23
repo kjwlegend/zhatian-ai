@@ -2,7 +2,7 @@
 
 import { X } from 'lucide-react';
 import { Draggable, Droppable } from 'react-beautiful-dnd';
-import { Page, PageComponent } from '@/app/services/db/schema';
+import { Component, Page, PageComponent } from '@/app/services/db/schema';
 import { usePageStore } from '@/app/store/pageStore';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
