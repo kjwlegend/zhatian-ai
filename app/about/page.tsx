@@ -193,8 +193,8 @@ function AboutPage() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <div className="w-[600px] h-[600px] rounded-lg overflow-hidden relative">
-              <Image src="/banner.jpg" alt="Banner image" fill className="object-cover" priority />
+            <div className="w-[400px] h-[600px] rounded-lg overflow-hidden relative">
+              <Image src="/banner.png" alt="Banner image" fill className="object-cover" priority />
             </div>
           </motion.div>
         </div>

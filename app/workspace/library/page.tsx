@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Loader2, Plus, Upload } from 'lucide-react';
+import { WelcomeDialog } from '@/app/components/welcomeDialog';
 import { Component } from '@/app/services/db/schema';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -93,6 +94,7 @@ export default function LibraryPage() {
           />
         ))}
       </div>
+      <WelcomeDialog />
     </div>
   );
 }

@@ -1,14 +1,15 @@
 'use client';
 
 import * as React from 'react';
+import { WelcomeDialog } from '@/app/components/welcomeDialog';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { BackendContent } from './backend';
+import { CmsContent } from './cms';
 import { ChatHeader } from './components/ChatHeader';
 import { SharedContextProvider } from './contexts/SharedContext';
 import { FrontendContent } from './frontend';
 import { RequirementContent } from './requirement';
 import { TestContent } from './test';
-import { CmsContent } from './cms';
 
 function ChatsContent() {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
@@ -38,9 +39,9 @@ function ChatsContent() {
         <TabsContent value="test" className="h-full">
           <TestContent />
         </TabsContent>
-        <TabsContent value="cms" className="h-full">
+        {/* <TabsContent value="cms" className="h-full">
           <CmsContent />
-        </TabsContent>
+        </TabsContent> */}
       </div>
     </Tabs>
   );
@@ -50,6 +51,7 @@ export default function ChatsPage() {
   return (
     <SharedContextProvider>
       <ChatsContent />
+      <WelcomeDialog />
     </SharedContextProvider>
   );
 }
