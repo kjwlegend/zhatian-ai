@@ -1,11 +1,11 @@
 import React from 'react';
 import Footer from './Footer/Footer';
-import HeaderNew from './Header/headernew';
+import NewHeader from './Header/headernew';
 
 export function DefaultLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <HeaderNew />
+      <NewHeader />
       {children}
       <Footer />
     </>

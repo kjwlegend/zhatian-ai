@@ -1,5 +1,6 @@
 'use client';
 
+import { v4 as uuidv4 } from 'uuid';
 import { create } from 'zustand';
 import { Project } from '@/app/workspace/projects/types/project';
 import {
@@ -54,7 +55,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const newProject: Project = {
-        id: crypto.randomUUID(),
+        id: uuidv4(),
         name: projectData.name || 'New Project',
         description: projectData.description || '',
         status: projectData.status || 'active',

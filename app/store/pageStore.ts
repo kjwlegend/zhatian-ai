@@ -1,5 +1,6 @@
 'use client';
 
+import { v4 as uuidv4 } from 'uuid';
 import { create } from 'zustand';
 import { openChatDB } from '../services/db';
 import { Component, Page, PageComponent } from '../services/db/schema';
@@ -63,7 +64,7 @@ export const usePageStore = create<PageState>((set, get) => ({
     try {
       const db = await openChatDB();
       const newPage: Page = {
-        id: crypto.randomUUID(),
+        id: uuidv4(),
         projectId,
         name: pageData.name || '新页面',
         description: pageData.description || '',
@@ -145,7 +146,7 @@ export const usePageStore = create<PageState>((set, get) => ({
 
       // 创建新的组件引用
       const pageComponent: PageComponent = {
-        id: crypto.randomUUID(),
+        id: uuidv4(),
         componentId,
         pageId,
         order: typeof targetIndex === 'number' ? targetIndex : page.components.length,
