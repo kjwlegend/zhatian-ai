@@ -94,7 +94,16 @@ export const sampleTasks: Task[] = [
   {
     id: '11',
     title: '生成流程图',
-    labels: ['workspace', 'marketplace'],
+    labels: ['requirement', 'brd'],
+    createdDate: '2024-12-26',
+    targetDate: '2024-12-26',
+    count: 5,
+    status: 'review',
+  },
+  {
+    id: '12',
+    title: '生成JIRA 卡片描述细节',
+    labels: ['project management', 'jira'],
     createdDate: '2024-12-26',
     targetDate: '2024-12-26',
     count: 5,
