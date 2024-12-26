@@ -1,6 +1,6 @@
 export const REQUIREMENT_SYSTEM_PROMPT = `你是一位专业的前端组件设计专家。在分析设计图或描述时，请专注于组件结构和交互逻辑的拆解，而不是具体的业务内容。你的回答必须包含以下内容，并使用markdown格式：
 
-1. 组件结构分析
+# 1. 组件结构分析
 - 页面布局架构
   * 整体布局类型（如Grid、Flex布局）
   * 响应式布局策略
@@ -9,8 +9,7 @@ export const REQUIREMENT_SYSTEM_PROMPT = `你是一位专业的前端组件设�
   * 对齐方式
   * 间距规律
   * 层级关系
-
-2. 组件拆解
+# 2. 组件拆解
 - 核心组件识别
   * 组件名称和类型（如轮播、列表、表单等）
   * 组件层级关系
@@ -21,18 +20,30 @@ export const REQUIREMENT_SYSTEM_PROMPT = `你是一位专业的前端组件设�
   * 基础UI元素清单（按钮、图片、文本等）
   * 交互行为定义
   * 状态管理需求
-
-3. 交互逻辑设计
-- 用户交互流程
+- 每个组件的用户交互流程和：
   * 点击/触摸事件
-  * 滚动/拖拽行为
+  * 滚动/拖拽行为 
   * 动画过渡效果
-- 状态变化
+  * 动画时长
+  * 过渡效果
+  * 反馈机制
+  * 例如：点击后，弹出toast提示，toast提示内容为"点击成功"
+  * 例如：点击后，样式或者颜色变化
+- 组件的状态变化
   * 组件内部状态
   * 组件间状态同步
   * 状态切换动效
+- 组件约束和规范
+  * 例如：
+  * * 邮件组件：(例如：最大长度为100，不能包含特殊字符, 邮件地址格式验证)
+  * * 手机号：(例如：11位，不能包含特殊字符, 手机号格式验证)
+  * * 商品标题： 不超过100个字符
+  * 
+  * 尺寸限制
+  * 响应式断点
+  * 主题定制范围
 
-4. CMS配置能力设计
+# 3. CMS配置能力设计
 - 组件级配置项
   * 布局配置（间距、对齐方式等）
   * 样式配置（颜色、字体、边框等）
@@ -46,15 +57,26 @@ export const REQUIREMENT_SYSTEM_PROMPT = `你是一位专业的前端组件设�
   * 触发条件设置
   * 响应行为定义
 
-5. 组件约束和规范
-- 样式规范
-  * 尺寸限制
-  * 响应式断点
-  * 主题定制范围
-- 交互规范
-  * 动画时长
-  * 过渡效果
-  * 反馈机制
+# 4. 输出数据埋点方案
+- 根据当前组件，输出数据埋点方案
+  * 埋点类型
+    + 点击事件
+    + 滚动事件
+    + 输入事件
+    + 错误事件
+  * 埋点参数
+    + 事件类型
+    + 事件时间
+    + 事件位置
+    + 用户ID
+    + 会话ID
+  * 埋点触发条件
+    + 用户点击
+    + 用户滚动到特定位置
+    + 用户输入特定内容
+    + 发生错误
+
+
 
 注意事项：
 1. 专注于组件的结构和交互逻辑，不要过多关注具体业务内容
@@ -294,7 +316,6 @@ Follow Cypress best practices, including proper selector usage, custom commands,
 Follow Playwright best practices, including proper selector usage, fixtures, and parallel testing.`,
 } as const;
 
-
 export const WORDPRESS_PROMPT = `
 请作为一个 WordPress 页面构建专家，根据以下需求生成完整的区块标记代码：
 
@@ -463,6 +484,3 @@ Current Framework: ${framework.toUpperCase()}
 Please ensure all test examples follow ${framework.toUpperCase()} best practices.
 Focus on test coverage, maintainability, and reliability.`;
 }
-
-
-

@@ -83,6 +83,7 @@ export const useComponentStore = create<ComponentState>()(
           }));
         } catch (err) {
           set({ error: err instanceof Error ? err : new Error('Failed to update component') });
+          throw err;
         } finally {
           set({ loading: false });
         }
