@@ -1,6 +1,7 @@
 import React from 'react';
 
 import './styles/global.scss';
+import { TALKING_DATA_APPID, VERSION } from './utils/constant';
 
 import { MantineProvider } from '@mantine/core';
 import { Toaster } from '@/components/ui/toaster';
@@ -20,6 +21,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           name="viewport"
           content="minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no"
         />
+        <script
+          async
+          src={
+            `https://jic.talkingdata.com/app/h5/v1?appid=${TALKING_DATA_APPID}&vn=公测版&vc=${VERSION}`
+          }
+        ></script>
       </head>
       <body>
         <MantineProvider>

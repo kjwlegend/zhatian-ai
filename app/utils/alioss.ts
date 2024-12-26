@@ -1,8 +1,6 @@
 import OSS from "ali-oss";
 
-const OSS_ACCESS_KEY_ID = process.env.OSS_ACCESS_KEY_ID;
-const OSS_ACCESS_KEY_SECRET = process.env.OSS_ACCESS_KEY_SECRET;
-const OSS_BUCKET = process.env.OSS_BUCKET;
+import { OSS_ACCESS_KEY_ID, OSS_ACCESS_KEY_SECRET, OSS_BUCKET } from "./constant";
 
 const getossClient = () => {
 	return new OSS({
