@@ -7,18 +7,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const currentVersion = {
-  version: '0.1',
-  date: '2023-12-24',
-  updates: [
-    '初始版本上线',
-    '基础AI对话功能',
-    '本地数据存储',
-    '基于图片的BRD文档生成',
-    '基于图片的前端代码生成',
-    '根据前端代码及架构生成后端代码',
-    '根据前端代码及架构生成测试用例',
-    'BD 助手',
-  ],
+  version: '0.1.1',
+  date: '2023-12-29',
+  updates: ['BRD 文档输出增加 User Story 描述', 'BRD 文档输出增加验收标准', '优化 BRD 文档格式'],
 };
 
 const nextVersion = {
@@ -29,11 +20,24 @@ const nextVersion = {
 
 const versionHistory = [
   {
+    version: '0.1.1',
+    date: '2023-12-29',
+    updates: ['BRD 文档输出增加 User Story 描述', 'BRD 文档输出增加验收标准', '优化 BRD 文档格式'],
+  },
+  {
     version: '0.1',
     date: '2023-12-24',
-    updates: ['初始版本上线', '基础AI对话功能', '本地数据存储'],
+    updates: [
+      '初始版本上线',
+      '基础AI对话功能',
+      '本地数据存储',
+      '基于图片的BRD文档生成',
+      '基于图片的前端代码生成',
+      '根据前端代码及架构生成后端代码',
+      '根据前端代码及架构生成测试用例',
+      'BD 助手',
+    ],
   },
-  // 可以继续添加更多历史版本
 ];
 
 export function WelcomeDialog() {
