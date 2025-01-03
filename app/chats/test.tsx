@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useChatStore } from '@/app/store/chatStore';
-import { useTestCode } from '@/app/store/codeStore';
+import { useCodeStore, useTestCode } from '@/app/store/codeStore';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BaseChatInterface } from './components/BaseChatInterface';
 import { ClearChatButton } from './components/ClearChatButton';
@@ -15,7 +15,7 @@ import {
 import { ResizableLayout } from './components/ResizableLayout';
 import { SharedFirstColumn } from './components/SharedFirstColumn';
 import { getTestPrompt } from './constants/prompts';
-import { useChatMessages } from './hooks/useChatMessages';
+import { Message, useChatMessages } from './hooks/useChatMessages';
 import { useCodeParser } from './hooks/useCodeParser';
 
 export function TestContent() {
@@ -32,6 +32,20 @@ export function TestContent() {
 
   const { parseResponse } = useCodeParser();
   const [copiedStates, setCopiedStates] = React.useState<Record<string, boolean>>({});
+
+  const { testCases } = useCodeStore();
+  const testCasesAndMessage: Message[] = [
+    // 将测试用例转换为消息格式
+    ...(testCases
+      ? [
+          {
+            role: 'user' as const,
+            content: `该功能的测试用例:\n${testCases}`,
+          },
+        ]
+      : []),
+    ...testMessages,
+  ];
 
   const { messages, isLoading, handleSendMessage, clearMessages } = useChatMessages({
     systemPrompt: getTestPrompt(selectedFramework),

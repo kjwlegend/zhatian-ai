@@ -9,7 +9,7 @@ export function ContactHeader() {
           <Mail className="h-4 w-4" />
           <span>需要新功能？请发送邮件至：</span>
           <a href="mailto:jingwei.kong@baozun.com" className="font-medium hover:underline">
-            support@example.com
+            jingwei.kong@baozun.com
           </a>
         </div>
         <div className="flex items-center gap-2">

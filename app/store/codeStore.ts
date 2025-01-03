@@ -30,6 +30,11 @@ interface CodeState {
   designFile: string | null;
   setDesignFile: (file: string | null) => void;
 
+  // Test Case state
+  testCases: string;
+  setTestCases: (cases: string) => void;
+  clearTestCases: () => void;
+
   // CMS state
   cmsCode: Record<string, string>;
   setCmsCode: (code: Record<string, string>) => void;
@@ -74,6 +79,7 @@ export const useCodeStore = create<CodeState>()(
       // Initialize component doc and design file
       componentDoc: '',
       designFile: null,
+      testCases: '',
 
       // Initialize CMS code
       cmsCode: {},
@@ -138,6 +144,9 @@ export const useCodeStore = create<CodeState>()(
             [type]: tab,
           },
         })),
+
+      setTestCases: (testCases: string) => set({ testCases: testCases }),
+      clearTestCases: () => set({ testCases: '' }),
 
       setComponentDoc: (doc) => set({ componentDoc: doc }),
       setDesignFile: (file) => set({ designFile: file }),

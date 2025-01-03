@@ -53,7 +53,7 @@ export const sampleTasks: Task[] = [
     createdDate: '2024-12-25',
     targetDate: '2025-02-15',
     count: 20,
-    status: 'review',
+    status: 'completed',
   },
   {
     id: '7',

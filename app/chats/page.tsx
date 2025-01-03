@@ -10,6 +10,7 @@ import { SharedContextProvider } from './contexts/SharedContext';
 import { FrontendContent } from './frontend';
 import { RequirementContent } from './requirement';
 import { TestContent } from './test';
+import { TestCaseContent } from './test-case';
 
 function ChatsContent() {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
@@ -35,6 +36,9 @@ function ChatsContent() {
         </TabsContent>
         <TabsContent value="backend" className="h-full">
           <BackendContent />
+        </TabsContent>
+        <TabsContent value="test-case" className="h-full">
+          <TestCaseContent />
         </TabsContent>
         <TabsContent value="test" className="h-full">
           <TestContent />

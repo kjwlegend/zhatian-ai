@@ -37,6 +37,7 @@ export interface Component {
   verified: boolean;
   description: string;
   designFile: string;
+  testCases: string;
   code: {
     frontend: Record<string, string>;
     backend: Record<string, string>;

@@ -8,6 +8,7 @@ interface ChatState {
   frontendMessages: Message[];
   backendMessages: Message[];
   testMessages: Message[];
+  testCaseMessages: Message[];
   cmsMessages: Message[];
 
   // Framework 选择
@@ -20,6 +21,7 @@ interface ChatState {
   setFrontendMessages: (messages: Message[]) => void;
   setBackendMessages: (messages: Message[]) => void;
   setTestMessages: (messages: Message[]) => void;
+  setTestCaseMessages: (messages: Message[]) => void;
   setCmsMessages: (messages: Message[]) => void;
 
   setFrontendFramework: (framework: string | null) => void;
@@ -38,47 +40,44 @@ export const useChatStore = create<ChatState>()(
       frontendMessages: [],
       backendMessages: [],
       testMessages: [],
+      testCaseMessages: [],
       cmsMessages: [],
       frontendFramework: null,
       backendFramework: null,
       testFramework: null,
 
       // Actions
-      setRequirementMessages: (messages) => 
-        set({ requirementMessages: messages }),
-      
-      setFrontendMessages: (messages) => 
-        set({ frontendMessages: messages }),
-      
-      setBackendMessages: (messages) => 
-        set({ backendMessages: messages }),
-      
-      setTestMessages: (messages) => 
-        set({ testMessages: messages }),
-      
-      setCmsMessages: (messages) => 
-        set({ cmsMessages: messages }),
+      setRequirementMessages: (messages) => set({ requirementMessages: messages }),
 
-      setFrontendFramework: (framework) => 
-        set({ frontendFramework: framework }),
-      
-      setBackendFramework: (framework) => 
-        set({ backendFramework: framework }),
-      
-      setTestFramework: (framework) => 
-        set({ testFramework: framework }),
+      setFrontendMessages: (messages) => set({ frontendMessages: messages }),
+
+      setBackendMessages: (messages) => set({ backendMessages: messages }),
+
+      setTestMessages: (messages) => set({ testMessages: messages }),
+
+      setTestCaseMessages: (message) => set({ testCaseMessages: message }),
+
+      setCmsMessages: (messages) => set({ cmsMessages: messages }),
+
+      setFrontendFramework: (framework) => set({ frontendFramework: framework }),
+
+      setBackendFramework: (framework) => set({ backendFramework: framework }),
+
+      setTestFramework: (framework) => set({ testFramework: framework }),
 
       // 重置
-      reset: () => set({
-        requirementMessages: [],
-        frontendMessages: [],
-        backendMessages: [],
-        testMessages: [],
-        cmsMessages: [],
-        frontendFramework: null,
-        backendFramework: null,
-        testFramework: null,
-      }),
+      reset: () =>
+        set({
+          requirementMessages: [],
+          frontendMessages: [],
+          backendMessages: [],
+          testCaseMessages: [],
+          testMessages: [],
+          cmsMessages: [],
+          frontendFramework: null,
+          backendFramework: null,
+          testFramework: null,
+        }),
     }),
     {
       name: 'chat-state',

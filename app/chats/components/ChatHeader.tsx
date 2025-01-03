@@ -82,8 +82,8 @@ export function ChatHeader({ isModalOpen, setIsModalOpen }: ChatHeaderProps) {
           <TabsTrigger value="requirement">需求</TabsTrigger>
           <TabsTrigger value="frontend">前端</TabsTrigger>
           <TabsTrigger value="backend">后端</TabsTrigger>
-          <TabsTrigger value="test">测试脚本</TabsTrigger>
           <TabsTrigger value="test-case">测试用例</TabsTrigger>
+          <TabsTrigger value="test">测试脚本</TabsTrigger>
         </TabsList>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={handleReset} className="flex items-center gap-2">

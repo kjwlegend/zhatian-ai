@@ -48,6 +48,7 @@ const defaultComponent: Omit<Component, 'id' | 'createdAt' | 'updatedAt'> = {
     backend: {},
     test: {},
   },
+  testCases: '',
   codeFramework: 'react',
   componentDoc: '',
   creator: 'system',
@@ -63,7 +64,7 @@ export function SaveProjectDialog({
   onSave,
   currentComponent,
 }: SaveProjectDialogProps) {
-  const { codeOutputs, componentDoc, designFile } = useCodeStore();
+  const { codeOutputs, componentDoc, designFile, testCases } = useCodeStore();
   const [componentData, setComponentData] = useState(defaultComponent);
   const [saveAsNew, setSaveAsNew] = useState(false);
 
@@ -86,6 +87,7 @@ export function SaveProjectDialog({
             backend: codeOutputs.backend || currentComponent.code.backend,
             test: codeOutputs.test || currentComponent.code.test,
           },
+          testCases: currentComponent.testCases,
           codeFramework: currentComponent.codeFramework,
           componentDoc: componentDoc || currentComponent.componentDoc,
           creator: currentComponent.creator,
@@ -103,6 +105,7 @@ export function SaveProjectDialog({
             test: codeOutputs.test,
           },
           componentDoc: componentDoc,
+          testCases: testCases,
           designFile: designFile || '',
         });
       }
