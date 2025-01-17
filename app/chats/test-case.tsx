@@ -12,6 +12,7 @@ import { FrameworkSelector } from './components/FrameworkSelector';
 import { ResizableLayout } from './components/ResizableLayout';
 import { SharedFirstColumn } from './components/SharedFirstColumn';
 import { TEST_CASE_GENERATION_PROMPT } from './constants/prompts';
+import { TEST_CASE_QUICK_PROMPTS } from './constants/quickPrompts';
 import { useChatMessages } from './hooks/useChatMessages';
 import { useTestCaseParser } from './hooks/useTestCaseParser';
 
@@ -47,13 +48,9 @@ export function TestCaseContent() {
     <BaseChatInterface
       messages={messages}
       onSendMessage={handleSendMessage}
+      quickPrompts={TEST_CASE_QUICK_PROMPTS}
       headerContent={
         <div className="flex items-center gap-2">
-          {/* <FrameworkSelector
-            type="test"
-            value={selectedFramework}
-            onValueChange={handleFrameworkChange}
-          /> */}
           <ClearChatButton onClear={handleClearAll} tabName="Test Cases" />
         </div>
       }

@@ -7,23 +7,34 @@ interface Message {
   content: string;
 }
 
+interface QuickPrompt {
+  title: string;
+  content: string;
+}
+
 interface BaseChatInterfaceProps {
   messages: Message[];
   onSendMessage: (message: string, attachments: string[]) => void;
   headerContent?: React.ReactNode;
+  quickPrompts?: QuickPrompt[];
 }
 
 export function BaseChatInterface({
   messages,
   onSendMessage,
   headerContent,
+  quickPrompts,
 }: BaseChatInterfaceProps) {
   return (
     <Card className="w-full h-full">
       <CardContent className="p-4 h-full flex flex-col">
         {headerContent && <div className="flex-shrink-0 mb-4">{headerContent}</div>}
         <div className="flex-1 min-h-0">
-          <ChatInterface messages={messages} onSendMessage={onSendMessage} />
+          <ChatInterface
+            messages={messages}
+            onSendMessage={onSendMessage}
+            quickPrompts={quickPrompts}
+          />
         </div>
       </CardContent>
     </Card>

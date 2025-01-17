@@ -9,6 +9,7 @@ import { MarkdownEditor } from './components/MarkdownEditor';
 import { ResizableLayout } from './components/ResizableLayout';
 import { SharedFirstColumn } from './components/SharedFirstColumn';
 import { REQUIREMENT_SYSTEM_PROMPT } from './constants/prompts';
+import { REQUIREMENT_QUICK_PROMPTS } from './constants/quickPrompts';
 import { useChatMessages } from './hooks/useChatMessages';
 import { useRequirementParser } from './hooks/useRequirementParser';
 
@@ -44,6 +45,7 @@ export function RequirementContent() {
     <BaseChatInterface
       messages={messages}
       onSendMessage={handleSendMessage}
+      quickPrompts={REQUIREMENT_QUICK_PROMPTS}
       headerContent={
         <div className="flex items-center gap-2">
           <ClearChatButton onClear={clearMessages} tabName="Requirement" />

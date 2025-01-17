@@ -16,6 +16,7 @@ const defaultNewComponent: Omit<Component, 'id' | 'createdAt' | 'updatedAt'> = {
     backend: {},
     test: {},
   },
+  testCases: '',
   codeFramework: 'react',
   componentDoc: '',
   creator: 'system',

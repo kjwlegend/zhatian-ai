@@ -105,9 +105,9 @@ export const sampleTasks: Task[] = [
     title: '生成JIRA 卡片描述细节',
     labels: ['project management', 'jira'],
     createdDate: '2024-12-26',
-    targetDate: '2024-12-26',
-    count: 5,
-    status: 'review',
+    targetDate: '2024-01-17',
+    count: 17,
+    status: 'completed',
   },
   {
     id: '13',
@@ -170,6 +170,16 @@ export const sampleTasks: Task[] = [
     createdDate: '2024-12-26',
     targetDate: '2024-12-31',
     count: 8,
+    status: 'completed',
+  },
+
+  {
+    id: '22',
+    title: '快捷输入模板',
+    labels: ['templates'],
+    createdDate: '2024-01-17',
+    targetDate: '2024-01-17',
+    count: 1,
     status: 'completed',
   },
 ];

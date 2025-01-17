@@ -8,6 +8,7 @@ import { CmsContent } from './cms';
 import { ChatHeader } from './components/ChatHeader';
 import { SharedContextProvider } from './contexts/SharedContext';
 import { FrontendContent } from './frontend';
+import { JiraContent } from './jira';
 import { RequirementContent } from './requirement';
 import { TestContent } from './test';
 import { TestCaseContent } from './test-case';
@@ -43,9 +44,9 @@ function ChatsContent() {
         <TabsContent value="test" className="h-full">
           <TestContent />
         </TabsContent>
-        {/* <TabsContent value="cms" className="h-full">
-          <CmsContent />
-        </TabsContent> */}
+        <TabsContent value="jira" className="h-full">
+          <JiraContent />
+        </TabsContent>
       </div>
     </Tabs>
   );

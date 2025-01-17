@@ -30,6 +30,9 @@ interface ChatState {
 
   // 重置所有状态
   reset: () => void;
+
+  jiraMessages: any[];
+  setJiraMessages: (messages: any[]) => void;
 }
 
 export const useChatStore = create<ChatState>()(
@@ -45,6 +48,7 @@ export const useChatStore = create<ChatState>()(
       frontendFramework: null,
       backendFramework: null,
       testFramework: null,
+      jiraMessages: [],
 
       // Actions
       setRequirementMessages: (messages) => set({ requirementMessages: messages }),
@@ -65,6 +69,8 @@ export const useChatStore = create<ChatState>()(
 
       setTestFramework: (framework) => set({ testFramework: framework }),
 
+      setJiraMessages: (messages) => set({ jiraMessages: messages }),
+
       // 重置
       reset: () =>
         set({
@@ -77,6 +83,7 @@ export const useChatStore = create<ChatState>()(
           frontendFramework: null,
           backendFramework: null,
           testFramework: null,
+          jiraMessages: [],
         }),
     }),
     {

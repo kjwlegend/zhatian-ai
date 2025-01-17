@@ -15,6 +15,7 @@ import {
 import { ResizableLayout } from './components/ResizableLayout';
 import { SharedFirstColumn } from './components/SharedFirstColumn';
 import { getBackendPrompt } from './constants/prompts';
+import { BACKEND_QUICK_PROMPTS } from './constants/quickPrompts';
 import { useChatMessages } from './hooks/useChatMessages';
 import { useCodeParser } from './hooks/useCodeParser';
 
@@ -82,6 +83,7 @@ export function BackendContent() {
     <BaseChatInterface
       messages={messages}
       onSendMessage={handleSendMessage}
+      quickPrompts={BACKEND_QUICK_PROMPTS}
       headerContent={
         <div className="flex items-center gap-2">
           <FrameworkSelector

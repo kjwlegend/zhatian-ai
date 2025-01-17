@@ -40,6 +40,10 @@ interface CodeState {
   setCmsCode: (code: Record<string, string>) => void;
   updateCmsCode: (code: Record<string, string>) => void;
   clearCmsCode: () => void;
+
+  // JIRA state
+  jiraContent: string;
+  setJiraContent: (content: string) => void;
 }
 
 const getInitialFramework = (type: CodeType) => {
@@ -83,6 +87,9 @@ export const useCodeStore = create<CodeState>()(
 
       // Initialize CMS code
       cmsCode: {},
+
+      // JIRA state
+      jiraContent: '',
 
       setSelectedFramework: (type, framework) =>
         set((state) => ({
@@ -153,6 +160,8 @@ export const useCodeStore = create<CodeState>()(
       setCmsCode: (code) => set({ cmsCode: code }),
       updateCmsCode: (code) => set({ cmsCode: code }),
       clearCmsCode: () => set({ cmsCode: {} }),
+
+      setJiraContent: (content) => set({ jiraContent: content }),
     }),
     {
       name: 'code-storage',
