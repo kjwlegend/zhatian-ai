@@ -7,14 +7,14 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const currentVersion = {
-  version: '0.1.1',
-  date: '2023-12-29',
-  updates: ['BRD 文档输出增加 User Story 描述', 'BRD 文档输出增加验收标准', '优化 BRD 文档格式'],
+  version: '0.1.2',
+  date: '2025-01-17',
+  updates: ['增加快捷输入模板', '生成JIRA卡片描述细节'],
 };
 
 const nextVersion = {
   version: '0.2',
-  expectedDate: '2024-01-15',
+  expectedDate: '2025-02-17',
   plannedFeatures: ['用户系统', '云端数据同步', '高级AI模型集成', '组件库完善', '组件市场'],
 };
 
@@ -36,6 +36,9 @@ const versionHistory = [
       '根据前端代码及架构生成后端代码',
       '根据前端代码及架构生成测试用例',
       'BD 助手',
+      'BRD 文档输出增加 User Story 描述',
+      'BRD 文档输出增加验收标准',
+      '优化 BRD 文档格式',
     ],
   },
 ];
