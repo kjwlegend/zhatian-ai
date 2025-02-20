@@ -19,6 +19,8 @@ export default function ProjectPage() {
     if (password === 'xiaoguang666') {
       setIsVerified(true);
       setError('');
+      const iframeSrc = IFRAME_SRC[params.projectId as string] || IFRAME_SRC.default;
+      window.open(`${iframeSrc}/`, '_blank');
     } else {
       setError('密码错误，请重试');
     }
@@ -64,6 +66,7 @@ export default function ProjectPage() {
     );
   }
 
+  return null;
   const iframeSrc = IFRAME_SRC[params.projectId as string] || IFRAME_SRC.default;
 
   return (
