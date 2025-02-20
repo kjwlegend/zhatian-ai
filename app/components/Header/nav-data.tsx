@@ -54,6 +54,11 @@ export const navItems: NavItem[] = [
     icon: MessageCircle,
   },
   {
+    title: '项目助手',
+    href: '/agents',
+    icon: MessageCircle,
+  },
+  {
     title: 'BD助手',
     href: '/bd',
     icon: MessageCircle,

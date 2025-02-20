@@ -20,6 +20,14 @@ export default withBundleAnalyzer({
   experimental: {
     optimizePackageImports: ['@mantine/core', '@mantine/hooks'],
   },
+  async rewrites() {
+    return [
+      {
+        source: '/chatbot/:path*',
+        destination: 'http://bomb.baozun.com/chatbot/:path*',
+      },
+    ];
+  },
   images: {
     dangerouslyAllowSVG: true,
     remotePatterns: [
