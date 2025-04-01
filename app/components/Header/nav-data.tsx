@@ -75,7 +75,7 @@ export const navItems: NavItem[] = [
   },
   {
     title: 'UI-Compare',
-    href: '/uiCompare',
+    href: '/pixelCompare',
     icon: FileText,
   },
   {

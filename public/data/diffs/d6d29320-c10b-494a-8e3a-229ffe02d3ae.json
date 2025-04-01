@@ -1,0 +1,19 @@
+{
+  "baseId": "5086e36c-1e90-4344-9ef8-446ce32f99f0",
+  "compareId": "75855226-6574-4d5e-81c5-30b6153b4fd8",
+  "baseName": "demo2",
+  "compareName": "demo1",
+  "diffPixels": 1790,
+  "diffPercentage": 0.28394850221130846,
+  "threshold": 0.01,
+  "ignoreAA": false,
+  "timestamp": "2025-03-31T17:38:47.713Z",
+  "diffImage": "d6d29320-c10b-494a-8e3a-229ffe02d3ae.png",
+  "baseImage": "5086e36c-1e90-4344-9ef8-446ce32f99f0.png",
+  "compareImage": "75855226-6574-4d5e-81c5-30b6153b4fd8.png",
+  "dimensions": {
+    "width": 702,
+    "height": 898
+  },
+  "diffAreas": []
+}
