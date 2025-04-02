@@ -326,7 +326,7 @@ export async function GET(
                                 - 阈值: ${promptData.threshold}
 
                             差异区域（${promptData.diff_areas.length}个聚类）:
-                            ${promptData.diff_areas.map((area, i) =>
+                            ${promptData.diff_areas.map((area: DiffArea, i: number) =>
       `区域 ${i + 1}: x=${area.x}, y=${area.y}, 宽度=${area.width}, 高度=${area.height}, 像素=${area.points}`
     ).join('\n')}
 

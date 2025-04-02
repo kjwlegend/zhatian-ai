@@ -39,12 +39,16 @@ interface ComparisonResult {
   baseName?: string;
   compareName?: string;
   timestamp?: string;
-  baseImageId: string;
-  compareImageId: string;
+  baseId: string;
+  compareId: string;
   baseImageName: string;
   compareImageName: string;
   diffCount: number;
   date: string;
+
+  base_name?: string;
+  compare_name?: string;
+  diff_percentage?:number;
 }
 
 interface ReportIssue {
@@ -62,6 +66,7 @@ interface Report {
   metadata?: {
     diffId: string;
     generatedAt: string;
+    comparisonData: ComparisonResult;
   };
   comparisonId: string;
   baseImageName: string;
@@ -726,10 +731,10 @@ export default function PixelCompare() {
                           {report?.metadata?.comparisonData?.base_name} vs {report?.metadata?.comparisonData?.compare_name}
                         </h3>
                         <p className="text-sm text-gray-500">
-                          Diff: {report?.metadata?.comparisonData?.diff_percentage.toFixed(2)}%
+                          Diff: {(report?.metadata?.comparisonData?.diff_percentage ?? 0).toFixed(2)}%
                         </p>
                         <p className="text-xs text-gray-400">
-                          {new Date(report?.metadata?.generatedAt).toLocaleString()}
+                          {new Date(report?.metadata?.generatedAt ?? Date.now()).toLocaleString()}
                         </p>
                       </CardContent>
                     </Card>
