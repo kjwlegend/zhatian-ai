@@ -61,7 +61,7 @@ interface BaseMetadata {
 const readDiffImage = (filePath: string): Promise<PNG> => {
   return new Promise((resolve, reject) => {
     fs.createReadStream(filePath)
-      .pipe(new PNG())
+      .pipe(new PNG() as any)
       .on('parsed', function (this: PNG) {
         resolve(this);
       })

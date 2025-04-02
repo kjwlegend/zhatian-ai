@@ -40,7 +40,7 @@ interface ComparisonResult {
 const readImage = (filePath: string): Promise<PNG> => {
   return new Promise((resolve, reject) => {
     const stream = fs.createReadStream(filePath)
-      .pipe(new PNG())
+      .pipe(new PNG() as any)
       .on('parsed', function (this: PNG) {
         resolve(this);
       })
