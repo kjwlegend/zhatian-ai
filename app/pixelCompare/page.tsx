@@ -3,52 +3,34 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { InfoCircledIcon, ImageIcon, MagnifyingGlassIcon, FileTextIcon, TrashIcon, UploadIcon } from "@radix-ui/react-icons";
-import { Skeleton } from "@/components/ui/skeleton";
-import Image from "next/image";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { AlertCircle, Trash2, Upload } from "lucide-react";
-import axios from "axios";
+// @ts-ignore
+// import { get } from 'lodash'
 
-// Types
+// Types for UI Compare
 interface Screenshot {
-  id: string;
-  filename: string;
-  name: string;
-  date: string;
-  size: number;
-  width?: number;
-  height?: number;
-  deviceType: string;
-  url?: string;
+  uploadName: string;
+  fileName: string;
+  filePath: string;
+  originalFilename: string;
 }
 
-interface ComparisonResult {
+interface Comparison {
   id: string;
-  baseImage: string;
-  compareImage: string;
-  diffImage: string;
-  diffPixels: number;
-  diffPercentage: number;
-  baseName?: string;
-  compareName?: string;
-  timestamp?: string;
   baseId: string;
   compareId: string;
-  baseImageName: string;
-  compareImageName: string;
-  diffCount: number;
+  baseImage: string;
+  compareImage: string;
+  baseName: string;
+  compareName: string;
+  diffPixels: number;
+  diffPercentage: number;
+  diffImage: string;
   date: string;
-
-  base_name?: string;
-  compare_name?: string;
-  diff_percentage?:number;
 }
 
 interface ReportIssue {
@@ -59,21 +41,22 @@ interface ReportIssue {
   recommendation: string;
 }
 
-interface Report {
+interface UIReport {
   id: string;
   summary: string;
   issues: ReportIssue[];
   metadata?: {
     diffId: string;
     generatedAt: string;
-    comparisonData: ComparisonResult;
+    comparisonData: any;
   };
-  comparisonId: string;
-  baseImageName: string;
-  compareImageName: string;
-  diffPercentage: number;
-  aiAnalysis: string;
   date: string;
+}
+
+interface UICompare {
+  Screenshots: Screenshot[];
+  Comparisons: Comparison[];
+  Reports: UIReport[];
 }
 
 export default function PixelCompare() {
@@ -93,14 +76,14 @@ export default function PixelCompare() {
   // Compare tab states
   const [baseImageId, setBaseImageId] = useState("");
   const [compareImageId, setCompareImageId] = useState("");
-  const [comparisons, setComparisons] = useState<ComparisonResult[]>([]);
-  const [selectedComparison, setSelectedComparison] = useState<ComparisonResult | null>(null);
+  const [comparisons, setComparisons] = useState<Comparison[]>([]);
+  const [selectedComparison, setSelectedComparison] = useState<Comparison | null>(null);
   const [comparing, setComparing] = useState(false);
 
   // Reports tab states
   const [comparisonId, setComparisonId] = useState("");
-  const [reports, setReports] = useState<Report[]>([]);
-  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  const [reports, setReports] = useState<UIReport[]>([]);
+  const [selectedReport, setSelectedReport] = useState<UIReport | null>(null);
   const [generating, setGenerating] = useState(false);
 
   // API base URL
@@ -113,31 +96,33 @@ export default function PixelCompare() {
   }, []);
 
   const fetchScreenshots = async () => {
-    try {
-      const response = await fetch(`${apiBase}/screenshots`);
-      if (response.ok) {
-        const data = await response.json();
-        setScreenshots(data.screenshots || []);
-        setError(null);
-      } else {
-        throw new Error('Failed to fetch screenshots');
+    let UICompare = localStorage.getItem('UI-Compare')
+
+    if (!UICompare) {
+      const params = {
+        Screenshots: [],
+        Comparisons: [],
+        Reports: []
       }
-    } catch (err: any) {
-      console.error('Error fetching screenshots:', err);
-      setError(err.message || 'Failed to fetch screenshots');
+      localStorage.setItem('UI-Compare', JSON.stringify(params))
+      setScreenshots([]);
+    } else {
+      const parsedData = JSON.parse(UICompare) as UICompare;
+      setScreenshots(parsedData.Screenshots || []);
     }
+
+    setError(null);
+    // Skip API fetch since we're using localStorage now
   };
 
   const fetchComparisons = async () => {
     try {
-      const response = await fetch(`${apiBase}/compare`);
-      if (response.ok) {
-        const data = await response.json();
-        setComparisons(data.comparisons || []);
-        setError(null);
-      } else {
-        throw new Error('Failed to fetch comparisons');
+      const UICompareStr = localStorage.getItem('UI-Compare');
+      if (UICompareStr) {
+        const UICompare = JSON.parse(UICompareStr) as UICompare;
+        setComparisons(UICompare.Comparisons || []);
       }
+      setError(null);
     } catch (err: any) {
       console.error('Error fetching comparisons:', err);
       setError(err.message || 'Failed to fetch comparisons');
@@ -146,14 +131,12 @@ export default function PixelCompare() {
 
   const fetchReports = async () => {
     try {
-      const response = await fetch(`${apiBase}/reports`);
-      if (response.ok) {
-        const data = await response.json();
-        setReports(data.reports || []);
-        setError(null);
-      } else {
-        throw new Error('Failed to fetch reports');
+      const UICompareStr = localStorage.getItem('UI-Compare');
+      if (UICompareStr) {
+        const UICompare = JSON.parse(UICompareStr) as UICompare;
+        setReports(UICompare.Reports || []);
       }
+      setError(null);
     } catch (err: any) {
       console.error('Error fetching reports:', err);
       setError(err.message || 'Failed to fetch reports');
@@ -202,23 +185,45 @@ export default function PixelCompare() {
     }
   };
 
-  const uploadImage = async () => {
-    if (!uploadFile || !uploadName) return;
+  // UI-Compare
 
+  const uploadToOSS = async () => {
+    if (!uploadFile || !uploadName) return;
     setLoading(true);
     try {
       const formData = new FormData();
       formData.append("file", uploadFile);
       formData.append("name", uploadName);
+      formData.append('folderName', 'BOMB-AI');
 
-      const response = await fetch(`${apiBase}/screenshots/upload`, {
+      const response = await fetch('/api/upload', {
         method: 'POST',
-        body: formData
+        body: formData,
       });
+      // const response = await fetch(`${apiBase}/screenshots/upload`, {
+      //   method: 'POST',
+      //   body: formData
+      // });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to upload image');
+        throw new Error('上传失败');
+      }
+
+      const data = await response.json();
+      let { fileName, filePath, originalFilename } = data;
+      let image = {
+        uploadName,
+        fileName,
+        filePath,
+        originalFilename
+      };
+      const UICompareStr = localStorage.getItem('UI-Compare');
+      if (UICompareStr) {
+        let UICompare = JSON.parse(UICompareStr) as UICompare;
+        UICompare.Screenshots.push(image);
+        localStorage.setItem('UI-Compare', JSON.stringify(UICompare));
+        // Refresh screenshots list
+        setScreenshots(UICompare.Screenshots);
       }
 
       // Reset form and refresh screenshots
@@ -237,18 +242,15 @@ export default function PixelCompare() {
     }
   };
 
-  const deleteScreenshot = async (id: string) => {
+  const deleteScreenshot = async (index: string) => {
     try {
-      const response = await fetch(`${apiBase}/screenshots/${id}`, {
-        method: 'DELETE'
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to delete screenshot');
+      const UICompareStr = localStorage.getItem('UI-Compare');
+      if (UICompareStr) {
+        const UICompare = JSON.parse(UICompareStr) as UICompare;
+        UICompare.Screenshots.splice(parseInt(index), 1);
+        localStorage.setItem('UI-Compare', JSON.stringify(UICompare));
+        setScreenshots(UICompare.Screenshots);
       }
-
-      fetchScreenshots();
       setError(null);
     } catch (err: any) {
       console.error('Error deleting screenshot:', err);
@@ -258,15 +260,24 @@ export default function PixelCompare() {
 
   const runComparison = async () => {
     if (!baseImageId || !compareImageId) return;
-
     setComparing(true);
+
     try {
+      // Find selected screenshots to get file paths
+      const baseScreenshot = screenshots.find(s => s.fileName === baseImageId);
+      const compareScreenshot = screenshots.find(s => s.fileName === compareImageId);
+
+      if (!baseScreenshot || !compareScreenshot) {
+        throw new Error('Selected screenshots not found');
+      }
+
+      // Call the comparison API with the file paths
       const response = await fetch(`${apiBase}/compare`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          baseImageId,
-          compareImageId
+          baseImageId: baseScreenshot.filePath,
+          compareImageId: compareScreenshot.filePath
         })
       });
 
@@ -274,10 +285,38 @@ export default function PixelCompare() {
         const error = await response.json();
         throw new Error(error.error || 'Failed to compare screenshots');
       }
-      // Reset form and refresh comparisons
+
+      // Get the API response data
+      const comparisonResult = await response.json();
+
+      // Now save the result to localStorage
+      const UICompareStr = localStorage.getItem('UI-Compare');
+      if (UICompareStr) {
+        const UICompare = JSON.parse(UICompareStr) as UICompare;
+
+        // Create comparison object with data from API and localStorage
+        const comparison: Comparison = {
+          id: comparisonResult.id,
+          baseId: baseImageId,
+          compareId: compareImageId,
+          baseImage: baseScreenshot.filePath,
+          compareImage: compareScreenshot.filePath,
+          baseName: baseScreenshot.uploadName,
+          compareName: compareScreenshot.uploadName,
+          diffPixels: comparisonResult.diffPixels,
+          diffPercentage: comparisonResult.diffPercentage,
+          diffImage: comparisonResult.diffImage,
+          date: new Date().toISOString()
+        };
+
+        UICompare.Comparisons.push(comparison);
+        localStorage.setItem('UI-Compare', JSON.stringify(UICompare));
+        setComparisons(UICompare.Comparisons);
+      }
+
+      // Reset form
       setBaseImageId('');
       setCompareImageId('');
-      fetchComparisons();
       setError(null);
     } catch (err: any) {
       console.error('Error running comparison:', err);
@@ -289,16 +328,16 @@ export default function PixelCompare() {
 
   const deleteComparison = async (id: string) => {
     try {
-      const response = await fetch(`${apiBase}/compare/${id}`, {
-        method: 'DELETE'
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to delete comparison');
+      const UICompareStr = localStorage.getItem('UI-Compare');
+      if (UICompareStr) {
+        const UICompare = JSON.parse(UICompareStr) as UICompare;
+        const index = UICompare.Comparisons.findIndex(comp => comp.id === id);
+        if (index !== -1) {
+          UICompare.Comparisons.splice(index, 1);
+          localStorage.setItem('UI-Compare', JSON.stringify(UICompare));
+          setComparisons(UICompare.Comparisons);
+        }
       }
-
-      fetchComparisons();
       setSelectedComparison(null);
       setError(null);
     } catch (err: any) {
@@ -312,10 +351,26 @@ export default function PixelCompare() {
 
     setGenerating(true);
     try {
-      const response = await fetch(`${apiBase}/reports/generate/${comparisonId}`, {
+      // Get comparison data from localStorage
+      const UICompareStr = localStorage.getItem('UI-Compare');
+      if (!UICompareStr) {
+        throw new Error('No comparison data found');
+      }
+
+      const UICompare = JSON.parse(UICompareStr) as UICompare;
+      const comparison = UICompare.Comparisons.find(comp => comp.id === comparisonId);
+
+      if (!comparison) {
+        throw new Error('Comparison not found');
+      }
+
+      // Encode the comparison data to pass directly to the API
+      const encodedData = encodeURIComponent(JSON.stringify(comparison));
+
+      // Call the report generation API with direct data
+      const response = await fetch(`${apiBase}/reports/generate/${comparisonId}?directData=true&data=${encodedData}`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
-        // body: JSON.stringify({ comparisonId })
       });
 
       if (!response.ok) {
@@ -323,9 +378,34 @@ export default function PixelCompare() {
         throw new Error(error.error || 'Failed to generate report');
       }
 
-      // Reset form and refresh reports
+      // Get the API response data
+      const apiResponse = await response.json();
+
+      // Check if the report was successfully generated
+      if (!apiResponse.success || !apiResponse.report) {
+        throw new Error('Failed to generate report: Invalid response format');
+      }
+
+      // Create a report object from API response with the correct format
+      const reportData: UIReport = {
+        id: Date.now().toString(),
+        summary: apiResponse.report.summary,
+        issues: apiResponse.report.issues || [],
+        metadata: {
+          diffId: comparisonId,
+          generatedAt: apiResponse.report.metadata?.generatedAt || new Date().toISOString(),
+          comparisonData: comparison
+        },
+        date: new Date().toISOString()
+      };
+
+      UICompare.Reports.push(reportData);
+      localStorage.setItem('UI-Compare', JSON.stringify(UICompare));
+      setReports(UICompare.Reports);
+
+      // Reset form and refresh reports list
       setComparisonId('');
-      // fetchReports();
+      fetchReports();
       setError(null);
     } catch (err: any) {
       console.error('Error generating report:', err);
@@ -336,16 +416,18 @@ export default function PixelCompare() {
   };
 
   const viewReport = async (id: string) => {
-
     try {
-      const response = await fetch(`${apiBase}/reports/${id}`);
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to fetch report');
-      }
+      const UICompareStr = localStorage.getItem('UI-Compare');
+      if (UICompareStr) {
+        const UICompare = JSON.parse(UICompareStr) as UICompare;
+        const report = UICompare.Reports.find(report => report.id === id);
 
-      const data = await response.json();
-      setSelectedReport(data.report);
+        if (!report) {
+          throw new Error('Report not found');
+        }
+
+        setSelectedReport(report);
+      }
       setError(null);
     } catch (err: any) {
       console.error('Error fetching report:', err);
@@ -355,16 +437,17 @@ export default function PixelCompare() {
 
   const deleteReport = async (id: string) => {
     try {
-      const response = await fetch(`${apiBase}/reports/${id}`, {
-        method: 'DELETE'
-      });
+      const UICompareStr = localStorage.getItem('UI-Compare');
+      if (UICompareStr) {
+        const UICompare = JSON.parse(UICompareStr) as UICompare;
+        const index = UICompare.Reports.findIndex(report => report.id === id);
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to delete report');
+        if (index !== -1) {
+          UICompare.Reports.splice(index, 1);
+          localStorage.setItem('UI-Compare', JSON.stringify(UICompare));
+          setReports(UICompare.Reports);
+        }
       }
-
-      fetchReports();
       setSelectedReport(null);
       setError(null);
     } catch (err: any) {
@@ -500,7 +583,7 @@ export default function PixelCompare() {
                   )}
 
                   <Button
-                    onClick={uploadImage}
+                    onClick={uploadToOSS}
                     disabled={loading || !uploadFile || !uploadName}
                     className="w-full"
                   >
@@ -520,24 +603,24 @@ export default function PixelCompare() {
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {screenshots.map((screenshot) => (
-                <Card key={screenshot.id} className="overflow-hidden">
+              {screenshots.map((screenshot, index) => (
+                <Card key={index} className="overflow-hidden">
                   <img
-                    src={`/data/screenshots/${screenshot.id}.png`}
-                    alt={screenshot.name}
-                    className="w-full  object-cover object-top"
+                    src={screenshot.filePath}
+                    alt={screenshot.uploadName}
+                    className="w-full object-cover object-top"
                   />
                   <CardContent className="p-4">
-                    <h3 className="font-medium truncate">{screenshot.name}</h3>
+                    <h3 className="font-medium truncate">{screenshot.uploadName}</h3>
                     <p className="text-sm text-gray-500 truncate">
-                      {new Date(screenshot.date).toLocaleString()}
+                      {screenshot.fileName}
                     </p>
-                    <p className="text-xs text-gray-400 mb-2">{screenshot.deviceType}</p>
+                    <p className="text-xs text-gray-400 mb-2">{screenshot.originalFilename}</p>
                     <Button
                       variant="destructive"
                       size="sm"
                       className="w-full"
-                      onClick={() => deleteScreenshot(screenshot.id)}
+                      onClick={() => deleteScreenshot(index.toString())}
                     >
                       <Trash2 className="h-4 w-4 mr-1" /> Delete
                     </Button>
@@ -564,9 +647,9 @@ export default function PixelCompare() {
                     onChange={(e) => setBaseImageId(e.target.value)}
                   >
                     <option value="">Select base image</option>
-                    {screenshots.map((screenshot) => (
-                      <option key={screenshot.id} value={screenshot.id}>
-                        {screenshot.name}
+                    {screenshots.map((screenshot, index) => (
+                      <option key={index} value={screenshot.fileName.toString()}>
+                        {screenshot.uploadName}
                       </option>
                     ))}
                   </select>
@@ -580,9 +663,9 @@ export default function PixelCompare() {
                     onChange={(e) => setCompareImageId(e.target.value)}
                   >
                     <option value="">Select compare image</option>
-                    {screenshots.map((screenshot) => (
-                      <option key={screenshot.id} value={screenshot.id}>
-                        {screenshot.name}
+                    {screenshots.map((screenshot, index) => (
+                      <option key={index} value={screenshot.fileName.toString()}>
+                        {screenshot.uploadName}
                       </option>
                     ))}
                   </select>
@@ -613,34 +696,44 @@ export default function PixelCompare() {
                       <div>
                         <h3 className="text-lg font-medium mb-2">Base Image</h3>
                         <img
-                          src={`/data/screenshots/${comparison.baseId}.png`}
-                          alt={comparison.baseImageName}
-                          className="w-full  object-cover object-top border"
+                          src={typeof comparison.baseId === 'number'
+                            ? screenshots[comparison.baseId]?.filePath
+                            : comparison.baseImage}
+                          alt={comparison.baseName}
+                          className="w-full object-cover object-top border"
                         />
                         <p className="text-sm mt-1 truncate">{comparison.baseName}</p>
                       </div>
                       <div>
                         <h3 className="text-lg font-medium mb-2">Compare Image</h3>
                         <img
-                          src={`/data/screenshots/${comparison.compareId}.png`}
-                          alt={comparison.compareImageName}
-                          className="w-full  object-cover object-top border"
+                          src={typeof comparison.compareId === 'number'
+                            ? screenshots[comparison.compareId]?.filePath
+                            : comparison.compareImage}
+                          alt={comparison.compareName}
+                          className="w-full object-cover object-top border"
                         />
                         <p className="text-sm mt-1 truncate">{comparison.compareName}</p>
                       </div>
                       <div>
                         <h3 className="text-lg font-medium mb-2">Diff Result</h3>
-                        <img
-                          src={`/data/diffs/${comparison.id}.png`}
-                          alt="Diff result"
-                          className="w-full  object-cover object-top border"
-                        />
+                        {comparison.diffImage ? (
+                          <img
+                            src={comparison.diffImage}
+                            alt="Diff result"
+                            className="w-full object-cover object-top border"
+                          />
+                        ) : (
+                          <div className="bg-gray-100 w-full h-48 flex items-center justify-center border">
+                            <p className="text-gray-400">Diff Preview</p>
+                          </div>
+                        )}
                         <div className="flex justify-between mt-1">
                           <p className="text-sm">
-                            Diff: <span className="font-medium">{comparison.diffPercentage.toFixed(2)}%</span>
+                            Diff: <span className="font-medium">{comparison.diffPercentage?.toFixed(2) || "0.00"}%</span>
                           </p>
                           <p className="text-sm">
-                            Pixels: <span className="font-medium">{comparison.diffPixels}</span>
+                            Pixels: <span className="font-medium">{comparison.diffPixels || 0}</span>
                           </p>
                         </div>
                       </div>
@@ -721,17 +814,16 @@ export default function PixelCompare() {
                   {reports.map((report) => (
                     <Card
                       key={report.id}
-                      className={`cursor-pointer ${
-                        selectedReport?.id === report.id ? "border-primary" : ""
-                      }`}
+                      className={`cursor-pointer ${selectedReport?.id === report.id ? "border-primary" : ""
+                        }`}
                       onClick={() => viewReport(report.id)}
                     >
                       <CardContent className="p-4">
                         <h3 className="font-medium">
-                          {report?.metadata?.comparisonData?.base_name} vs {report?.metadata?.comparisonData?.compare_name}
+                          {report?.metadata?.comparisonData?.baseName} vs {report?.metadata?.comparisonData?.compareName}
                         </h3>
                         <p className="text-sm text-gray-500">
-                          Diff: {(report?.metadata?.comparisonData?.diff_percentage ?? 0).toFixed(2)}%
+                          Diff: {(report?.metadata?.comparisonData?.diffPercentage ?? 0).toFixed(2)}%
                         </p>
                         <p className="text-xs text-gray-400">
                           {new Date(report?.metadata?.generatedAt ?? Date.now()).toLocaleString()}
@@ -750,7 +842,7 @@ export default function PixelCompare() {
                   <CardContent className="p-6">
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="text-lg font-medium">
-                        {selectedReport?.metadata?.comparisonData?.base_name} vs {selectedReport?.metadata?.comparisonData?.compare_name}
+                        {selectedReport?.metadata?.comparisonData?.baseName} vs {selectedReport?.metadata?.comparisonData?.compareName}
                       </h3>
                       <Button
                         variant="destructive"
@@ -761,27 +853,17 @@ export default function PixelCompare() {
                       </Button>
                     </div>
                     <Separator className="my-4" />
-                    {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    {selectedReport?.metadata?.comparisonData?.diffImage && (
                       <img
-                        src={`/data/screenshots/${selectedReport.comparisonId.split("-")[0]}.png`}
-                        alt={selectedReport?.metadata?.comparisonData?.base_name}
-                        className="w-full  object-cover object-top border"
+                        src={selectedReport.metadata.comparisonData.diffImage}
+                        alt="Diff result"
+                        className="w-full object-cover object-top border mb-4"
                       />
-                      <img
-                        src={`/data/screenshots/${selectedReport.comparisonId.split("-")[1]}.png`}
-                        alt={selectedReport?.metadata?.comparisonData?.compare_name}
-                        className="w-full  object-cover object-top border"
-                      />
-                    </div> */}
-                    <img
-                      src={`/data/diffs/${selectedReport?.metadata?.diffId}.png`}
-                      alt="Diff result"
-                      className="w-full  object-cover object-top border mb-4"
-                    />
+                    )}
                     <div className="p-4 border rounded-lg bg-gray-50">
                       <h4 className="font-bold mb-2">Issue</h4>
                       <div className="whitespace-pre-wrap text-sm">
-                        {selectedReport.issues.map((issue) => (
+                        {selectedReport?.issues?.map((issue) => (
                           <div key={issue.title}>
                             <h5 className="font-bold mb-2">title: {issue.title}</h5>
                             <p className="text-sm text-gray-500">description: {issue.description}</p>

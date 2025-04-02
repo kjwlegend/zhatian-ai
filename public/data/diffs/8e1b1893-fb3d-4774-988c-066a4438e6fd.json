@@ -1,0 +1,20 @@
+{
+  "id": "8e1b1893-fb3d-4774-988c-066a4438e6fd",
+  "baseId": "https://xiaoguangai.oss-cn-shanghai.aliyuncs.com/BOMB-AI/1743579605485_2.png",
+  "compareId": "https://xiaoguangai.oss-cn-shanghai.aliyuncs.com/BOMB-AI/1743579577755_1.png",
+  "baseName": "https://xiaoguangai.oss-cn-shanghai.aliyuncs.com/BOMB-AI/1743579605485_2.png",
+  "compareName": "https://xiaoguangai.oss-cn-shanghai.aliyuncs.com/BOMB-AI/1743579577755_1.png",
+  "diffPixels": 1790,
+  "diffPercentage": 0.28394850221130846,
+  "threshold": 0.01,
+  "ignoreAA": false,
+  "timestamp": "2025-04-02T08:02:35.150Z",
+  "diffImage": "8e1b1893-fb3d-4774-988c-066a4438e6fd.png",
+  "baseImage": "https://xiaoguangai.oss-cn-shanghai.aliyuncs.com/BOMB-AI/1743579605485_2.png.png",
+  "compareImage": "https://xiaoguangai.oss-cn-shanghai.aliyuncs.com/BOMB-AI/1743579577755_1.png.png",
+  "dimensions": {
+    "width": 702,
+    "height": 898
+  },
+  "diffAreas": []
+}

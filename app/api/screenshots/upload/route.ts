@@ -6,7 +6,7 @@ import { promises as fsPromises } from 'fs';
 import sharp from 'sharp';
 
 // Directory to store screenshots
-const SCREENSHOT_DIR = process.env.SCREENSHOT_DIR || 'public/data/screenshots';
+const SCREENSHOT_DIR = process.env.OSS_BASE_URL || 'public/data/screenshots';
 
 // Ensure the directory exists
 if (!fs.existsSync(SCREENSHOT_DIR)) {

@@ -5,7 +5,6 @@ import { PNG } from 'pngjs';
 import OpenAI from 'openai';
 
 // Set up directory paths
-const SCREENSHOT_DIR = process.env.SCREENSHOT_DIR || 'public/data/screenshots';
 const DIFF_DIR = process.env.DIFF_DIR || 'public/data/diffs';
 
 // Initialize OpenAI
@@ -13,6 +12,12 @@ const openai = new OpenAI({
   apiKey: process.env.VLM_OPENAI_API_KEY,
   baseURL: process.env.VLM_BASE_URL || undefined,
 });
+
+// Import at runtime to avoid TypeScript declaration issues
+import '../../../compare/route';
+
+// In-memory cache to store reports
+const reportCache = new Map<string, any>();
 
 // Types
 interface DiffCluster {
@@ -32,22 +37,23 @@ interface DiffArea {
 }
 
 interface ComparisonData {
+  id: string;
   baseId: string;
   compareId: string;
+  baseName: string;
+  compareName: string;
   diffPixels: number;
   diffPercentage: number;
   threshold: number;
   ignoreAA: boolean;
+  timestamp: string;
+  diffImage: string;
+  baseImage: string;
+  compareImage: string;
   dimensions: {
     width: number;
     height: number;
   };
-  baseName: string;
-  compareName: string;
-  diffImage: string;
-  baseImage: string;
-  compareImage: string;
-  timestamp: string;
   diffAreas: DiffArea[];
 }
 
@@ -71,10 +77,9 @@ const readDiffImage = (filePath: string): Promise<PNG> => {
   });
 };
 
-// Helper function to analyze diff clusters (find groups of difference pixels)
-const analyzeDiffClusters = async (diffImagePath: string): Promise<DiffCluster[]> => {
+// Helper function to analyze diff clusters using an in-memory PNG
+const analyzeDiffClusters = async (diffImage: PNG): Promise<DiffCluster[]> => {
   try {
-    const diffImage = await readDiffImage(diffImagePath);
     const { width, height, data } = diffImage;
 
     // Find red pixels (diff pixels are red in our implementation)
@@ -163,55 +168,108 @@ const analyzeDiffClusters = async (diffImagePath: string): Promise<DiffCluster[]
 };
 
 // Helper to get comparison data
-const getComparisonData = async (diffId: string): Promise<{
-  baseMetadata: BaseMetadata;
-  compareMetadata: BaseMetadata;
-  [key: string]: any;
-}> => {
-  // Get diff metadata
-  const metadataPath = path.join(DIFF_DIR, `${diffId}.json`);
+const getComparisonData = async (diffId: string): Promise<any> => {
+  try {
+    // Try to get metadata directly from the URL parameter
+    console.log(`Looking for comparison data with ID: ${diffId}`);
 
-  if (!fs.existsSync(metadataPath)) {
+    // Try direct import first
+    let metadata;
+    try {
+      const compareModule = await import('../../../compare/route');
+      metadata = compareModule.comparisonMetadataCache.get(diffId);
+      console.log('Metadata from direct import:', metadata ? 'Found' : 'Not found');
+    } catch (importErr) {
+      console.error('Error importing compare module:', importErr);
+    }
+
+    // If not found via direct import, try to find by ID in localStorage on client side
+    // or try to read from file as fallback on server side
+    if (!metadata) {
+      console.log('Metadata not found in memory cache, trying fallback...');
+
+      // Server-side fallback - try to read from file if exists
+      try {
+        const metadataPath = path.join(DIFF_DIR, `${diffId}.json`);
+        if (fs.existsSync(metadataPath)) {
+          const fileData = fs.readFileSync(metadataPath, 'utf8');
+          metadata = JSON.parse(fileData);
+          console.log('Found metadata in file system');
+        }
+      } catch (fileErr) {
+        console.error('Error reading metadata from file:', fileErr);
+      }
+
+      if (!metadata) {
+        throw new Error(`Comparison metadata not found for ID: ${diffId}`);
+      }
+    }
+
+    // Analyze diff clusters if possible
+    let diffClusters: DiffCluster[] = [];
+    if (metadata.diffImage) {
+      try {
+        // Handle both relative and absolute URLs
+        let imageUrl = metadata.diffImage;
+        if (!imageUrl.startsWith('http')) {
+          // Get the base URL from the environment or use a default
+          const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+          imageUrl = new URL(imageUrl, baseUrl).toString();
+        }
+
+        const response = await fetch(imageUrl);
+        if (response.ok) {
+          const imageBuffer = await response.arrayBuffer();
+          const pngParser = new PNG();
+
+          // Use Promise to handle the parsing async
+          await new Promise<void>((resolve, reject) => {
+            (pngParser as any).parse(Buffer.from(imageBuffer), (err: any) => {
+              if (err) reject(err);
+              else resolve();
+            });
+          });
+
+          // Now analyze diff clusters using the image data
+          diffClusters = await analyzeDiffClusters(pngParser);
+        }
+      } catch (err) {
+        console.error('Error analyzing diff clusters:', err);
+      }
+    }
+
+    // Add diff areas to metadata
+    metadata.diffAreas = diffClusters;
+
+    return {
+      ...metadata,
+      baseMetadata: { url: metadata.baseImage },
+      compareMetadata: { url: metadata.compareImage },
+      diffImagePath: metadata.diffImage
+    };
+  } catch (error) {
+    console.error('Error getting comparison metadata:', error);
     throw new Error('Comparison metadata not found');
   }
-
-  const metadata = JSON.parse(fs.readFileSync(metadataPath, 'utf8')) as ComparisonData;
-
-  // Analyze diff clusters
-  const diffImagePath = path.join(DIFF_DIR, metadata.diffImage);
-  console.log('Analyzing diff clusters for:', diffImagePath);
-
-  const diffClusters = await analyzeDiffClusters(diffImagePath);
-
-  // Add diff areas to metadata
-  metadata.diffAreas = diffClusters;
-
-  // Get base and compare image metadata
-  let baseMetadata: BaseMetadata = {}, compareMetadata: BaseMetadata = {};
-
-  const baseMetadataPath = path.join(SCREENSHOT_DIR, `${metadata.baseId}.json`);
-  const compareMetadataPath = path.join(SCREENSHOT_DIR, `${metadata.compareId}.json`);
-
-  if (fs.existsSync(baseMetadataPath)) {
-    baseMetadata = JSON.parse(fs.readFileSync(baseMetadataPath, 'utf8'));
-  }
-
-  if (fs.existsSync(compareMetadataPath)) {
-    compareMetadata = JSON.parse(fs.readFileSync(compareMetadataPath, 'utf8'));
-  }
-
-  return {
-    ...metadata,
-    baseMetadata,
-    compareMetadata,
-    diffImagePath
-  };
 };
 
-// Helper to save an AI report
+// No file saving - only in-memory storage
 const saveReport = (diffId: string, report: any): void => {
-  const reportPath = path.join(DIFF_DIR, `${diffId}_report.json`);
-  fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
+  reportCache.set(diffId, report);
+
+  // Export the report for other routes
+  try {
+    // Share this report with the reports API
+    import('../../../reports/route').then(reportsModule => {
+      if (reportsModule.addReport) {
+        reportsModule.addReport(diffId, report);
+      }
+    }).catch(err => {
+      console.error('Error sharing report with reports API:', err);
+    });
+  } catch (err) {
+    console.error('Error sharing report:', err);
+  }
 };
 
 // Generate an AI report for a comparison
@@ -223,24 +281,74 @@ export async function GET(
     const diffId = params.id;
     console.log('Generating report for diff ID:', diffId);
 
-    const comparisonData = await getComparisonData(diffId);
+    // Try to get comparison data from request body if this is a POST request
+    let comparisonData;
+
+    // Check if there's a searchParam called directData - this would be a signal
+    // that we should load the comparison data from the URL
+    const useDirectData = req.nextUrl.searchParams.get('directData') === 'true';
+
+    if (useDirectData) {
+      try {
+        // Try to get the comparison data from the query params
+        const encodedData = req.nextUrl.searchParams.get('data');
+        if (encodedData) {
+          const decodedData = decodeURIComponent(encodedData);
+          comparisonData = JSON.parse(decodedData);
+          console.log('Using direct comparison data from query params');
+        }
+      } catch (parseErr) {
+        console.error('Error parsing direct comparison data:', parseErr);
+      }
+    }
+
+    // If we don't have data yet, try to get it from the metadata cache
+    if (!comparisonData) {
+      comparisonData = await getComparisonData(diffId);
+    }
+
+    // Validate and ensure comparisonData has all required properties
+    console.log('Available keys in comparisonData:', Object.keys(comparisonData));
+
+    // Add default values for any missing required properties
+    if (!comparisonData.dimensions) {
+      console.log('Missing dimensions property, adding default');
+      comparisonData.dimensions = { width: 800, height: 600 };
+    }
+
+    if (!comparisonData.diffPixels) comparisonData.diffPixels = 0;
+    if (!comparisonData.diffPercentage) comparisonData.diffPercentage = 0;
+    if (!comparisonData.diffAreas) comparisonData.diffAreas = [];
+    if (!comparisonData.baseName) comparisonData.baseName = 'Base Image';
+    if (!comparisonData.compareName) comparisonData.compareName = 'Compare Image';
+    if (!comparisonData.threshold) comparisonData.threshold = 0.01;
 
     // Prepare data for OpenAI
-    const promptData = {
+    const promptData: {
+      diff_pixels: number;
+      diff_percentage: number;
+      diff_areas: DiffArea[];
+      base_name: string;
+      compare_name: string;
+      dimensions: { width: number; height: number };
+      threshold: number;
+      base_url: string;
+      compare_url: string;
+      diff_image_url: string;
+      diff_image_base64: string | null;
+    } = {
       diff_pixels: comparisonData.diffPixels,
       diff_percentage: comparisonData.diffPercentage,
-      diff_areas: comparisonData.diffAreas,
-      base_name: comparisonData.baseName,
-      compare_name: comparisonData.compareName,
+      diff_areas: comparisonData.diffAreas || [],
+      base_name: comparisonData.baseName || 'Base Image',
+      compare_name: comparisonData.compareName || 'Compare Image',
       dimensions: comparisonData.dimensions,
-      threshold: comparisonData.threshold,
-      base_url: comparisonData.baseMetadata?.url,
-      compare_url: comparisonData.compareMetadata?.url,
-      diff_image_url: comparisonData.diffImagePath,
-
-      diff_image_base64: fs.existsSync(comparisonData.diffImagePath)
-        ? `data:image/png;base64,${fs.readFileSync(comparisonData.diffImagePath).toString('base64')}`
-        : null,
+      threshold: comparisonData.threshold || 0.01,
+      base_url: comparisonData.baseMetadata?.url || comparisonData.baseImage || '',
+      compare_url: comparisonData.compareMetadata?.url || comparisonData.compareImage || '',
+      diff_image_url: comparisonData.diffImagePath || comparisonData.diffImage || '',
+      // Handle diff image - could be a local file or a URL
+      diff_image_base64: null
       // base_image_base64: fs.existsSync(path.join(SCREENSHOT_DIR, comparisonData.baseImage))
       //   ? `data:image/png;base64,${fs.readFileSync(path.join(SCREENSHOT_DIR, comparisonData.baseImage)).toString('base64')}`
       //   : null,
@@ -248,70 +356,29 @@ export async function GET(
       //   ? `data:image/png;base64,${fs.readFileSync(path.join(SCREENSHOT_DIR, comparisonData.compareImage)).toString('base64')}`
       //   : null
     };
+
+    // Try to load the diff image if it exists
+    const diffPath = promptData.diff_image_url;
+    if (diffPath) {
+      try {
+        if (diffPath.startsWith('http')) {
+          // It's a URL, fetch it
+          const response = await fetch(diffPath);
+          if (response.ok) {
+            const arrayBuffer = await response.arrayBuffer();
+            const buffer = Buffer.from(arrayBuffer);
+            promptData.diff_image_base64 = `data:image/png;base64,${buffer.toString('base64')}`;
+          }
+        } else if (fs.existsSync(diffPath)) {
+          // It's a local file
+          promptData.diff_image_base64 = `data:image/png;base64,${fs.readFileSync(diffPath).toString('base64')}`;
+        }
+      } catch (error) {
+        console.error('Error loading diff image:', error);
+      }
+    }
+
     // Create a prompt for OpenAI
-    // 基准图：${ promptData.base_name } ${ promptData.base_url || '' }
-    // 对比图：${ promptData.compare_name } ${ promptData.compare_url || '' }
-    // 差异图：${ promptData.diff_image_base64 } 红色部分为差异位置
-
-    //     const promptText = `您是一位精通CSS视觉规范的UI测试专家，请基于像素级差异分析，为前端团队提供结构化修改方案。以下是分析要求：
-
-    // 【输入数据】
-    // 差异参数：
-    // - 差异像素：${promptData.diff_pixels}
-    // - 差异率：${promptData.diff_percentage.toFixed(2)}%
-    // - 分辨率：${promptData.dimensions.width}x${promptData.dimensions.height}
-    // - 差异区域：${promptData.diff_areas.length}个聚类
-
-    // 【分析维度】
-    // 1. 布局问题：
-    //    - 位置偏移：x/y轴方向偏差（使用px单位）
-    //    - 尺寸差异：width/height变化超过±1px
-    //    - 间距异常：margin/padding不一致
-
-    // 2. 样式问题：
-    //    - 字体属性：font-family/font-size/font-weight
-    //    - 颜色体系：color/background-color/border-color
-    //    - 盒模型：border-radius/box-shadow/outline
-    //    - 定位方式：position偏移（absolute/fixed定位需特别标注）
-
-    // 3. 内容问题：
-    //    - 文本截断：width不足导致的...省略
-    //    - 图像变形：aspect-ratio改变
-    //    - 图标错位：svg与文本基线对齐问题
-
-    // 【输出规范】
-    // {
-    //   "summary": "总体差异摘要（包含关键指标分析）",
-    //   "style_analysis": {
-    //     "layout_changes": [
-    //       {
-    //         "property": "margin-left | width | ...",
-    //         "base_value": "基准值（带单位）",
-    //         "current_value": "当前值（带单位）",
-    //         "deviation": "±数值",
-    //         "priority": "critical/important/minor"
-    //       }
-    //     ],
-    //     "visual_changes": [
-    //       {
-    //         "selector": "建议的CSS选择器",
-    //         "properties": {
-    //           "font-size": {"base": "14px", "current": "13.5px"},
-    //           "border-radius": {"base": "4px", "current": "6px"}
-    //         },
-    //         "recommendation": ["font-size: calc(13.5px + 0.3pt)","border-radius: 保持设计系统一致性"]
-    //       }
-    //     ]
-    //   },
-    //   "critical_issues": [
-    //     {
-    //       "type": "文本溢出 | 点击区域不足 | 颜色对比度不足",
-    //       "coordinates": {x: [], y: []},
-    //       "before_after": ["基准图描述", "当前图描述"],
-    //       "accessibility_impact": "WCAG标准影响分析"
-    //     }
-    //   ]
-    // }`;
     const promptText = `您是一位专注于视觉回归分析的UI测试专家。
 
                             请分析以下两组UI截图的对比数据并生成一份综合性报告：
@@ -322,11 +389,11 @@ export async function GET(
                             对比数据:
                                 - 差异像素: ${promptData.diff_pixels}
                                 - 差异比例: ${promptData.diff_percentage.toFixed(2)}%
-                                - 图像尺寸: ${promptData.dimensions.width}x${promptData.dimensions.height}
+                                - 图像尺寸: ${promptData.dimensions?.width || 0}x${promptData.dimensions?.height || 0}
                                 - 阈值: ${promptData.threshold}
 
-                            差异区域（${promptData.diff_areas.length}个聚类）:
-                            ${promptData.diff_areas.map((area: DiffArea, i: number) =>
+                            差异区域（${promptData.diff_areas?.length || 0}个聚类）:
+                            ${(promptData.diff_areas || []).map((area: DiffArea, i: number) =>
       `区域 ${i + 1}: x=${area.x}, y=${area.y}, 宽度=${area.width}, 高度=${area.height}, 像素=${area.points}`
     ).join('\n')}
 
@@ -358,7 +425,7 @@ export async function GET(
         issues: [
           {
             title: "布局偏移",
-            description: `在坐标区域附近(x=${promptData.diff_areas[0]?.x || 0}, y=${promptData.diff_areas[0]?.y || 0})发现元素位置偏移，影响了整体界面的一致性。`,
+            description: `在坐标区域附近(x=${promptData.diff_areas?.[0]?.x || 0}, y=${promptData.diff_areas?.[0]?.y || 0})发现元素位置偏移，影响了整体界面的一致性。`,
             type: "UI错位",
             priority: "重要",
             recommendation: "检查CSS样式中的margin和padding设置，确保两个版本使用相同的布局规则。"
@@ -421,7 +488,7 @@ export async function GET(
       }
     };
 
-    // Save the report
+    // Save the report to memory only - no files
     saveReport(diffId, finalReport);
 
     return NextResponse.json({ success: true, report: finalReport });

@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import puppeteer from 'puppeteer';
 
 // Set up directory paths
-const SCREENSHOT_DIR = process.env.SCREENSHOT_DIR || 'public/data/screenshots';
+const SCREENSHOT_DIR = process.env.OSS_BASE_URL || 'public/data/screenshots';
 
 // Ensure directories exist
 if (!fs.existsSync(SCREENSHOT_DIR)) {

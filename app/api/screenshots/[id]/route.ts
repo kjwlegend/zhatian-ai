@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 
 // Set up directory paths
-const SCREENSHOT_DIR = process.env.SCREENSHOT_DIR || 'public/data/screenshots';
+const SCREENSHOT_DIR = process.env.OSS_BASE_URL || 'public/data/screenshots';
 
 // GET a single screenshot by ID
 export async function GET(

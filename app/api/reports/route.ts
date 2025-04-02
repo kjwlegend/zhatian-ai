@@ -1,39 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
 
-// Set up directory paths
-const DIFF_DIR = process.env.DIFF_DIR || 'public/data/diffs';
+// In-memory reports cache
+const reportCache = new Map<string, any>();
+
+// Function to add a report to the cache
+export function addReport(diffId: string, report: any): void {
+  reportCache.set(diffId, report);
+}
 
 // GET all reports
 export async function GET(req: NextRequest) {
   try {
-    // Ensure the directory exists
-    if (!fs.existsSync(DIFF_DIR)) {
-      fs.mkdirSync(DIFF_DIR, { recursive: true });
-      return NextResponse.json({ success: true, reports: [] });
-    }
-
-    // Get all report files
-    const files = fs.readdirSync(DIFF_DIR)
-      .filter(file => file.includes('_report.json'));
-
-    // Read each report
-    const reports = files.map(filename => {
-      try {
-        const reportPath = path.join(DIFF_DIR, filename);
-        const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
-        const diffId = filename.replace('_report.json', '');
-
-        return {
-          id: diffId,
-          ...report
-        };
-      } catch (err) {
-        console.error(`Error reading report ${filename}:`, err);
-        return null;
-      }
-    }).filter(Boolean);
+    // Convert the cache to an array of reports
+    const reports = Array.from(reportCache.entries()).map(([diffId, report]) => {
+      return {
+        id: diffId,
+        ...report
+      };
+    });
 
     return NextResponse.json({ success: true, reports });
   } catch (err) {
