@@ -3,21 +3,17 @@ import fs from 'fs';
 import path from 'path';
 import { PNG } from 'pngjs';
 import OpenAI from 'openai';
+import { comparisonMetadataCache, addReport } from '@/app/api/_lib/metadata-cache';
 
 // Set up directory paths
 const DIFF_DIR = process.env.DIFF_DIR || 'public/data/diffs';
+
 
 // Initialize OpenAI
 const openai = new OpenAI({
   apiKey: process.env.VLM_OPENAI_API_KEY,
   baseURL: process.env.VLM_BASE_URL || undefined,
 });
-
-// Import at runtime to avoid TypeScript declaration issues
-import '../../../compare/route';
-
-// In-memory cache to store reports
-const reportCache = new Map<string, any>();
 
 // Types
 interface DiffCluster {
@@ -173,15 +169,9 @@ const getComparisonData = async (diffId: string): Promise<any> => {
     // Try to get metadata directly from the URL parameter
     console.log(`Looking for comparison data with ID: ${diffId}`);
 
-    // Try direct import first
-    let metadata;
-    try {
-      const compareModule = await import('../../../compare/route');
-      metadata = compareModule.comparisonMetadataCache.get(diffId);
-      console.log('Metadata from direct import:', metadata ? 'Found' : 'Not found');
-    } catch (importErr) {
-      console.error('Error importing compare module:', importErr);
-    }
+    // Try getting data from the shared cache first
+    let metadata = comparisonMetadataCache.get(diffId);
+    console.log('Metadata from direct cache access:', metadata ? 'Found' : 'Not found');
 
     // If not found via direct import, try to find by ID in localStorage on client side
     // or try to read from file as fallback on server side
@@ -255,21 +245,8 @@ const getComparisonData = async (diffId: string): Promise<any> => {
 
 // No file saving - only in-memory storage
 const saveReport = (diffId: string, report: any): void => {
-  reportCache.set(diffId, report);
-
-  // Export the report for other routes
-  try {
-    // Share this report with the reports API
-    import('../../../reports/route').then(reportsModule => {
-      if (reportsModule.addReport) {
-        reportsModule.addReport(diffId, report);
-      }
-    }).catch(err => {
-      console.error('Error sharing report with reports API:', err);
-    });
-  } catch (err) {
-    console.error('Error sharing report:', err);
-  }
+  // Use the shared addReport function directly
+  addReport(diffId, report);
 };
 
 // Generate an AI report for a comparison

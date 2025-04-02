@@ -4,6 +4,7 @@ import path from 'path';
 import { PNG } from 'pngjs';
 import pixelmatch from 'pixelmatch';
 import { v4 as uuidv4 } from 'uuid';
+import { comparisonMetadataCache, ComparisonResult } from '@/app/api/_lib/metadata-cache';
 
 // Set up directory paths
 const SCREENSHOT_DIR = process.env.OSS_BASE_URL || 'public/data/screenshots';
@@ -12,28 +13,6 @@ const DIFF_DIR = process.env.DIFF_DIR || 'public/data/diffs';
 // Ensure directories exist
 if (!fs.existsSync(DIFF_DIR)) {
   fs.mkdirSync(DIFF_DIR, { recursive: true });
-}
-
-// Types
-interface ComparisonResult {
-  id: string;
-  baseId: string;
-  compareId: string;
-  baseName: string;
-  compareName: string;
-  diffPixels: number;
-  diffPercentage: number;
-  threshold: number;
-  ignoreAA: boolean;
-  timestamp: string;
-  diffImage: string;
-  baseImage: string;
-  compareImage: string;
-  dimensions: {
-    width: number;
-    height: number;
-  };
-  diffAreas: Array<any>; // Will be populated by report analysis
 }
 
 // Helper function to get file from OSS or local path
@@ -103,17 +82,14 @@ async function uploadToOSS(buffer: Buffer, fileName: string, folderName: string 
   };
 }
 
-// Helper function for in-memory comparison metadata storage
-export const comparisonMetadataCache = new Map<string, ComparisonResult>();
-
 // Modified helper to save comparison result - doesn't save to filesystem
 const saveComparisonResult = (diffId: string, metadata: ComparisonResult) => {
   // Store in memory cache instead of filesystem
   comparisonMetadataCache.set(diffId, metadata);
 };
 
-// Helper function to get comparison metadata from cache
-export const getComparisonMetadata = (diffId: string) => {
+// Helper function to get comparison metadata from cache - no longer exported as a route handler
+const getComparisonMetadata = (diffId: string) => {
   return comparisonMetadataCache.get(diffId);
 };
 
