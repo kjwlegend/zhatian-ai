@@ -112,8 +112,6 @@ export default function PixelCompare() {
       const response = await fetch(`${apiBase}/screenshots`);
       if (response.ok) {
         const data = await response.json();
-        console.error('%c data.screenshots ', 'background-image:color:transparent;color:red;');
-        console.error('🚀~ => ', data.screenshots);
         setScreenshots(data.screenshots || []);
         setError(null);
       } else {
@@ -130,8 +128,6 @@ export default function PixelCompare() {
       const response = await fetch(`${apiBase}/compare`);
       if (response.ok) {
         const data = await response.json();
-        console.error('%c data.comparisons ', 'background-image:color:transparent;color:red;');
-        console.error('🚀~ => ', data.comparisons);
         setComparisons(data.comparisons || []);
         setError(null);
       } else {
@@ -335,6 +331,7 @@ export default function PixelCompare() {
   };
 
   const viewReport = async (id: string) => {
+
     try {
       const response = await fetch(`${apiBase}/reports/${id}`);
       if (!response.ok) {
@@ -431,6 +428,7 @@ export default function PixelCompare() {
                   <div className="space-y-2">
                     <Label htmlFor="url">Website URL</Label>
                     <Input
+                      disabled={true}
                       id="url"
                       placeholder="https://example.com"
                       value={url}
@@ -440,6 +438,7 @@ export default function PixelCompare() {
                   <div className="space-y-2">
                     <Label htmlFor="name">Screenshot Name</Label>
                     <Input
+                      disabled={true}
                       id="name"
                       placeholder="Homepage - Desktop"
                       value={name}
@@ -687,7 +686,7 @@ export default function PixelCompare() {
                     <option value="">Select a comparison</option>
                     {comparisons.map((comparison) => (
                       <option key={comparison.id} value={comparison.id}>
-                        {comparison.baseImageName} vs {comparison.compareImageName} (
+                        {comparison.baseName} vs {comparison.compareName} (
                         {comparison.diffPercentage.toFixed(2)}%)
                       </option>
                     ))}
@@ -724,13 +723,13 @@ export default function PixelCompare() {
                     >
                       <CardContent className="p-4">
                         <h3 className="font-medium">
-                          {report.baseImageName} vs {report.compareImageName}
+                          {report?.metadata?.comparisonData?.base_name} vs {report?.metadata?.comparisonData?.compare_name}
                         </h3>
                         <p className="text-sm text-gray-500">
-                          Diff: {report.diffPercentage.toFixed(2)}%
+                          Diff: {report?.metadata?.comparisonData?.diff_percentage.toFixed(2)}%
                         </p>
                         <p className="text-xs text-gray-400">
-                          {new Date(report.date).toLocaleString()}
+                          {new Date(report?.metadata?.generatedAt).toLocaleString()}
                         </p>
                       </CardContent>
                     </Card>
@@ -746,38 +745,51 @@ export default function PixelCompare() {
                   <CardContent className="p-6">
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="text-lg font-medium">
-                        {selectedReport.baseImageName} vs {selectedReport.compareImageName}
+                        {selectedReport?.metadata?.comparisonData?.base_name} vs {selectedReport?.metadata?.comparisonData?.compare_name}
                       </h3>
                       <Button
                         variant="destructive"
                         size="sm"
-                        onClick={() => deleteReport(selectedReport.id)}
+                        onClick={() => deleteReport(selectedReport?.id)}
                       >
                         <Trash2 className="h-4 w-4 mr-1" /> Delete
                       </Button>
                     </div>
                     <Separator className="my-4" />
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                       <img
                         src={`/data/screenshots/${selectedReport.comparisonId.split("-")[0]}.png`}
-                        alt={selectedReport.baseImageName}
+                        alt={selectedReport?.metadata?.comparisonData?.base_name}
                         className="w-full  object-cover object-top border"
                       />
                       <img
                         src={`/data/screenshots/${selectedReport.comparisonId.split("-")[1]}.png`}
-                        alt={selectedReport.compareImageName}
+                        alt={selectedReport?.metadata?.comparisonData?.compare_name}
                         className="w-full  object-cover object-top border"
                       />
-                    </div>
+                    </div> */}
                     <img
-                      src={`/data/diffs/${selectedReport.comparisonId}.png`}
+                      src={`/data/diffs/${selectedReport?.metadata?.diffId}.png`}
                       alt="Diff result"
                       className="w-full  object-cover object-top border mb-4"
                     />
                     <div className="p-4 border rounded-lg bg-gray-50">
+                      <h4 className="font-bold mb-2">Issue</h4>
+                      <div className="whitespace-pre-wrap text-sm">
+                        {selectedReport.issues.map((issue) => (
+                          <div key={issue.title}>
+                            <h5 className="font-bold mb-2">title: {issue.title}</h5>
+                            <p className="text-sm text-gray-500">description: {issue.description}</p>
+                            <p className="text-sm text-gray-500">type: {issue.type}</p>
+                            <p className="text-sm text-gray-500">priority: {issue.priority}</p>
+                            <p className="text-sm text-gray-500">recommendation: {issue.recommendation}</p>
+                          </div>
+                        ))}
+                      </div>
+                      <br></br>
                       <h4 className="font-bold mb-2">AI Analysis</h4>
                       <div className="whitespace-pre-wrap text-sm">
-                        {selectedReport.aiAnalysis}
+                        {selectedReport.summary}
                       </div>
                     </div>
                   </CardContent>

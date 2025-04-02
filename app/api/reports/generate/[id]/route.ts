@@ -253,65 +253,101 @@ export async function GET(
     // 对比图：${ promptData.compare_name } ${ promptData.compare_url || '' }
     // 差异图：${ promptData.diff_image_base64 } 红色部分为差异位置
 
-    const promptText = `您是一位精通CSS视觉规范的UI测试专家，请基于像素级差异分析，为前端团队提供结构化修改方案。以下是分析要求：
+    //     const promptText = `您是一位精通CSS视觉规范的UI测试专家，请基于像素级差异分析，为前端团队提供结构化修改方案。以下是分析要求：
 
-【输入数据】
-差异参数：
-- 差异像素：${promptData.diff_pixels}
-- 差异率：${promptData.diff_percentage.toFixed(2)}%
-- 分辨率：${promptData.dimensions.width}x${promptData.dimensions.height}
-- 差异区域：${promptData.diff_areas.length}个聚类
+    // 【输入数据】
+    // 差异参数：
+    // - 差异像素：${promptData.diff_pixels}
+    // - 差异率：${promptData.diff_percentage.toFixed(2)}%
+    // - 分辨率：${promptData.dimensions.width}x${promptData.dimensions.height}
+    // - 差异区域：${promptData.diff_areas.length}个聚类
 
-【分析维度】
-1. 布局问题：
-   - 位置偏移：x/y轴方向偏差（使用px单位）
-   - 尺寸差异：width/height变化超过±1px
-   - 间距异常：margin/padding不一致
+    // 【分析维度】
+    // 1. 布局问题：
+    //    - 位置偏移：x/y轴方向偏差（使用px单位）
+    //    - 尺寸差异：width/height变化超过±1px
+    //    - 间距异常：margin/padding不一致
 
-2. 样式问题：
-   - 字体属性：font-family/font-size/font-weight
-   - 颜色体系：color/background-color/border-color
-   - 盒模型：border-radius/box-shadow/outline
-   - 定位方式：position偏移（absolute/fixed定位需特别标注）
+    // 2. 样式问题：
+    //    - 字体属性：font-family/font-size/font-weight
+    //    - 颜色体系：color/background-color/border-color
+    //    - 盒模型：border-radius/box-shadow/outline
+    //    - 定位方式：position偏移（absolute/fixed定位需特别标注）
 
-3. 内容问题：
-   - 文本截断：width不足导致的...省略
-   - 图像变形：aspect-ratio改变
-   - 图标错位：svg与文本基线对齐问题
+    // 3. 内容问题：
+    //    - 文本截断：width不足导致的...省略
+    //    - 图像变形：aspect-ratio改变
+    //    - 图标错位：svg与文本基线对齐问题
 
-【输出规范】
-{
-  "summary": "总体差异摘要（包含关键指标分析）",
-  "style_analysis": {
-    "layout_changes": [
-      {
-        "property": "margin-left | width | ...",
-        "base_value": "基准值（带单位）",
-        "current_value": "当前值（带单位）",
-        "deviation": "±数值",
-        "priority": "critical/important/minor"
-      }
-    ],
-    "visual_changes": [
-      {
-        "selector": "建议的CSS选择器",
-        "properties": {
-          "font-size": {"base": "14px", "current": "13.5px"},
-          "border-radius": {"base": "4px", "current": "6px"}
-        },
-        "recommendation": ["font-size: calc(13.5px + 0.3pt)","border-radius: 保持设计系统一致性"]
-      }
-    ]
-  },
-  "critical_issues": [
-    {
-      "type": "文本溢出 | 点击区域不足 | 颜色对比度不足",
-      "coordinates": {x: [], y: []},
-      "before_after": ["基准图描述", "当前图描述"],
-      "accessibility_impact": "WCAG标准影响分析"
-    }
-  ]
-}`;
+    // 【输出规范】
+    // {
+    //   "summary": "总体差异摘要（包含关键指标分析）",
+    //   "style_analysis": {
+    //     "layout_changes": [
+    //       {
+    //         "property": "margin-left | width | ...",
+    //         "base_value": "基准值（带单位）",
+    //         "current_value": "当前值（带单位）",
+    //         "deviation": "±数值",
+    //         "priority": "critical/important/minor"
+    //       }
+    //     ],
+    //     "visual_changes": [
+    //       {
+    //         "selector": "建议的CSS选择器",
+    //         "properties": {
+    //           "font-size": {"base": "14px", "current": "13.5px"},
+    //           "border-radius": {"base": "4px", "current": "6px"}
+    //         },
+    //         "recommendation": ["font-size: calc(13.5px + 0.3pt)","border-radius: 保持设计系统一致性"]
+    //       }
+    //     ]
+    //   },
+    //   "critical_issues": [
+    //     {
+    //       "type": "文本溢出 | 点击区域不足 | 颜色对比度不足",
+    //       "coordinates": {x: [], y: []},
+    //       "before_after": ["基准图描述", "当前图描述"],
+    //       "accessibility_impact": "WCAG标准影响分析"
+    //     }
+    //   ]
+    // }`;
+    const promptText = `您是一位专注于视觉回归分析的UI测试专家。
+
+                            请分析以下两组UI截图的对比数据并生成一份综合性报告：
+
+                            基准图: ${promptData.base_name} ${promptData.base_url ? `(URL: ${promptData.base_url})` : ''}
+                            对比图: ${promptData.compare_name} ${promptData.compare_url ? `(URL: ${promptData.compare_url})` : ''}
+
+                            对比数据:
+                                - 差异像素: ${promptData.diff_pixels}
+                                - 差异比例: ${promptData.diff_percentage.toFixed(2)}%
+                                - 图像尺寸: ${promptData.dimensions.width}x${promptData.dimensions.height}
+                                - 阈值: ${promptData.threshold}
+
+                            差异区域（${promptData.diff_areas.length}个聚类）:
+                            ${promptData.diff_areas.map((area, i) =>
+      `区域 ${i + 1}: x=${area.x}, y=${area.y}, 宽度=${area.width}, 高度=${area.height}, 像素=${area.points}`
+    ).join('\n')}
+
+                            请分析数据并提供以下内容：
+                            1. 简洁的UI差异总结
+                            2. 问题分类（UI错位、内容变更、样式差异等）
+                            3. 每个问题的优先级评估（严重/重要/轻微）
+                            4. 修复建议或调整方案
+
+                            请以JSON格式生成报告，结构如下：
+                            {
+                                "summary": "总体分析摘要（一段式）",
+                                "issues": [{
+                                    "title": "问题简述",
+                                    "description": "问题详细描述",
+                                    "type": "问题类型",
+                                    "priority": "严重/重要/轻微",
+                                    "recommendation": "修复建议"
+                                }]
+                            }`
+
     // Check if OpenAI API key is available
     if (!process.env.VLM_OPENAI_API_KEY) {
       // Generate a mock report if API key is not available
