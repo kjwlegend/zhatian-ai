@@ -189,6 +189,7 @@ export async function POST(req: NextRequest) {
 
     // Create metadata for the comparison
     const comparisonMetadata: ComparisonResult = {
+      id: diffFilename.replace('.png', ''),
       baseId,
       compareId,
       baseName: baseMetadata.name || baseId,
