@@ -256,7 +256,7 @@ export async function GET(
 ) {
   try {
     const diffId = params.id;
-    console.log('Generating report for diff ID:', diffId);
+    // console.log('Generating report for diff ID:', diffId);
 
     // Try to get comparison data from request body if this is a POST request
     let comparisonData;
@@ -272,7 +272,7 @@ export async function GET(
         if (encodedData) {
           const decodedData = decodeURIComponent(encodedData);
           comparisonData = JSON.parse(decodedData);
-          console.log('Using direct comparison data from query params');
+          // console.log('Using direct comparison data from query params');
         }
       } catch (parseErr) {
         console.error('Error parsing direct comparison data:', parseErr);
@@ -285,11 +285,11 @@ export async function GET(
     }
 
     // Validate and ensure comparisonData has all required properties
-    console.log('Available keys in comparisonData:', Object.keys(comparisonData));
+    // console.log('Available keys in comparisonData:', Object.keys(comparisonData));
 
     // Add default values for any missing required properties
     if (!comparisonData.dimensions) {
-      console.log('Missing dimensions property, adding default');
+      // console.log('Missing dimensions property, adding default');
       comparisonData.dimensions = { width: 800, height: 600 };
     }
 
@@ -441,13 +441,13 @@ export async function GET(
       response_format: { type: "json_object" }
     });
 
-    console.error('%c response ', 'background-image:color:transparent;color:red;');
-    console.error('🚀~ => ', response);
+    // console.error('%c response ', 'background-image:color:transparent;color:red;');
+    // console.error('🚀~ => ', response);
     // Parse the AI response
     const aiResponse = response.choices[0].message.content;
 
-    console.error('%c aiResponse ', 'background-image:color:transparent;color:red;');
-    console.error('🚀~ => ', aiResponse);
+    // console.error('%c aiResponse ', 'background-image:color:transparent;color:red;');
+    // console.error('🚀~ => ', aiResponse);
 
     if (!aiResponse) {
       throw new Error('Empty response from OpenAI');
