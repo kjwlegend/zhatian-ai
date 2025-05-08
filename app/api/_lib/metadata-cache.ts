@@ -17,6 +17,23 @@ export interface ComparisonResult {
     width: number;
     height: number;
   };
+  // New fields for image preprocessing and anti-aliasing
+  preprocessing: {
+    devicePixelRatio: number;
+    normalizedWidth: number;
+    normalizedHeight: number;
+    originalDimensions: {
+      base: { width: number; height: number };
+      compare: { width: number; height: number };
+    };
+  };
+  antiAliasing: {
+    enabled: boolean;
+    threshold: number;
+    alphaThreshold: number;
+    aaColor: [number, number, number];
+    detectAA: boolean;
+  };
   diffAreas: Array<any>; // Will be populated by report analysis
 }
 

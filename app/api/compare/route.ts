@@ -4,7 +4,14 @@ import path from 'path';
 import { PNG } from 'pngjs';
 import pixelmatch from 'pixelmatch';
 import { v4 as uuidv4 } from 'uuid';
-import { comparisonMetadataCache, ComparisonResult } from '@/app/api/_lib/metadata-cache';
+import { comparisonMetadataCache, ComparisonResult } from '../_lib/metadata-cache';
+import {
+  preprocessImage,
+  createDefaultAAConfig,
+  isAntiAliased,
+  AntiAliasingConfig,
+  normalizeImagePair
+} from '../_lib/image-processor';
 
 // Set up directory paths
 const SCREENSHOT_DIR = process.env.OSS_BASE_URL || 'public/data/screenshots';
@@ -31,8 +38,8 @@ const getFile = async (filePath: string): Promise<Buffer> => {
   return fs.readFileSync(filePath);
 };
 
-// Updated helper to read an image as PNG
-const readImage = async (filePath: string): Promise<PNG> => {
+// Updated helper to read an image as PNG with preprocessing
+const readImage = async (filePath: string, devicePixelRatio: number = 1): Promise<PNG> => {
   return new Promise(async (resolve, reject) => {
     try {
       // Get the file data (whether local or from OSS)
@@ -40,11 +47,13 @@ const readImage = async (filePath: string): Promise<PNG> => {
 
       // Create a PNG from the buffer
       const png = new PNG() as any;
-      png.parse(fileData, (error: Error | null, data: PNG) => {
+      png.parse(fileData, async (error: Error | null, data: PNG) => {
         if (error) {
           reject(error);
         } else {
-          resolve(data);
+          // Preprocess the image before returning
+          const processed = await preprocessImage(data, devicePixelRatio);
+          resolve(processed.image);
         }
       });
     } catch (err) {
@@ -84,7 +93,6 @@ async function uploadToOSS(buffer: Buffer, fileName: string, folderName: string 
 
 // Modified helper to save comparison result - doesn't save to filesystem
 const saveComparisonResult = (diffId: string, metadata: ComparisonResult) => {
-  // Store in memory cache instead of filesystem
   comparisonMetadataCache.set(diffId, metadata);
 };
 
@@ -112,7 +120,13 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { baseImageId: baseId, compareImageId:compareId, threshold = 0.01, ignoreAA = false } = body;
+    const {
+      baseImageId: baseId,
+      compareImageId: compareId,
+      threshold = 0.3,
+      ignoreAA = true,
+      devicePixelRatio = 1
+    } = body;
 
     if (!baseId || !compareId) {
       return NextResponse.json(
@@ -123,42 +137,36 @@ export async function POST(req: NextRequest) {
 
     // Get file paths - support both OSS URLs and local paths
     const basePath = baseId.startsWith('http') ? baseId : path.join(SCREENSHOT_DIR, `${baseId}`);
-
     const comparePath = compareId.startsWith('http') ? compareId : path.join(SCREENSHOT_DIR, `${compareId}`);
 
     try {
-      // Read both images
-      const img1 = await readImage(basePath);
-      const img2 = await readImage(comparePath);
+      // Read both images with preprocessing
+      const img1 = await readImage(basePath, devicePixelRatio);
+      const img2 = await readImage(comparePath, devicePixelRatio);
 
-      // Ensure dimensions match
-      let width: number, height: number;
+      // Normalize image dimensions
+      const { img1: normalizedImg1, img2: normalizedImg2, dimensions } = normalizeImagePair(img1, img2);
 
-      if (img1.width !== img2.width || img1.height !== img2.height) {
-        // Resize the larger image to match the smaller one
-        width = Math.min(img1.width, img2.width);
-        height = Math.min(img1.height, img2.height);
-        console.log(`Dimensions don't match. Resizing to ${width}x${height}`);
-      } else {
-        width = img1.width;
-        height = img1.height;
-      }
+      // Create anti-aliasing configuration
+      const aaConfig = createDefaultAAConfig();
+      aaConfig.enabled = !ignoreAA;
+      aaConfig.threshold = threshold;
 
       // Create output image (diff)
-      const diff = new PNG({ width, height });
+      const diff = new PNG({ width: dimensions.width, height: dimensions.height });
 
-      // Run pixelmatch
+      // Run pixelmatch with enhanced anti-aliasing detection
       const numDiffPixels = pixelmatch(
-        img1.data,
-        img2.data,
+        normalizedImg1.data,
+        normalizedImg2.data,
         diff.data,
-        width,
-        height,
+        dimensions.width,
+        dimensions.height,
         {
           threshold: parseFloat(threshold.toString()),
           includeAA: !ignoreAA,
-          alpha: 0.1,
-          diffColor: [255, 0, 0],    // Red for differences
+          alpha: aaConfig.alphaThreshold,
+          diffColor: aaConfig.aaColor,
           diffMask: false
         }
       );
@@ -182,7 +190,7 @@ export async function POST(req: NextRequest) {
       const ossUploadResult = await uploadToOSS(diffBuffer, diffFilename);
 
       // Calculate diff percentage
-      const totalPixels = width * height;
+      const totalPixels = dimensions.width * dimensions.height;
       const diffPercentage = (numDiffPixels / totalPixels) * 100;
 
       // Get metadata for base and compare images
@@ -201,10 +209,26 @@ export async function POST(req: NextRequest) {
         threshold: parseFloat(threshold.toString()),
         ignoreAA,
         timestamp: new Date().toISOString(),
-        diffImage: ossUploadResult.filePath, // Use OSS path instead of local filename
+        diffImage: ossUploadResult.filePath,
         baseImage: baseId,
         compareImage: compareId,
-        dimensions: { width, height },
+        dimensions: dimensions,
+        preprocessing: {
+          devicePixelRatio,
+          normalizedWidth: dimensions.width,
+          normalizedHeight: dimensions.height,
+          originalDimensions: {
+            base: { width: img1.width, height: img1.height },
+            compare: { width: img2.width, height: img2.height }
+          }
+        },
+        antiAliasing: {
+          enabled: !ignoreAA,
+          threshold: threshold,
+          alphaThreshold: aaConfig.alphaThreshold,
+          aaColor: aaConfig.aaColor,
+          detectAA: aaConfig.detectAA
+        },
         diffAreas: [] // This will be populated by analyzing diff clusters
       };
 
@@ -219,19 +243,21 @@ export async function POST(req: NextRequest) {
         diffImage: ossUploadResult.filePath,
         diffPixels: numDiffPixels,
         diffPercentage,
-        id: diffId
+        id: diffId,
+        preprocessing: comparisonMetadata.preprocessing,
+        antiAliasing: comparisonMetadata.antiAliasing
       });
     } catch (err) {
-      console.error('Error reading images:', err);
+      console.error('Error reading or comparing images:', err);
       return NextResponse.json(
-        { success: false, error: 'Failed to read images' },
+        { success: false, error: 'Failed to read or compare images' },
         { status: 500 }
       );
     }
   } catch (err) {
-    console.error('Error comparing images:', err);
+    console.error('Error processing comparison:', err);
     return NextResponse.json(
-      { success: false, error: 'Failed to compare images' },
+      { success: false, error: 'Failed to process comparison' },
       { status: 500 }
     );
   }
