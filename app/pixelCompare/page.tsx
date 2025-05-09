@@ -31,6 +31,10 @@ interface Comparison {
   diffPercentage: number;
   diffImage: string;
   date: string;
+  aiAnalysis?: {
+    summary: string;
+    recommendations: string[];
+  };
 }
 
 interface ReportIssue {
@@ -59,6 +63,11 @@ interface UICompare {
   Reports: UIReport[];
 }
 
+// Add imports
+import { CompareConfig } from './components/CompareConfig';
+import { EnhancedPixelCompareService } from './services/EnhancedPixelCompareService';
+import { PixelCompareConfig } from './types';
+
 export default function PixelCompare() {
   // State variables
   const [activeTab, setActiveTab] = useState("screenshots");
@@ -86,6 +95,22 @@ export default function PixelCompare() {
   const [selectedReport, setSelectedReport] = useState<UIReport | null>(null);
   const [generating, setGenerating] = useState(false);
 
+  // Add new state for comparison config
+  const [compareConfig, setCompareConfig] = useState<PixelCompareConfig>({
+    threshold: 0.1,
+    colorTolerance: 0.1,
+    antiAliasing: true,
+    useAI: false,
+    elementDetection: false,
+    semanticAnalysis: false,
+    useParallel: false,
+    cacheResults: false,
+    progressiveLoading: false
+  });
+
+  // Initialize comparison service
+  const compareService = useRef<EnhancedPixelCompareService | null>(null);
+
   // API base URL
   const apiBase = "/api";
 
@@ -93,7 +118,18 @@ export default function PixelCompare() {
     fetchScreenshots();
     fetchComparisons();
     fetchReports();
+    compareService.current = new EnhancedPixelCompareService(compareConfig);
+    return () => {
+      compareService.current?.cleanup();
+    };
   }, []);
+
+  // Add new effect to update service config when it changes
+  useEffect(() => {
+    if (compareService.current) {
+      compareService.current.updateConfig(compareConfig);
+    }
+  }, [compareConfig]);
 
   const fetchScreenshots = async () => {
     let UICompare = localStorage.getItem('UI-Compare')
@@ -263,7 +299,7 @@ export default function PixelCompare() {
     setComparing(true);
 
     try {
-      // Find selected screenshots to get file paths
+      // Find selected screenshots
       const baseScreenshot = screenshots.find(s => s.fileName === baseImageId);
       const compareScreenshot = screenshots.find(s => s.fileName === compareImageId);
 
@@ -271,53 +307,65 @@ export default function PixelCompare() {
         throw new Error('Selected screenshots not found');
       }
 
-      // Call the comparison API with the file paths
-      const response = await fetch(`${apiBase}/compare`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          baseImageId: baseScreenshot.filePath,
-          compareImageId: compareScreenshot.filePath
-        })
-      });
+      // Run enhanced comparison
+      const result = await compareService.current?.compare(
+        baseScreenshot.filePath,
+        compareScreenshot.filePath
+      );
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to compare screenshots');
+      if (!result) {
+        throw new Error('Comparison failed');
       }
 
-      // Get the API response data
-      const comparisonResult = await response.json();
+      // Create comparison object
+      const comparison: Comparison = {
+        id: Date.now().toString(),
+        baseId: baseImageId,
+        compareId: compareImageId,
+        baseImage: baseScreenshot.filePath,
+        compareImage: compareScreenshot.filePath,
+        baseName: baseScreenshot.uploadName,
+        compareName: compareScreenshot.uploadName,
+        diffPixels: result.diffResult.diffPixels,
+        diffPercentage: result.diffResult.diffPercentage,
+        diffImage: result.diffResult.diffImage,
+        date: new Date().toISOString(),
+        aiAnalysis: result.aiAnalysis
+      };
 
-      // Now save the result to localStorage
+      // Save to localStorage
       const UICompareStr = localStorage.getItem('UI-Compare');
       if (UICompareStr) {
         const UICompare = JSON.parse(UICompareStr) as UICompare;
-
-        // Create comparison object with data from API and localStorage
-        const comparison: Comparison = {
-          id: comparisonResult.id,
-          baseId: baseImageId,
-          compareId: compareImageId,
-          baseImage: baseScreenshot.filePath,
-          compareImage: compareScreenshot.filePath,
-          baseName: baseScreenshot.uploadName,
-          compareName: compareScreenshot.uploadName,
-          diffPixels: comparisonResult.diffPixels,
-          diffPercentage: comparisonResult.diffPercentage,
-          diffImage: comparisonResult.diffImage,
-          date: new Date().toISOString()
-        };
-
         UICompare.Comparisons.push(comparison);
         localStorage.setItem('UI-Compare', JSON.stringify(UICompare));
         setComparisons(UICompare.Comparisons);
       }
 
+      // Show warning if images were resized
+      const baseImg = new Image();
+      const compareImg = new Image();
+
+      await Promise.all([
+        new Promise<void>((resolve) => {
+          baseImg.onload = () => resolve();
+          baseImg.src = baseScreenshot.filePath;
+        }),
+        new Promise<void>((resolve) => {
+          compareImg.onload = () => resolve();
+          compareImg.src = compareScreenshot.filePath;
+        })
+      ]);
+
+      if (baseImg.width !== compareImg.width || baseImg.height !== compareImg.height) {
+        setError(`Warning: Images had different dimensions (${baseImg.width}x${baseImg.height} vs ${compareImg.width}x${compareImg.height}). They were automatically resized for comparison.`);
+      } else {
+        setError(null);
+      }
+
       // Reset form
       setBaseImageId('');
       setCompareImageId('');
-      setError(null);
     } catch (err: any) {
       console.error('Error running comparison:', err);
       setError(err.message || 'Failed to compare screenshots');
@@ -477,6 +525,157 @@ export default function PixelCompare() {
     'Minor': 'bg-green-100 text-green-800'
   };
 
+  // Update the comparison card to include config
+  const renderComparisonCard = () => (
+    <Card>
+      <CardHeader>
+        <CardTitle>Run Image Comparison</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="baseImage">Base Image</Label>
+              <select
+                id="baseImage"
+                className="w-full border rounded-md p-2"
+                value={baseImageId}
+                onChange={(e) => setBaseImageId(e.target.value)}
+              >
+                <option value="">Select base image</option>
+                {screenshots.map((screenshot, index) => (
+                  <option key={index} value={screenshot.fileName}>
+                    {screenshot.uploadName}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="compareImage">Compare Image</Label>
+              <select
+                id="compareImage"
+                className="w-full border rounded-md p-2"
+                value={compareImageId}
+                onChange={(e) => setCompareImageId(e.target.value)}
+              >
+                <option value="">Select compare image</option>
+                {screenshots.map((screenshot, index) => (
+                  <option key={index} value={screenshot.fileName}>
+                    {screenshot.uploadName}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <CompareConfig
+            config={compareConfig}
+            onChange={setCompareConfig}
+          />
+
+          <Button
+            onClick={runComparison}
+            disabled={comparing || !baseImageId || !compareImageId}
+            className="w-full"
+          >
+            {comparing ? "Comparing..." : "Run Comparison"}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  // Update the comparison results display
+  const renderComparisonResults = (comparison: Comparison) => (
+    <Card key={comparison.id}>
+      <CardContent className="p-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <h3 className="text-lg font-medium mb-2">Base Image</h3>
+            <img
+              src={comparison.baseImage}
+              alt={comparison.baseName}
+              className="w-full object-cover object-top border"
+            />
+            <p className="text-sm mt-1 truncate">{comparison.baseName}</p>
+          </div>
+          <div>
+            <h3 className="text-lg font-medium mb-2">Compare Image</h3>
+            <img
+              src={comparison.compareImage}
+              alt={comparison.compareName}
+              className="w-full object-cover object-top border"
+            />
+            <p className="text-sm mt-1 truncate">{comparison.compareName}</p>
+          </div>
+          <div>
+            <h3 className="text-lg font-medium mb-2">Diff Result</h3>
+            {comparison.diffImage ? (
+              <img
+                src={comparison.diffImage}
+                alt="Diff result"
+                className="w-full object-cover object-top border"
+              />
+            ) : (
+              <div className="bg-gray-100 w-full h-48 flex items-center justify-center border">
+                <p className="text-gray-400">Diff Preview</p>
+              </div>
+            )}
+            <div className="flex justify-between mt-1">
+              <p className="text-sm">
+                Diff: <span className="font-medium">{comparison.diffPercentage.toFixed(2)}%</span>
+              </p>
+              <p className="text-sm">
+                Pixels: <span className="font-medium">{comparison.diffPixels}</span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {comparison.aiAnalysis && (
+          <div className="mt-4 p-4 border rounded-lg bg-gray-50">
+            <h4 className="font-bold mb-2">AI Analysis</h4>
+            <div className="space-y-2">
+              <p className="text-sm">{comparison.aiAnalysis.summary}</p>
+              {comparison.aiAnalysis.recommendations.length > 0 && (
+                <div>
+                  <h5 className="font-medium mt-2 mb-1">Recommendations:</h5>
+                  <ul className="list-disc list-inside text-sm">
+                    {comparison.aiAnalysis.recommendations.map((rec, index) => (
+                      <li key={index}>{rec}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        <div className="flex justify-between mt-4">
+          <p className="text-sm text-gray-500">
+            {new Date(comparison.date).toLocaleString()}
+          </p>
+          <div className="space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setComparisonId(comparison.id)}
+            >
+              Generate AI Report
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => deleteComparison(comparison.id)}
+            >
+              <Trash2 className="h-4 w-4 mr-1" /> Delete
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
   return (
     <div className="container mx-auto py-8">
       <h1 className="text-3xl font-bold mb-6">Pixel Compare - Visual Regression Testing</h1>
@@ -632,54 +831,7 @@ export default function PixelCompare() {
         </TabsContent>
 
         <TabsContent value="compare">
-          <Card>
-            <CardHeader>
-              <CardTitle>Run Image Comparison</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="baseImage">Base Image</Label>
-                  <select
-                    id="baseImage"
-                    className="w-full border rounded-md p-2"
-                    value={baseImageId}
-                    onChange={(e) => setBaseImageId(e.target.value)}
-                  >
-                    <option value="">Select base image</option>
-                    {screenshots.map((screenshot, index) => (
-                      <option key={index} value={screenshot.fileName.toString()}>
-                        {screenshot.uploadName}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="compareImage">Compare Image</Label>
-                  <select
-                    id="compareImage"
-                    className="w-full border rounded-md p-2"
-                    value={compareImageId}
-                    onChange={(e) => setCompareImageId(e.target.value)}
-                  >
-                    <option value="">Select compare image</option>
-                    {screenshots.map((screenshot, index) => (
-                      <option key={index} value={screenshot.fileName.toString()}>
-                        {screenshot.uploadName}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <Button
-                onClick={runComparison}
-                disabled={comparing || !baseImageId || !compareImageId}
-                className="w-full mt-4"
-              >
-                {comparing ? "Comparing..." : "Run Comparison"}
-              </Button>
-            </CardContent>
-          </Card>
+          {renderComparisonCard()}
 
           <h2 className="text-xl font-bold mt-8 mb-4">Comparison Results</h2>
           {comparisons.length === 0 ? (
@@ -689,79 +841,7 @@ export default function PixelCompare() {
             </div>
           ) : (
             <div className="space-y-4">
-              {comparisons.map((comparison) => (
-                <Card key={comparison.id}>
-                  <CardContent className="p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <h3 className="text-lg font-medium mb-2">Base Image</h3>
-                        <img
-                          src={typeof comparison.baseId === 'number'
-                            ? screenshots[comparison.baseId]?.filePath
-                            : comparison.baseImage}
-                          alt={comparison.baseName}
-                          className="w-full object-cover object-top border"
-                        />
-                        <p className="text-sm mt-1 truncate">{comparison.baseName}</p>
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-medium mb-2">Compare Image</h3>
-                        <img
-                          src={typeof comparison.compareId === 'number'
-                            ? screenshots[comparison.compareId]?.filePath
-                            : comparison.compareImage}
-                          alt={comparison.compareName}
-                          className="w-full object-cover object-top border"
-                        />
-                        <p className="text-sm mt-1 truncate">{comparison.compareName}</p>
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-medium mb-2">Diff Result</h3>
-                        {comparison.diffImage ? (
-                          <img
-                            src={comparison.diffImage}
-                            alt="Diff result"
-                            className="w-full object-cover object-top border"
-                          />
-                        ) : (
-                          <div className="bg-gray-100 w-full h-48 flex items-center justify-center border">
-                            <p className="text-gray-400">Diff Preview</p>
-                          </div>
-                        )}
-                        <div className="flex justify-between mt-1">
-                          <p className="text-sm">
-                            Diff: <span className="font-medium">{comparison.diffPercentage?.toFixed(2) || "0.00"}%</span>
-                          </p>
-                          <p className="text-sm">
-                            Pixels: <span className="font-medium">{comparison.diffPixels || 0}</span>
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex justify-between mt-4">
-                      <p className="text-sm text-gray-500">
-                        {new Date(comparison.date).toLocaleString()}
-                      </p>
-                      <div className="space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setComparisonId(comparison.id)}
-                        >
-                          Generate AI Report
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => deleteComparison(comparison.id)}
-                        >
-                          <Trash2 className="h-4 w-4 mr-1" /> Delete
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+              {comparisons.map((comparison) => renderComparisonResults(comparison))}
             </div>
           )}
         </TabsContent>
