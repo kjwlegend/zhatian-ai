@@ -1,11 +1,15 @@
-import { PixelCompareConfig, ComparisonResult } from '../types';
-import { AIAnalysisService } from './AIAnalysisService';
+import { PixelCompareConfig } from '../types';
+import { ComparisonResult } from '@/app/api/_lib/metadata-cache';
+// import { AIAnalysisService } from './AIAnalysisService';
 import pixelmatch from 'pixelmatch';
 import { PNG } from 'pngjs';
+import { v4 as uuidv4 } from 'uuid';
+import path from 'path';
+import fs from 'fs';
 
 export class EnhancedPixelCompareService {
   private config: PixelCompareConfig;
-  private aiService: AIAnalysisService;
+  // private aiService: AIAnalysisService;
   private cache: Map<string, ComparisonResult>;
 
   constructor(config: Partial<PixelCompareConfig>) {
@@ -21,7 +25,7 @@ export class EnhancedPixelCompareService {
       progressiveLoading: true,
       ...config
     };
-    this.aiService = new AIAnalysisService();
+    // this.aiService = new AIAnalysisService();
     this.cache = new Map();
   }
 
@@ -118,6 +122,19 @@ export class EnhancedPixelCompareService {
     };
   }
 
+  private findFirstPixel(imageData: Uint8ClampedArray, width: number, height: number): { x: number; y: number } | null {
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const idx = (y * width + x) * 4;
+        // Check if pixel is not transparent (alpha > 0) and has some color value
+        if (imageData[idx + 3] > 0 && (imageData[idx] > 0 || imageData[idx + 1] > 0 || imageData[idx + 2] > 0)) {
+          return { x, y };
+        }
+      }
+    }
+    return null; // Return null if no non-transparent pixel found
+  }
+
   private resizeImage(image: PNG, width: number, height: number): PNG {
     const canvas = document.createElement('canvas');
     canvas.width = width;
@@ -140,11 +157,43 @@ export class EnhancedPixelCompareService {
       image.height
     );
 
+    // Find the first non-transparent pixel
+    const basePoint = this.findFirstPixel(imageData.data, image.width, image.height);
     // Put the image data on the temp canvas
     tempCtx.putImageData(imageData, 0, 0);
 
-    // Resize using the canvas
-    ctx.drawImage(tempCanvas, 0, 0, image.width, image.height, 0, 0, width, height);
+    // If we found a base point, use it for drawing
+    if (basePoint) {
+      // Calculate the new dimensions maintaining aspect ratio
+      const aspectRatio = image.width / image.height;
+      let newWidth = width;
+      let newHeight = height;
+
+      if (width / height > aspectRatio) {
+        newWidth = height * aspectRatio;
+      } else {
+        newHeight = width / aspectRatio;
+      }
+
+      // Clear the destination canvas
+      ctx.clearRect(0, 0, width, height);
+
+      // Calculate the centered position
+      const offsetX = (width - newWidth) / 2;
+      const offsetY = (height - newHeight) / 2;
+
+      // Draw the image with the base point offset
+      ctx.drawImage(
+        tempCanvas,
+        basePoint.x, basePoint.y, // Source position (starting from base point)
+        image.width - basePoint.x, image.height - basePoint.y, // Source dimensions
+        offsetX, offsetY, // Destination position
+        newWidth, newHeight // Destination dimensions
+      );
+    } else {
+      // Fallback to original resize logic if no base point found
+      ctx.drawImage(tempCanvas, 0, 0, image.width, image.height, 0, 0, width, height);
+    }
 
     // Get the resized image data
     const resizedImageData = ctx.getImageData(0, 0, width, height);
@@ -174,6 +223,53 @@ export class EnhancedPixelCompareService {
 
   private generateCacheKey(baseImageUrl: string, compareImageUrl: string): string {
     return `${baseImageUrl}:${compareImageUrl}:${JSON.stringify(this.config)}`;
+  }
+
+  private async uploadToOSS(buffer: Buffer, fileName: string, folderName: string = 'DIFF-AI'): Promise<{filePath: string, fileName: string}> {
+    // Create form data for upload
+    const formData = new FormData();
+    const blob = new Blob([buffer], { type: 'image/png' });
+    formData.append('file', blob, fileName);
+    formData.append('folderName', folderName);
+
+    // Get the base URL from the environment or use a default
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const uploadUrl = new URL('/api/upload', baseUrl).toString();
+
+    // Upload to OSS with absolute URL
+    const response = await fetch(uploadUrl, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to upload diff image to OSS');
+    }
+
+    const data = await response.json();
+    return {
+      filePath: data.filePath,
+      fileName: data.fileName
+    };
+  }
+
+  private async saveDiffImage(diffImage: PNG): Promise<{filePath: string, fileName: string}> {
+    const diffId = uuidv4();
+    const diffFilename = `${diffId}.png`;
+
+    // Convert PNG to buffer
+    const chunks: Buffer[] = [];
+    const diffStream = diffImage.pack();
+
+    // Wait for the PNG to be serialized
+    const diffBuffer = await new Promise<Buffer>((resolve, reject) => {
+      diffStream.on('data', (chunk: Buffer) => chunks.push(Buffer.from(chunk)));
+      diffStream.on('end', () => resolve(Buffer.concat(chunks)));
+      diffStream.on('error', reject);
+    });
+
+    // Upload to OSS
+    return await this.uploadToOSS(diffBuffer, diffFilename);
   }
 
   public async compare(
@@ -218,42 +314,48 @@ export class EnhancedPixelCompareService {
         this.config
       );
 
-      const diffResult = {
-        diffImage: this.pngToDataUrl(comparisonResult.diffImage),
-        diffPixels: comparisonResult.diffPixels,
-        diffPercentage: comparisonResult.diffPercentage,
-        baseImage: baseImageUrl,
-        compareImage: compareImageUrl
-      };
+      // Save diff image to OSS and get its path
+      const ossUploadResult = await this.saveDiffImage(comparisonResult.diffImage);
 
-      // Run AI analysis if enabled
-      let aiAnalysis = undefined;
-      if (this.config.useAI) {
-        try {
-          aiAnalysis = await this.aiService.analyze({
-            diffResult,
-            baseImage: baseImageUrl,
-            compareImage: compareImageUrl,
-            metadata: {
-              config: this.config,
-              timestamp: new Date().toISOString(),
-              processingTime: Date.now() - startTime
-            }
-          });
-        } catch (error) {
-          console.warn('AI analysis failed:', error);
-          // Continue without AI analysis
-        }
-      }
+      // Get metadata for base and compare images
+      const baseName = baseImageUrl.split('/').pop() || baseImageUrl;
+      const compareName = compareImageUrl.split('/').pop() || compareImageUrl;
 
       const result: ComparisonResult = {
-        diffResult,
-        aiAnalysis,
-        metadata: {
-          config: this.config,
-          timestamp: new Date().toISOString(),
-          processingTime: Date.now() - startTime
-        }
+        id: ossUploadResult.fileName.replace('.png', ''),
+        baseId: baseImageUrl,
+        compareId: compareImageUrl,
+        baseName,
+        compareName,
+        diffPixels: comparisonResult.diffPixels,
+        diffPercentage: comparisonResult.diffPercentage,
+        threshold: this.config.threshold,
+        ignoreAA: !this.config.antiAliasing,
+        timestamp: new Date().toISOString(),
+        diffImage: ossUploadResult.filePath,
+        baseImage: baseImageUrl,
+        compareImage: compareImageUrl,
+        dimensions: {
+          width: processedBase.width,
+          height: processedBase.height
+        },
+        preprocessing: {
+          devicePixelRatio: 1,
+          normalizedWidth: processedBase.width,
+          normalizedHeight: processedBase.height,
+          originalDimensions: {
+            base: { width: baseImage.width, height: baseImage.height },
+            compare: { width: compareImage.width, height: compareImage.height }
+          }
+        },
+        antiAliasing: {
+          enabled: this.config.antiAliasing,
+          threshold: this.config.threshold,
+          alphaThreshold: 0.1,
+          aaColor: [255, 255, 0],
+          detectAA: true
+        },
+        diffAreas: []
       };
 
       // Cache result if enabled

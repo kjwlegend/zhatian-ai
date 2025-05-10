@@ -319,18 +319,18 @@ export default function PixelCompare() {
 
       // Create comparison object
       const comparison: Comparison = {
-        id: Date.now().toString(),
+        id: result.id,
         baseId: baseImageId,
         compareId: compareImageId,
         baseImage: baseScreenshot.filePath,
         compareImage: compareScreenshot.filePath,
         baseName: baseScreenshot.uploadName,
         compareName: compareScreenshot.uploadName,
-        diffPixels: result.diffResult.diffPixels,
-        diffPercentage: result.diffResult.diffPercentage,
-        diffImage: result.diffResult.diffImage,
-        date: new Date().toISOString(),
-        aiAnalysis: result.aiAnalysis
+        diffPixels: result.diffPixels,
+        diffPercentage: result.diffPercentage,
+        diffImage: result.diffImage,
+        date: result.timestamp,
+        aiAnalysis: undefined // AI analysis is currently disabled
       };
 
       // Save to localStorage
@@ -404,6 +404,8 @@ export default function PixelCompare() {
       if (!UICompareStr) {
         throw new Error('No comparison data found');
       }
+      console.error('%c UICompareStr ', 'background-image:color:transparent;color:red;');
+      console.error('🚀~ => ', UICompareStr);
 
       const UICompare = JSON.parse(UICompareStr) as UICompare;
       const comparison = UICompare.Comparisons.find(comp => comp.id === comparisonId);
