@@ -232,12 +232,8 @@ export class EnhancedPixelCompareService {
     formData.append('file', blob, fileName);
     formData.append('folderName', folderName);
 
-    // Get the base URL from the environment or use a default
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-    const uploadUrl = new URL('/api/upload', baseUrl).toString();
-
     // Upload to OSS with absolute URL
-    const response = await fetch(uploadUrl, {
+    const response = await fetch('/api/upload', {
       method: 'POST',
       body: formData,
     });
