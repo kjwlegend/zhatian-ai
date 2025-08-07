@@ -1,284 +1,314 @@
-# AI 驱动的全栈开发助手
+# 🤖 AI Chat to Code - 智能全栈开发助手
 
-一个基于 AI 的全栈开发辅助系统,通过自然语言交互方式,帮助开发团队快速构建高质量的应用。
+<div align="center">
 
-## 核心功能
+[![License](https://img.shields.io/badge/License-Apache%203.0-blue.svg)](https://opensource.org/licenses/Apache-3.0)
+[![Next.js](https://img.shields.io/badge/Next.js-14.0-black)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
+[![Docker](https://img.shields.io/badge/Docker-supported-blue)](https://www.docker.com/)
 
-### 1. 售前支持
+**基于AI的智能全栈开发辅助系统 - 通过自然语言交互，助力团队快速构建高质量应用**
 
-- 历史投标检索与分析
-- 品牌新闻分析
-- 投标方案评估
-- 演讲稿生成与演练
+[🚀 快速开始](#-快速开始) • [📖 文档](./docs) • [🎯 演示](#-功能演示) • [🛠️ 开发指南](#-开发指南)
 
-### 2. 需求分析
+</div>
 
-- 业务需求分析
-- 基于设计稿的代码生成
-- 快速需求文档撰写
-- 产品文档生成
+## ✨ 核心特性
 
-### 3. 开发辅助
+### 🎯 四大核心模块
 
-- 前端框架代码生成
-- 宝塔 UNEX/LIGHT 配置
-- UNEX 接口生成与对接
-- 测试用例编写
-- 测试脚本生成
+<table>
+<tr>
+<td width="50%">
 
-### 4. 运营支持
+**🔍 售前支持 (BD Assistant)**
 
-- 自然语言页面内容生成
-- 客服话术演练
+- 📊 历史投标检索与智能分析
+- 📰 品牌新闻实时分析
+- 📝 投标方案智能评估
+- 🎤 演讲稿生成与演练指导
 
-## 技术特性
+**🧠 需求分析 (Requirements)**
 
-### 框架集成
+- 📋 业务需求智能分析
+- 🎨 设计稿一键转代码
+- ⚡ 快速需求文档生成
+- 📄 产品文档自动撰写
 
-- ACE/UNEX 框架集成
-- 多语言支持 (Vue, React, Python, Node.js, Java)
-- CMS 框架标准集成 (WordPress, Drupal)
+</td>
+<td width="50%">
 
-### 知识沉淀
+**⚙️ 开发辅助 (Development)**
 
-- 售前 BD 方法论沉淀
-- 开发组件库沉淀
-- 技术经验沉淀
+- 🎛️ 前端框架代码智能生成
+- 🗄️ 宝塔UNEX/LIGHT配置
+- 🔌 UNEX接口生成与对接
+- 🧪 测试用例与脚本自动生成
 
-### AI 调优
+**🚀 运营支持 (Operations)**
 
-- 输出模板调优
-- 工作流链路调优
-- 底层思维链调优
+- 📝 自然语言内容快速生成
+- 💬 客服话术智能演练
+- 📊 数据分析报告生成
 
-## 工作区规划
+</td>
+</tr>
+</table>
 
-### 产品文档区
+### 🏗️ 技术架构优势
 
-- 左侧对话区
-- 右侧文本编辑区
-- 通过对话自动填充文档
+- **🎯 框架集成**: ACE/UNEX框架深度集成，支持Vue、React、Python、Node.js、Java
+- **📚 知识沉淀**: BD方法论、组件库、技术经验持续积累
+- **🤖 AI调优**: 输出模板、工作流链路、思维链深度优化
+- **🔧 CMS集成**: WordPress、Drupal等CMS框架标准对接
 
-### 前端组件区
+## 🚀 快速开始
 
-- 左侧对话区
-- 右侧代码区
+### 📋 环境要求
 
-### 数据库区
+- Node.js >= 18.0.0
+- Docker & Docker Compose (推荐)
+- Git
 
-- 左侧对话区
-- 右侧 SQL 语法区
+### ⚡ 本地开发
 
-### 后端开发区
+```bash
+# 1. 克隆项目
+git clone https://github.com/your-org/ai-chat-to-code.git
+cd ai-chat-to-code
 
-- 左侧对话区
-- 右侧语言选择 (JAVA/PYTHON) 和代码区
+# 2. 安装依赖
+npm install
+# 或使用 pnpm (推荐)
+pnpm install
 
-## 开发脚本
+# 3. 环境配置
+cp .env.example .env.local
+# 编辑 .env.local 配置必要的API密钥
 
-### 构建和开发
+# 4. 启动开发服务器
+npm run dev
+```
 
-- `dev` - 启动开发服务器
-- `build` - 构建生产版本
-- `analyze` - 分析打包体积
+### 🐳 Docker 部署
 
-### 测试相关
+```bash
+# 开发环境
+docker-compose up -d
 
-- `typecheck` - 检查 TypeScript 类型
-- `lint` - 运行 ESLint 检查
-- `jest` - 运行单元测试
-- `test` - 运行所有测试和检查
+# 生产环境
+docker-compose -f docker-compose.prod.yml up -d
+```
 
-### 其他工具
+访问 [http://localhost:3000](http://localhost:3000) 开始使用！
 
-- `storybook` - 启动 Storybook
-- `prettier:write` - 格式化代码
+## 🛠️ 技术栈
 
-### 前端技术栈
+### 前端技术
 
-- **框架**: Next.js (App Router)
-- **语言**: TypeScript
-- **样式**: Tailwind CSS
-- **动画**: Framer Motion
-- **测试**: Jest & React Testing Library
-- **代码质量**: ESLint & Prettier
+```typescript
+- Framework: Next.js 14 (App Router)
+- Language: TypeScript 5.0+
+- Styling: Tailwind CSS + Shadcn UI
+- Animation: Framer Motion
+- State: Zustand + React Query
+- Testing: Jest + React Testing Library
+```
 
-### 后端技术栈
+### 后端技术
 
-- **框架**: Express.js (Node.js) / Flask (Python)
-- **语言**: Node.js / Python
-- **数据库**: MySQL (关系型数据库)
-- **向量数据库**: Milvus
-- **缓存**: Redis
-- **网关**: OpenResty
-- **容器化**: Docker
+```python
+- Runtime: Node.js / Python
+- Framework: Express.js / Flask
+- Database: MySQL + Redis
+- Vector DB: Milvus
+- Gateway: OpenResty
+- Container: Docker + Kubernetes
+```
 
-### 部署技术栈
+### AI & 集成
 
-- **容器化**: Docker
-- **容器编排**: Kubernetes (可选)
-- **CI/CD**: GitHub Actions / GitLab CI
-- **监控**: Prometheus & Grafana
-- **日志管理**: ELK Stack (Elasticsearch, Logstash, Kibana)
-- **负载均衡**: Nginx
-- **服务发现**: Consul
-- **配置中心**: Nacos
-- **消息队列**: RabbitMQ
-- **服务网格**: Istio (可选)
+```yaml
+- LLM APIs: OpenAI GPT-4, Dify
+- Vector Search: Milvus + Embedding
+- Framework Integration: ACE/UNEX
+- CMS Support: WordPress, Drupal
+```
 
-## 贡献指南
+## 🎯 功能演示
 
-欢迎提交 Pull Request 和 Issue。在提交代码前,请确保:
+### 💼 售前BD助手
 
-1. 通过所有测试
-2. 符合代码规范
-3. 更新相关文档
-4. 添加必要的测试用例
+```mermaid
+graph LR
+    A[历史投标数据] --> B[AI分析]
+    B --> C[方案评估]
+    C --> D[演讲稿生成]
+    D --> E[实战演练]
+```
 
-## 许可证
-
-APACHE 3.0 License
-
-# Todo list
-
-- 增加组件上传功能
-- 增加组件验证逻辑
-- 增加代码预览功能
-- 优化组件库
-- 增加页面部分的预览功能
-
-# Architecture Diagram
-
-![Architecture Diagram](./docs/bombai-architecture.png)
+### 🎨 需求转代码
 
 ```mermaid
 graph TD
-    subgraph Frontend [前端架构]
-        Next[Next.js App Router]
-        TS[TypeScript]
-        UI[UI层]
-        Store[状态管理]
-        Hooks[Hooks层]
-
-        UI --> |样式| Tailwind[Tailwind CSS]
-        UI --> |动画| Framer[Framer Motion]
-        UI --> |组件| Shadcn[Shadcn UI]
-
-        Next --> TS
-        TS --> UI
-        TS --> Store
-        TS --> Hooks
-
-        subgraph QA [质量保证]
-            Jest[Jest测试]
-            RTL[React Testing Library]
-            ESLint[ESLint]
-            Prettier[Prettier]
-        end
-    end
-
-    subgraph Backend [后端架构]
-        LB[Nginx负载均衡]
-        Gateway[OpenResty网关]
-
-        subgraph Services [服务层]
-            Express1[Express.js服务1]
-            Express2[Express.js服务2]
-            Flask1[Flask服务1]
-            Flask2[Flask服务2]
-            AI[AI服务]
-        end
-
-        subgraph Storage [存储层]
-            MySQL[(MySQL数据库)]
-            Milvus[(Milvus向量库)]
-            Redis[(Redis缓存)]
-            OSS[(阿里云OSS)]
-        end
-
-        LB --> Gateway
-        Gateway --> |负载分发| Express1 & Express2
-        Gateway --> |负载分发| Flask1 & Flask2
-        Gateway --> AI
-
-        Services --> Storage
-        AI --> |调用| OpenAI[OpenAI API]
-        AI --> |调用| Dify[Dify API]
-    end
-
-    subgraph DevOps [运维架构]
-        subgraph Container [容器化]
-            Docker[Docker]
-            K8s[Kubernetes]
-        end
-
-        subgraph CICD [持续集成/部署]
-            Actions[GitHub Actions]
-            GitLab[GitLab CI]
-        end
-
-        subgraph Monitor [监控系统]
-            Prometheus[Prometheus]
-            Grafana[Grafana]
-        end
-
-        subgraph Logging [日志系统]
-            ES[Elasticsearch]
-            Logstash[Logstash]
-            Kibana[Kibana]
-        end
-    end
-
-    Client[客户端] --> Frontend
-    Frontend --> LB
-    Backend --> DevOps
+    A[设计稿上传] --> B[元素识别]
+    B --> C[组件拆解]
+    C --> D[代码生成]
+    D --> E[预览调试]
 ```
 
-# 后端 CSV excel 数据对话架构
+## 📁 项目结构
 
+app/
+├── agents/ # 项目智能助手
+├── bd/ # 售前支持模块
+├── codes/ # 代码生成模块
+├── workspace/ # 工作区管理
+├── components/ # 公共组件
+├── services/ # 后端服务
+└── store/ # 状态管理
+components/ # UI组件库
+docs/ # 文档资源
+
+## 🔧 开发指南
+
+### 📜 可用脚本
+
+| 命令                | 说明               |
+| ------------------- | ------------------ |
+| `npm run dev`       | 启动开发服务器     |
+| `npm run build`     | 构建生产版本       |
+| `npm run test`      | 运行所有测试       |
+| `npm run lint`      | 代码规范检查       |
+| `npm run typecheck` | TypeScript类型检查 |
+
+### 🌍 环境变量
+
+```bash
+# OpenAI配置
+OPENAI_API_KEY=your_openai_key
+OPENAI_BASE_URL=https://api.openai.com/v1
+
+# Dify配置
+DIFY_API_KEY=your_dify_key
+DIFY_BASE_URL=https://api.dify.ai/v1
+
+# 数据库配置
+DATABASE_URL=mysql://user:pass@localhost:3306/db
+REDIS_URL=redis://localhost:6379
 ```
-graph LR
-    A[前端] --> B[文件上传]
-    B --> C[Python 后端]
-    A --> D[对话请求]
-    D --> C
-    C --> E[数据处理/Pandas]
-    C --> F[LLM 分析]
-    C --> G[返回结果]
-    G --> H[前端可视化]
+
+## 🏛️ 系统架构
+
+### 🎯 整体架构图
+
+![Architecture Diagram](./docs/bombai-architecture.png)
+
+<details>
+<summary>📊 详细架构图</summary>
+
+```mermaid
+graph TB
+    subgraph "🖥️ 前端层"
+        A[Next.js App Router]
+        B[TypeScript + Tailwind]
+        C[Shadcn UI Components]
+        D[Zustand Store]
+    end
+
+    subgraph "🔀 网关层"
+        E[OpenResty Gateway]
+        F[Nginx Load Balancer]
+    end
+
+    subgraph "⚙️ 服务层"
+        G[Express.js API]
+        H[Flask Python Service]
+        I[AI Processing Service]
+    end
+
+    subgraph "💾 数据层"
+        J[(MySQL Database)]
+        K[(Redis Cache)]
+        L[(Milvus Vector DB)]
+        M[(Ali OSS Storage)]
+    end
+
+    subgraph "🤖 AI层"
+        N[OpenAI GPT-4]
+        O[Dify Platform]
+        P[Custom Models]
+    end
+
+    A --> E
+    E --> F
+    F --> G
+    F --> H
+    G --> I
+    H --> I
+    I --> N
+    I --> O
+    I --> P
+    G --> J
+    G --> K
+    H --> L
+    G --> M
 ```
 
-更强大的数据处理能力
-使用 Pandas 进行高效的数据操作
-更好的内存管理
-复杂计算更快速
-更好的扩展性
-易于集成其他 Python 数据科学库
-可以使用 NumPy, SciPy 等进行高级分析
-支持机器学习模型集成
-前端职责更清晰
-专注于用户交互和数据展示
-减少前端数据处理负担
-更好的性能表现
-注意事项
-数据传输
-考虑大文件上传的处理
-实现数据压缩
-添加进度提示
-状态管理
-后端需要管理用户会话
-考虑数据持久化存储
-实现数据缓存机制
-错误处理
-添加请求超时处理
-实现错误重试机制
-提供友好的错误提示 4. 安全性
-添加文件类型验证
-实现数据访问控制
-防止 SQL 注入等安全问题
+</details>
 
-LLM 的主要作用
-意图理解: 解析用户自然语言查询
-分析规划: 确定数据操作步骤
-可视化建议: 推荐合适的图表类型
-结果解释: 生成数据分析解释
+## 🤝 贡献指南
+
+我们欢迎所有形式的贡献！请在提交PR前确保：
+
+- ✅ 通过所有测试 (`npm run test`)
+- ✅ 符合代码规范 (`npm run lint`)
+- ✅ 更新相关文档
+- ✅ 添加必要的测试用例
+
+### 🔄 开发流程
+
+1. Fork 本仓库
+2. 创建特性分支 (`git checkout -b feature/amazing-feature`)
+3. 提交更改 (`git commit -m 'Add some amazing feature'`)
+4. 推送到分支 (`git push origin feature/amazing-feature`)
+5. 打开 Pull Request
+
+## 📋 开发路线图
+
+### 🎯 近期计划 (Q1 2024)
+
+- [ ] 🧩 组件上传与验证功能
+- [ ] 👁️ 实时代码预览功能
+- [ ] 📚 组件库优化升级
+- [ ] 🎨 页面部分预览功能
+- [ ] 🔍 智能代码搜索
+
+### 🚀 长期规划 (2024)
+
+- [ ] 🌐 多语言国际化支持
+- [ ] 📱 移动端适配优化
+- [ ] 🔌 更多第三方集成
+- [ ] 🤖 自定义AI模型训练
+- [ ] ☁️ 云端部署方案
+
+## 📄 许可证
+
+本项目采用 [Apache 3.0 License](./LICENSE) 开源协议。
+
+## 🙋‍♂️ 支持与反馈
+
+- 📧 邮箱: support@your-domain.com
+- 💬 讨论: [GitHub Discussions](https://github.com/your-org/ai-chat-to-code/discussions)
+- 🐛 Bug报告: [GitHub Issues](https://github.com/your-org/ai-chat-to-code/issues)
+- 📖 文档: [在线文档](https://docs.your-domain.com)
+
+---
+
+<div align="center">
+
+**⭐ 如果这个项目对你有帮助，请给我们一个星标！**
+
+Made with ❤️ by [Your Team Name](https://github.com/your-org)
+
+</div>
