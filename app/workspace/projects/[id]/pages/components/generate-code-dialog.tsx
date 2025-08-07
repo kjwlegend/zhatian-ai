@@ -2,10 +2,10 @@
 
 import { useCallback, useState } from 'react';
 import { Loader2 } from 'lucide-react';
-import { CodeDisplay } from '@/app/chats/components/CodeDisplay';
-import { WORDPRESS_PROMPT } from '@/app/chats/constants/prompts';
-import { useChatMessages } from '@/app/chats/hooks/useChatMessages';
-import { useCodeParser } from '@/app/chats/hooks/useCodeParser';
+import { CodeDisplay } from '@/app/codes/components/CodeDisplay';
+import { WORDPRESS_PROMPT } from '@/app/codes/constants/prompts';
+import { useChatMessages } from '@/app/codes/hooks/useChatMessages';
+import { useCodeParser } from '@/app/codes/hooks/useCodeParser';
 import { Component, Page } from '@/app/services/db/schema';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

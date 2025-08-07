@@ -1,4 +1,12 @@
-import { FileText, HelpCircle, LayoutDashboard, Library, MessageCircle, Users } from 'lucide-react';
+import {
+  Code2Icon,
+  FileText,
+  HelpCircle,
+  LayoutDashboard,
+  Library,
+  MessageCircle,
+  Users,
+} from 'lucide-react';
 
 export type NavItem = {
   title: string;
@@ -49,9 +57,9 @@ export const navItems: NavItem[] = [
     ],
   },
   {
-    title: '聊天',
-    href: '/chats',
-    icon: MessageCircle,
+    title: '开发',
+    href: '/code',
+    icon: Code2Icon,
   },
   {
     title: '项目助手',

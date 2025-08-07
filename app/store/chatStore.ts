@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Message } from '@/app/chats/hooks/useChatMessages';
+import { Message } from '@/app/codes/hooks/useChatMessages';
 
 interface ChatState {
   // 消息相关

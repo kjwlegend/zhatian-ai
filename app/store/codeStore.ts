@@ -2,7 +2,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { FRAMEWORK_OPTIONS } from '@/app/chats/components/FrameworkSelector';
+import { FRAMEWORK_OPTIONS } from '@/app/codes/components/FrameworkSelector';
 
 type CodeType = 'frontend' | 'backend' | 'test';
 

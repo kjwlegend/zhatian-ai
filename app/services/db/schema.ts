@@ -1,5 +1,5 @@
 import { DBSchema } from 'idb';
-import { Message } from '@/app/chats/hooks/useChatMessages';
+import { Message } from '@/app/codes/hooks/useChatMessages';
 import {
   Platform,
   Project,

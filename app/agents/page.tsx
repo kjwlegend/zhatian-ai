@@ -10,12 +10,14 @@ const projects = [
     name: 'Gucci',
     status: 'WIP',
     description: '正在开发中的 Gucci 项目助手',
+    disabled: true,
   },
   {
     id: 'valentino',
     name: 'Valentino',
     status: '试用中',
     description: '处于试用阶段的 Valentino 项目助手',
+    disabled: false,
   },
 ];
 
@@ -39,14 +41,16 @@ export default function AgentsPage() {
         {projects.map((project) => (
           <Card
             key={project.id}
-            className="cursor-pointer hover:border-primary transition-colors"
-            onClick={() => handleProjectClick(project.id)}
+            className={`${project.disabled ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:border-primary'} transition-colors`}
+            onClick={() => !project.disabled && handleProjectClick(project.id)}
           >
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MessageCircle className="h-5 w-5" />
                 {project.name}
-                <span className="text-sm font-normal text-muted-foreground">({project.status})</span>
+                <span className="text-sm font-normal text-muted-foreground">
+                  ({project.status})
+                </span>
               </CardTitle>
               <CardDescription>{project.description}</CardDescription>
             </CardHeader>
