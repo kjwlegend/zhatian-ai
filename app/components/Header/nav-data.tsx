@@ -82,6 +82,11 @@ export const navItems: NavItem[] = [
     // ],
   },
   {
+    title: 'UI-Compare',
+    href: '/pixelCompare',
+    icon: FileText,
+  },
+  {
     title: '组件市场',
     href: '/market-place',
     icon: Library,
